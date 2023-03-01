@@ -14,60 +14,51 @@ export default function useCardReleaseAnimation(controls:AnimationControls,cardC
   
   const getTargetPos = useCallback(
     (seatNo: number, cardNo: number) => {
-      const pos: { x: any; y: any; zIndex: any; rotate: any; times: any } = {
-        x: 0,
-        y: 0,
-        zIndex: 0,
-        rotate: 0,
-        times: [],
-      };
+
       if (seatCoords && seats) {
         const seatCoord = seatCoords.find(
           (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
         );
         const seat = seats.find((s: SeatModel) => s.no === seatNo);
-        if (seat) {
-          const index = seat.cards.findIndex((c) => c === cardNo);
-          let x = 0;
-          let y = 0;
-          let dx = 0;
-          let dy = 0;
-          let zIndex=index+1;
-          let r: any[] = [];
-          if (seatCoord.direction === 2) {
-            //right
-            // zIndex = seat.cards.length-index;
-            const dif = cardXY["height"] * 0.2;
-            y = seatCoord["y"] - dif * (index-(seat.cards.length - 1) / 2) -150;
-            x = 0-cardXY["height"]-30;
-            r = [60, 60, 90, 90];
-            dy =0;
+        if (seatCoord&&seat?.slots) {
+          const slot =  seat.slots.find((s)=>s.id===seat.currentSlot);
+          if(slot?.cards){
+              const index = slot.cards.findIndex((c) => c === cardNo);
+              let x = 0;
+              let y = 0;
+              let dx = 0;
+              let dy = 0;
+              let zIndex=index+1;
+              let r: any[] = [];
+              if (seatCoord.direction === 2) {
+                //right
+                // zIndex = seat.cards.length-index;
+                const dif = cardXY["height"] * 0.2;
+                y = seatCoord["y"] - dif * (index-(seat.cards.length - 1) / 2) -150;
+                x = 0-cardXY["height"]-30;
+                r = [60, 60, 90, 90];
+                dy =0;
 
-          } else if (seatCoord.direction === 1) {
-            //left
-            const dif = cardXY["height"] * 0.2;
-            y = seatCoord["y"] - dif * ((seat.cards.length - 1) / 2 - index) - 150;
-            x = cardXY["height"] - viewport["width"] - 30;
-            r = [60, 60, 90, 90];
-            dy = 80;
-          } else if (seatCoord.direction === 0) {
-            //bottom
-            const dif = cardXY["width"] * 0.3;
-            x = dif * (index - (seat.cards.length - 1) / 2) - seatCoord["x"];
-            y = seatCoord["y"];
-            r = [60, 60, 0, 0];
-            dx = 80;
-          }
-            pos["zIndex"] = [0, zIndex, zIndex, zIndex]
-            //hit
-            pos["x"] = [null, x + dx, x + dx, x];
-            pos["y"] = [null, y + dy, y + dy, y];
-            pos["rotate"] = r;
-            pos["times"] = [0, 0.3, 0.7, 1];
-
+              } else if (seatCoord.direction === 1) {
+                //left
+                const dif = cardXY["height"] * 0.2;
+                y = seatCoord["y"] - dif * ((seat.cards.length - 1) / 2 - index) - 150;
+                x = cardXY["height"] - viewport["width"] - 30;
+                r = [60, 60, 90, 90];
+                dy = 80;
+              } else if (seatCoord.direction === 0) {
+                //bottom
+                const dif = cardXY["width"] * 0.3;
+                x = dif * (index - (seat.cards.length - 1) / 2) - seatCoord["x"];
+                y = seatCoord["y"];
+                r = [60, 60, 0, 0];
+                dx = 80;
+              }
+              return {x:[null, x + dx, x + dx, x],y:[null, y + dy, y + dy, y],rotate:r,zIndex:[0, zIndex, zIndex, zIndex]}
+            }
         }
       }
-      return pos;
+      return null;
     },[cardXY,seatCoords,seats,viewport])
    
 
@@ -76,32 +67,38 @@ export default function useCardReleaseAnimation(controls:AnimationControls,cardC
     controls.start((i) => {
       const seat = seats.find((s) => s.no === seatNo);
       if (seat) {
-        const index = seat["cards"].findIndex((c) => c === i);
-        if (index >= 0) {
-          // const x = -600 + index * 30;
-          const { x, y, zIndex, rotate, times } = getTargetPos(seatNo, i);
-          if (i === cardNo) {
-            return {
-              x: x,
-              y: y,
-              rotate: rotate,
-              zIndex: zIndex,
-              transition: {
-                duration: 1,
-                default: { ease: "linear" },
-                times: times,
-              },
-            };
-          } else
-            return {
-              opacity:1,
-              x: x[x.length - 1],
-              y: y[y.length - 1],
-              transition: {
-                duration: 1,
-                default: { ease: "linear" },
-              },
-            };
+        const slot =  seat.slots.find((s)=>s.id===seat.currentSlot);
+        if(slot?.cards){
+            const index = slot["cards"].findIndex((c) => c === i);
+            if (index >= 0) {
+             
+              const pos = getTargetPos(seatNo, i);
+              if(pos&&pos['x']&&pos['y']&&pos['zIndex']&&pos['rotate']){
+                  if (i === cardNo) {
+                    return {
+                      // x:[...pos['x']],
+                      // y:[...pos['y']],
+                      // rotate:[...pos['rotate']],
+                      // zIndex:pos['zIndex'],
+                      transition: {
+                        duration: 1,
+                        default: { ease: "linear" },
+                        times:[0, 0.3, 0.7, 1],
+                      },
+                    };
+                  } 
+                  //else
+                    // return {
+                    //   opacity:1,
+                    //   x: pos['x'][pos['x'].length - 1],
+                    //   y: pos['y'][pos['y'].length - 1],
+                    //   transition: {
+                    //     duration: 1,
+                    //     default: { ease: "linear" },
+                    //   },
+                    // };
+              }
+            }
         }
       }
       return {};

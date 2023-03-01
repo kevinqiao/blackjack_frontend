@@ -10,7 +10,7 @@ export default function useCardInitAnimation(controls:AnimationControls,cardCont
   const { viewport, cardXY, seatCoords } = useCoordManager();
   console.log(seats)
   const getTargetPos = useCallback(
-    (seatNo: number, cardNo: number) => {
+    (seatNo: number, cardNo: number):any => {
       const pos: { x: any; y: any; zIndex: any; rotate: any; times: any } = {
         x: 0,
         y: 0,
@@ -18,51 +18,53 @@ export default function useCardInitAnimation(controls:AnimationControls,cardCont
         rotate: 0,
         times: [],
       };
-
       if (seatCoords && seats) {
         const seatCoord = seatCoords.find(
           (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
         );
         const seat = seats.find((s: SeatModel) => s.no === seatNo);
-        if (seatCoord&&seat) {
-
-          const index = seat.cards.findIndex((c) => c === cardNo);
-          let x = 0;
-          let y = 0;
-          let dx = 0;
-          let dy = 0;
-          let r: any[] = [];
-          if (seatCoord.direction === 2) {
-            //left
-            const dif = cardXY["height"] * 0.2;
-            y = seatCoord["y"] - dif * (index-(seat.cards.length - 1) / 2) -150;
-            x = 0-cardXY["height"]-30;
-            r = [60, 60, 90, 90];
-            dy = 80;
-          } else if (seatCoord.direction === 1) {
-            //left
-            const dif = cardXY["height"] * 0.2;
-            y = seatCoord["y"] - dif * ((seat.cards.length - 1) / 2 - index) - 150;
-            x = cardXY["height"] - viewport["width"] - 30;
-            r = [60, 60, 90, 90];
-            dy = 80;
-          } else if (seatCoord.direction === 0) {
-            //bottom
-            const dif = cardXY["width"] * 0.3;
-            x = dif * (index - (seat.cards.length - 1) / 2) - seatCoord["x"];
-            y = seatCoord["y"];
-            r = [60, 60, 0, 0];
-            dx = 80;
-          }
+        if (seatCoord&&seat?.slots) {
+          const slot =  seat.slots.find((s)=>s.id===seat.currentSlot);
+          if(slot?.cards){
+              const index = slot.cards.findIndex((c) => c === cardNo);
+              let x = 0;
+              let y = 0;
+              let dx = 0;
+              let dy = 0;
+              let r: any[] = [];
+              if (seatCoord.direction === 2) {
+                //left
+                const dif = cardXY["height"] * 0.2;
+                y = seatCoord["y"] - dif * (index-(seat.cards.length - 1) / 2) -150;
+                x = 0-cardXY["height"]-30;
+                r = [60, 60, 90, 90];
+                dy = 80;
+              } else if (seatCoord.direction === 1) {
+                //left
+                const dif = cardXY["height"] * 0.2;
+                y = seatCoord["y"] - dif * ((seat.cards.length - 1) / 2 - index) - 150;
+                x = cardXY["height"] - viewport["width"] - 30;
+                r = [60, 60, 90, 90];
+                dy = 80;
+              } else if (seatCoord.direction === 0) {
+              //bottom
+              const dif = cardXY["width"] * 0.3;
+              x = dif * (index - (seat.cards.length - 1) / 2) - seatCoord["x"];
+              y = seatCoord["y"];
+              r = [60, 60, 0, 0];
+              dx = 80;
+            }
             pos['rotate']=r;
             pos["x"] = [0, x, x, x, x];
             pos["y"] = [0, y, y, y, y];
             pos["zIndex"] = [0, index + 1, index + 1, index + 1];
             pos["times"] = [0, 0.4, 0.5, 0.8, 1];
+            return pos;
+          }
           
         }
       }
-      return pos;
+      return {};
     },[cardXY,seatCoords,viewport,seats])
    
 
