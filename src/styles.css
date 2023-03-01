@@ -1,0 +1,250 @@
+:root {
+  --blue: #1e90ff;
+  --white: #ffffff; 
+  --content:"2";
+  --content1:"6";
+  --startX:67.5px;
+  --cx:151px;
+  --c1x:117px;
+  --c2x:111px;
+  --tx:9px;
+  --t2x:20px;
+  --fontSize:50px/111px;
+  --lg1:67.5px;
+  --lg2:83.5px;
+  --lg3:97.4304px;
+  --lg4:113.4304px;
+  --lgb1:69.5px;
+  --lgb2:81.5px;
+  --lgb3:98.7104px;
+  --lgb4:110.7104px;
+  --br1:8px;
+  --bs0:-1px;
+  --bs1:1px;
+  --bs2:3px;
+  --bs3:5px;
+  --accent: var(--blue);
+}
+body {
+  background: #404040;
+}
+h1 {
+  text-align: center;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.7);
+  font-size: 46px;
+  font-family: 'Fredoka One', cursive;
+}
+h1 > span {
+  color: #f00;
+}
+h2 {
+  text-align: center;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.7);
+  font-size: 22px;
+  font-family: 'Fredoka One', cursive;
+}
+a {
+  color: #89310F;
+}
+.chips {
+  width:"100%";
+  min-width: 300px;
+  padding: 2px 0;
+  text-align: center;
+  background-color: #014D43;
+  box-shadow: 0 0 0 5px #282828 inset, 0 0 0 10px #969696 inset, 0 0 6px rgba(255, 255, 255, 0.2);
+}
+
+.testchip {
+  margin: 1em;
+  position: relative;
+  display: inline-block;
+  width: 151px;
+  height: 151px;
+  box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.5), 0 0 3px 0 rgba(0, 0, 0, 0.4) inset;
+  border-radius: 50%;
+  background-size: 151px 151px;
+  background-position: center center;
+}
+.testchip:before {
+  position: absolute;
+  content: "";
+  z-index: 1;
+  width: 97px;
+  height: 97px;
+  border-radius: 50%;
+  top: 19px;
+  left: 19px;
+  background-size: 151px 151px;
+  background-position: center center;
+}
+.blankchip {
+  margin: 5px;
+  position: relative;
+  display: inline-block;
+  width: var(--cx);
+  height: var(--cx);
+  border-radius: 50%;
+  background-size: var(--cx) var(--cx);
+  background-position: center center;
+}
+.pokerchip {
+  margin: 5px;
+  position: relative;
+  display: inline-block;
+  width: var(--cx);
+  height: var(--cx);
+  box-shadow: 0 0 var(--bs3) 1px rgba(0, 0, 0, 0.5), 0 0 var(--bs2) 0 rgba(0, 0, 0, 0.4) inset;
+  border-radius: 50%;
+  background-size: var(--cx) var(--cx);
+  background-position: center center;
+}
+.pokerchip:before {
+  position: absolute;
+  content: "";
+  z-index: 1;
+  width: var(--c1x);
+  height: var(--c1x);
+  border-radius: 50%;
+  top: var(--tx);
+  left: var(--tx);
+  background-size: var(--cx) var(--cx);
+  background-position: center center;
+}
+.pokerchip:after {
+  z-index: 2;
+  position: absolute;
+  content: "25";
+  text-align: center;
+  font: bold var(--fontSize) Arial;
+  white-space: pre;
+  width: var(--c2x);
+  height: var(--c2x);
+  border-radius: 50%;
+  top: var(--t2x);
+  left: var(--t2x);
+  text-shadow: var(--bs0) var(--bs0) 0px rgba(0, 0, 0, 0.3), var(--bs1) var(--bs1) 0px rgba(255, 255, 255, 0.2);
+}
+/* .pokerchip:hover {
+  -webkit-animation: 2s rotate-right linear infinite;
+          animation: 2s rotate-right linear infinite;
+} */
+
+@-webkit-keyframes rotate-right {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+@keyframes rotate-right {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+/* Colors */
+.white {
+  background-image: linear-gradient(0deg, transparent 0, transparent 64.5px, #fff 64.5px, #fff 86.5px, transparent 86.5px, transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent 94.4304px, #fff 94.4304px, #fff 116.4304px, transparent 116.4304px, transparent var(--cx)), linear-gradient(120deg, #dddddd 0, #dddddd 94.4304px, #fff 94.4304px, #fff 116.4304px, #dddddd 116.4304px, #dddddd var(--cx));
+}
+.white:before {
+  border: var(--br1) solid #dddddd;
+  background-image: linear-gradient(0deg, transparent 0, transparent 69.5px, #EBEBEB 69.5px, #EBEBEB 81.5px, transparent 81.5px, transparent 151px), linear-gradient(30deg, transparent 0, transparent 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, transparent 110.7104px, transparent 151px), linear-gradient(60deg, transparent 0, transparent 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, transparent 110.7104px, transparent 151px), linear-gradient(90deg, transparent 0, transparent 69.5px, #EBEBEB 69.5px, #EBEBEB 81.5px, transparent 81.5px, transparent 151px), linear-gradient(120deg, transparent 0, transparent 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, transparent 110.7104px, transparent 151px), linear-gradient(150deg, #C1C1C1 0, #C1C1C1 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, #C1C1C1 110.7104px, #C1C1C1 151px);
+}
+
+
+.red {
+  background-image: linear-gradient(0deg, transparent 0, transparent var(--lg1), #fff var(--lg1), #fff var(--lg2), transparent var(--lg2), transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent var(--lg3), #fff var(--lg3), #fff var(--lg4), transparent var(--lg4), transparent var(--cx)), linear-gradient(120deg, #800000 0, #800000 var(--lg3), #fff var(--lg3), #fff var(--lg4), #800000 var(--lg4), #800000 var(--cx));
+}
+.red:before {
+  border: var(--br1) solid #800000;
+  background-image: linear-gradient(0deg, transparent 0, transparent var(--lgb1), #EBEBEB var(--lgb1), #EBEBEB var(--lgb2), transparent var(--lgb2), transparent var(--cx)), linear-gradient(30deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(90deg, transparent 0, transparent var(--lgb1), #EBEBEB var(--lgb1), #EBEBEB var(--lgb2), transparent var(--lgb2), transparent var(--cx)), linear-gradient(120deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(150deg, #6C0000 0, #6C0000 var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), #6C0000 var(--lgb4), #6C0000 var(--cx));
+}
+.red:after {
+  content: var(--content1);
+  background: #800000;
+  color: #6C0000;
+}
+
+.blue {
+  background-image: linear-gradient(0deg, transparent 0, transparent var(--lg1), #fff var(--lg1), #fff var(--lg2), transparent var(--lg2), transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent var(--lg3), #fff var(--lg3), #fff var(--lg4), transparent var(--lg4), transparent var(--cx)), linear-gradient(120deg,  #000099 0,  #000099 var(--lg3), #fff var(--lg3), #fff var(--lg4),  #000099 var(--lg4),  #000099 var(--cx));
+}
+.blue:before {
+  border: var(--br1) solid #000099;
+  background-image: linear-gradient(0deg, transparent 0, transparent var(--lgb1), #EBEBEB var(--lgb1), #EBEBEB var(--lgb2), transparent var(--lgb2), transparent var(--cx)), linear-gradient(30deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(90deg, transparent 0, transparent var(--lgb1), #EBEBEB var(--lgb1), #EBEBEB var(--lgb2), transparent var(--lgb2), transparent var(--cx)), linear-gradient(120deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(150deg, #00016C 0, #00016C var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), #00016C var(--lgb4), #00016C var(--cx));
+}
+.blue:after {
+  content: var(--content1);
+  background: #000099;
+  color: #00016C;
+}
+.green {
+  background-image: linear-gradient(0deg, transparent 0, transparent var(--lg1), #fff var(--lg1), #fff var(--lg2), transparent var(--lg2), transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent var(--lg3), #fff var(--lg3), #fff var(--lg4), transparent var(--lg4), transparent var(--cx)), linear-gradient(120deg,  #008000 0,  #008000 var(--lg3), #fff var(--lg3), #fff var(--lg4),  #008000 var(--lg4),#008000 var(--cx));
+}
+.green:before {
+  border: var(--br1) solid #008000;
+  background-image: linear-gradient(0deg, transparent 0, transparent var(--lgb1), #EBEBEB var(--lgb1), #EBEBEB var(--lgb2), transparent var(--lgb2), transparent var(--cx)), linear-gradient(30deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(90deg, transparent 0, transparent var(--lgb1), #EBEBEB var(--lgb1), #EBEBEB var(--lgb2), transparent var(--lgb2), transparent var(--cx)), linear-gradient(120deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(150deg, #016C00 0, #016C00 var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), #016C00 var(--lgb4), #016C00 var(--cx));
+}
+.green:after {
+  content: var(--content1);
+  background: #008000;
+  color: #016C00;
+}
+.black {
+  background-image: linear-gradient(0deg, transparent 0, transparent 67.5px, #fff 67.5px, #fff 83.5px, transparent 83.5px, transparent 151px), linear-gradient(60deg, transparent 0, transparent 97.4304px, #fff 97.4304px, #fff 113.4304px, transparent 113.4304px, transparent 151px), linear-gradient(120deg, #222222 0, #222222 97.4304px, #fff 97.4304px, #fff 113.4304px, #222222 113.4304px, #222222 151px);
+}
+.black:before {
+  border: 8px solid #222222;
+  background-image: linear-gradient(0deg, transparent 0, transparent 69.5px, #EBEBEB 69.5px, #EBEBEB 81.5px, transparent 81.5px, transparent 151px), linear-gradient(30deg, transparent 0, transparent 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, transparent 110.7104px, transparent 151px), linear-gradient(60deg, transparent 0, transparent 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, transparent 110.7104px, transparent 151px), linear-gradient(90deg, transparent 0, transparent 69.5px, #EBEBEB 69.5px, #EBEBEB 81.5px, transparent 81.5px, transparent 151px), linear-gradient(120deg, transparent 0, transparent 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, transparent 110.7104px, transparent 151px), linear-gradient(150deg, #000000 0, #000000 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, #000000 110.7104px, #000000 151px);
+}
+.black:after {
+  content: "100";
+  background: #222222;
+  color: #000000;
+}
+.circle {
+  width: 100px;
+  height: 100px;
+  background: red;
+  border-radius: 50%
+}
+.grid-card {
+  display: grid;
+  grid-template-columns: 1fr 4fr 1fr;
+  grid-template-rows: 0.7fr 1.5fr 0.7fr;
+  grid-gap: 0px;
+  background-color: white;
+  color: black;
+  font-size: 1.2em;
+  padding: 0px;
+  border-radius: 5%;
+  box-shadow: 0px 5px 15px grey;
+}
+.card-top-left {
+  padding: 0.1em;
+}
+
+.card-bottom-right {
+  padding: 0.1em;
+  align-self: end;
+  transform: rotate(180deg);
+}
+.suit{
+  text-align: center;
+  align-self: center;
+  font-size: 2em;
+}
+.box {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: var(--accent);
+}
