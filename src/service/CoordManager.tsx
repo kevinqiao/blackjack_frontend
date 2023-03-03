@@ -27,13 +27,21 @@ const initChipCSS = (scale: number) => {
     r.style.setProperty("--bs3", 5 * scale + "px");
   }
 };
+const initCardCSS = (scale: number) => {
+  const r: HTMLElement | null = document.querySelector(":root");
+  // var rs = getComputedStyle(r);
+  if (r?.style) {
+    r.style.setProperty("--card-font-size", 1.2 * scale + "em");
+    r.style.setProperty("--card-star-size", 2 * scale + "em");
+  }
+};
 export const CoordProvider = ({ children }: { children: HTMLElement }) => {
   const [value, setValue] = useState({});
   const updateCoord = () => {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const v: any = { width: w, height: h };
-    const scale: number = Number(((w * 0.5) / (5 * 151)).toFixed(2));
+    const scale: number = (w * 0.5) / (5 * 151);
     initChipCSS(scale >= 1 ? 1 : scale);
     const myChipW = scale * 151 * 5 + 60;
     const myChipX = (w - myChipW) / 2;
@@ -44,8 +52,11 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     v["chipWidth"] = scale * 151;
     v["viewport"] = { width: w, height: h };
 
-    const cardWidth = (130 / 900) * (w > 1000 ? 1000 : w);
+    let cardWidth = (130 / 900) * (w > 1000 ? 1000 : w);
+    cardWidth = cardWidth < 70 ? 70 : cardWidth;
     const cardHeight = (cardWidth * 180) / 130;
+
+    initCardCSS(cardWidth / 130);
     v["cardXY"] = { width: cardWidth, height: cardHeight };
 
     v["seatCoords"] = [];
@@ -73,7 +84,7 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     return () => window.removeEventListener("resize", updateCoord, true);
   }, []);
 
-  return <CoordContext.Provider value={value}>{children}</CoordContext.Provider>;
+  return <CoordContext.Provider value={value}> {children} </CoordContext.Provider>;
 };
 
 const useCoordManager = () => {

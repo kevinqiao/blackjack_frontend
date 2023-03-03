@@ -25,12 +25,11 @@ const make_deck = () => {
       default:
         break;
     }
-    cards[j++] = { no: ++no, value: v, rank: i, suit: "h" };
-    cards[j++] = { no: ++no, value: v, rank: i, suit: "d" };
-    cards[j++] = { no: ++no, value: v, rank: i, suit: "c" };
-    cards[j++] = { no: ++no, value: v, rank: i, suit: "s" };
+    cards[j++] = { no: ++no, value: v, rank: i, suit: "h", seat: -1, slot: 0 };
+    cards[j++] = { no: ++no, value: v, rank: i, suit: "d", seat: -1, slot: 0 };
+    cards[j++] = { no: ++no, value: v, rank: i, suit: "c", seat: -1, slot: 0 };
+    cards[j++] = { no: ++no, value: v, rank: i, suit: "s", seat: -1, slot: 0 };
   }
-  console.log(cards);
   return cards;
 };
 const initialState = {
@@ -50,15 +49,34 @@ const actions = {
   HIT_CARD: "HIT_CARD",
   HIT_BLANK: "HIT_BLANK",
   HIT_DEALER: "HIT_DEALER",
+  SLOT_SPLIT: "SLOT_SPLIT",
+  OPEN_SLOT: "SLOT_OPEN",
 };
 
 const reducer = (state: any, action: any) => {
   let dealer: SeatModel;
-  let slot: SeatBetSlot | undefined;
+  let slot: SeatBetSlot;
   let seat: SeatModel;
+  let card: CardModel;
   switch (action.type) {
     case actions.INIT_GAME:
       return Object.assign({}, state, action.game);
+    case actions.SLOT_SPLIT:
+      seat = state.seats.find((s: SeatModel) => s.no === action.data.seatNo);
+      if (!seat) return state;
+      const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
+      if (!currentSlot || currentSlot.cards.length !== 2) return state;
+      slot = { id: Date.now(), cards: [currentSlot.cards[1]] };
+      seat.slots.push(slot);
+      currentSlot.cards.splice(1, 1);
+      card = state.cards.find((c: CardModel) => c.no === slot["cards"][0]);
+      card["slot"] = slot["id"];
+      return Object.assign({}, state, { seats: [...state.seats] });
+    case actions.OPEN_SLOT:
+      seat = state.seats.find((s: SeatModel) => s.no === action.data.seatNo);
+      if (!seat) return state;
+      seat.currentSlot = action.data.slot;
+      return Object.assign({}, state, { seats: [...state.seats], cards: [...state.cards] });
     case actions.HIT_CARD:
       seat = state.seats.find((s: SeatModel) => s.no === action.data.seatNo);
       if (!seat) return state;
@@ -67,10 +85,13 @@ const reducer = (state: any, action: any) => {
         seat.slots = [slot];
         seat.currentSlot = slot["id"];
       } else {
-        slot = seat.slots.find((s: SeatBetSlot) => seat.currentSlot === s.id);
-        if (slot) slot.cards.push(action.data.cardNo);
+        const cslot = seat.slots.find((s: SeatBetSlot) => seat.currentSlot === s.id);
+        if (cslot) cslot.cards.push(action.data.cardNo);
       }
-      return Object.assign({}, state, { seats: [...state.seats] });
+      card = state.cards.find((c: CardModel) => c.no === action.data.cardNo);
+      card["seat"] = action.data.seatNo;
+      card["slot"] = seat.currentSlot;
+      return Object.assign({}, state, { seats: [...state.seats], cards: [...state.cards] });
     case actions.HIT_BLANK:
       dealer = state.seats.find((s: SeatModel) => s.no === 3);
       if (dealer) {
@@ -84,10 +105,17 @@ const reducer = (state: any, action: any) => {
       if (dealer) {
         if (!dealer.slots || dealer.slots.length === 0) dealer.slots = [{ id: Date.now(), cards: [] }];
         dealer.currentSlot = dealer.slots[0].id;
-        const cards = dealer.slots[0].cards.filter((c: number) => c !== 0);
-        dealer.slots[0].cards.push(action.data.cardNo);
-        dealer.slots[0]["cards"] = cards;
-        return Object.assign({}, state, { seats: [...state.seats] });
+        if (dealer.slots[0]["cards"].length === 0) {
+          dealer.slots[0]["cards"].push(...[action.data.cardNo, 0]);
+        } else {
+          const cards = dealer.slots[0].cards.filter((c: number) => c !== 0);
+          cards.push(action.data.cardNo);
+          dealer.slots[0]["cards"] = cards;
+          const card = state.cards.find((c: CardModel) => c.no === action.data.cardNo);
+          card["seat"] = 3;
+          card["slot"] = dealer.slots[0].id;
+        }
+        return Object.assign({}, state, { seats: [...state.seats], cards: [...state.cards] });
       } else return state;
     default:
       return state;
@@ -103,6 +131,8 @@ const GameContext = createContext<IGameContext>({
   hit: (seatNo: number) => null,
   hitBlank: () => null,
   hitDealer: () => null,
+  split: (seatNo: number) => null,
+  switchSlot: (seatNo: number) => null,
 });
 
 export const GameProvider = ({ children }: { children: React.ReactNode }) => {
@@ -121,17 +151,17 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
         gameId: Date.now(),
         cards: make_deck(),
         seats: [
-          { no: 0, cards: [], status: 1, slots: [] },
-          { no: 1, cards: [], status: 1, slots: [] },
-          { no: 2, cards: [], status: 1, slots: [] },
-          { no: 3, cards: [2], status: 1, slots: [] },
+          { no: 0, status: 1, slots: [] },
+          { no: 1, status: 1, slots: [] },
+          { no: 2, status: 1, currentSlot: 1, slots: [{ id: 1, cards: [6, 9] }] },
+          { no: 3, status: 1, slots: [] },
         ],
         status: 0,
       };
       dispatch({ type: actions.INIT_GAME, game: game });
     },
     hit: (seatNo: number) => {
-      const releaseds = state.seats.map((s: any) => s["slots"].map((c: number) => ["cards"].flat())).flat();
+      const releaseds = state.seats.map((s: any) => s["slots"].map((c: SeatBetSlot) => c["cards"])).flat(2);
       const toReleases = state.cards.filter((c: CardModel) => !releaseds.includes(c.no));
       const no = Math.floor(Math.random() * toReleases.length);
       const card = toReleases[no];
@@ -141,18 +171,35 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
       }
     },
     hitDealer: () => {
-      const releaseds = state.seats.map((s: any) => s["slots"].map((c: number) => ["cards"].flat())).flat();
+      const releaseds = state.seats.map((s: any) => s["slots"].map((c: SeatBetSlot) => c["cards"])).flat(2);
       const toReleases = state.cards.filter((c: CardModel) => !releaseds.includes(c.no));
       const no = Math.floor(Math.random() * toReleases.length);
       const card = toReleases[no];
       if (card) {
+        const dealer = state.seats.find((s: SeatModel) => s.no === 3);
+        let phase = !dealer.slots || dealer.slots.length === 0 ? 0 : 1;
+        if (phase === 1 && dealer.slots[0]["cards"].includes(0)) phase = 2;
         dispatch({ type: actions.HIT_DEALER, data: { seatNo: 3, cardNo: card.no } });
-        createEvent({ name: "blankReplaced", data: { seatNo: 3, cardNo: card["no"] } });
+        if (phase === 0) {
+          createEvent({ name: "hitCreated", data: { seatNo: 3, cardNo: card["no"] } });
+          setTimeout(() => createEvent({ name: "blankReleased", data: null }), 800);
+        } else if (phase === 2) {
+          createEvent({ name: "blankReplaced", data: { seatNo: 3, cardNo: card["no"] } });
+        } else createEvent({ name: "hitCreated", data: { seatNo: 3, cardNo: card["no"] } });
       }
     },
     hitBlank: () => {
       dispatch({ type: actions.HIT_CARD, data: { seatNo: 3, cardNo: 0 } });
       createEvent({ name: "blankReleased", data: null });
+    },
+    split: (seatNo: number) => {
+      dispatch({ type: actions.SLOT_SPLIT, data: { seatNo: seatNo } });
+      createEvent({ name: "betSplited", data: { seatNo: seatNo } });
+    },
+    switchSlot: (seatNo: number, slot: number) => {
+      console.log(seatNo + ":" + slot);
+      dispatch({ type: actions.OPEN_SLOT, data: { seatNo, slot } });
+      createEvent({ name: "betSwitched", data: { seatNo, slot } });
     },
   };
 

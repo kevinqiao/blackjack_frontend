@@ -24,6 +24,8 @@
   --bs2:3px;
   --bs3:5px;
   --accent: var(--blue);
+  --card-font-size:1.2em;
+  --card-star-size:2em;
 }
 body {
   background: #404040;
@@ -223,7 +225,7 @@ a {
   grid-gap: 0px;
   background-color: white;
   color: black;
-  font-size: 1.2em;
+  font-size: var(--card-font-size);
   padding: 0px;
   border-radius: 5%;
   box-shadow: 0px 5px 15px grey;
@@ -240,7 +242,7 @@ a {
 .suit{
   text-align: center;
   align-self: center;
-  font-size: 2em;
+  font-size: var(--card-star-size);
 }
 .box {
   width: 200px;

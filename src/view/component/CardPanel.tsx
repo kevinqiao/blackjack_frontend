@@ -1,7 +1,11 @@
 import { motion, useAnimationControls } from "framer-motion";
+import { useCallback } from "react";
+import { CardModel } from "../../model";
 import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
+import useBetSlotSplitAnimation from "../animation/BetSlotSplitAnimation";
+import useBetSlotSwitchAnimation from "../animation/BetSlotSwitchAnimation";
 import useBlankCardAnimation from "../animation/BlankCardAnimation";
 import useCardInitAnimation from "../animation/CardInitAnimation";
 import useCardReleaseAnimation from "../animation/CardReleaseAnimation";
@@ -11,14 +15,27 @@ import "./styles.css";
 export default function CardPanel() {
   const { viewport, cardXY } = useCoordManager();
   const { createEvent } = useEventSubscriber([]);
-  const { gameId, cards, hit, hitBlank, hitDealer, initGame } = useGameManager();
+  const { gameId, seats, cards, hit, split, switchSlot, hitBlank, hitDealer, initGame } = useGameManager();
   const blankControls = useAnimationControls();
   const controls = useAnimationControls();
   const cardControls = useAnimationControls();
+  useBetSlotSwitchAnimation(controls, cardControls);
+  useBetSlotSplitAnimation(controls, cardControls);
   useBlankCardAnimation(controls, cardControls, blankControls);
   useCardInitAnimation(controls, cardControls);
   useCardReleaseAnimation(controls, cardControls);
 
+  const canOpen = useCallback(
+    (card: CardModel) => {
+      let open = 0;
+      if (seats?.length > 0) {
+        const seat = seats.find((s) => s.no === card["seat"]);
+        if (seat?.currentSlot != card["slot"]) open = 1;
+      }
+      return open;
+    },
+    [seats]
+  );
   return (
     <>
       {viewport &&
@@ -28,14 +45,16 @@ export default function CardPanel() {
             key={gameId + "-" + c["no"] + ""}
             custom={c["no"]}
             style={{
+              cursor: canOpen(c) === 1 ? "pointer" : "default",
               position: "absolute",
               top: 0,
-              left: viewport["width"] - 90,
+              left: viewport["width"] - cardXY["width"] / 2,
               width: cardXY["width"],
               height: cardXY["height"],
               transform: "rotate(60deg)",
             }}
             animate={controls}
+            onClick={() => (canOpen(c) > 0 ? switchSlot(c["seat"], c["slot"]) : null)}
           >
             <motion.div
               // className={"card"}
@@ -75,7 +94,7 @@ export default function CardPanel() {
         style={{
           position: "absolute",
           top: 0,
-          left: viewport?.width ? viewport["width"] - 90 : 0,
+          left: viewport?.width ? viewport["width"] - cardXY["width"] / 2 : 0,
           width: cardXY?.width ? cardXY["width"] : 0,
           height: cardXY?.height ? cardXY["height"] : 0,
           transform: "rotate(60deg)",
@@ -131,6 +150,7 @@ export default function CardPanel() {
       >
         Hit(Seat2)
       </div>
+
       <div style={{ height: 10 }} />
       <div
         style={{
@@ -159,9 +179,25 @@ export default function CardPanel() {
           backgroundColor: "red",
           color: "white",
         }}
+        onClick={() => split(0)}
+      >
+        Split
+      </div>
+      <div style={{ height: 10 }} />
+      <div
+        style={{
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: 120,
+          height: 40,
+          backgroundColor: "red",
+          color: "white",
+        }}
         onClick={() => hitDealer()}
       >
-        Replace Blank
+        Hit Dealer
       </div>
       <div style={{ height: 10 }} />
       <div
