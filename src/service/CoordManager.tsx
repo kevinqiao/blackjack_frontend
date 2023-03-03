@@ -52,7 +52,7 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     v["chipWidth"] = scale * 151;
     v["viewport"] = { width: w, height: h };
 
-    let cardWidth = (130 / 900) * (w > 1000 ? 1000 : w);
+    let cardWidth = (130 / 1000) * (w > 1000 ? 1000 : w);
     cardWidth = cardWidth < 70 ? 70 : cardWidth;
     const cardHeight = (cardWidth * 180) / 130;
 
@@ -63,7 +63,7 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     const seat0 = { no: 0, direction: 0, x: w / 2, y: h - cardHeight - 20 };
     const seat1 = { no: 1 };
     const seat2 = { no: 2 };
-    const seat3 = { no: 3, direction: 0, x: w / 2, y: 20 };
+    const seat3 = { no: 3, direction: 0, x: w / 2, y: 40 };
     v["seatCoords"].push(seat0);
     v["seatCoords"].push(seat1);
     v["seatCoords"].push(seat2);
@@ -73,12 +73,12 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
       Object.assign(seat2, { direction: 2, x: w, y: h / 2 });
     } else {
       Object.assign(seat1, { direction: 1, x: 0, y: h / 2 });
-      Object.assign(seat2, { direction: 2, x: 0, y: h / 2 });
+      Object.assign(seat2, { direction: 2, x: w, y: h / 2 });
     }
-    console.log(v);
     setValue(v);
   };
   useEffect(() => {
+    console.log(window.innerWidth + ":" + window.outerWidth);
     updateCoord();
     window.addEventListener("resize", updateCoord, true);
     return () => window.removeEventListener("resize", updateCoord, true);

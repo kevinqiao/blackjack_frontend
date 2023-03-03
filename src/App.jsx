@@ -4,6 +4,7 @@ import { EventProvider } from "./service/EventManager";
 import { GameProvider } from "./service/GameManager";
 import "./styles.css";
 import CardPanel from "./view/component/CardPanel";
+import ControlPanel from "./view/component/ControlPanel";
 
 function App() {
   const FlattenedProviderTree = (providers) => {
@@ -31,6 +32,7 @@ function App() {
       {/* <PokeCard height={180} width={130} suit={"♥"} color={"red"} value={"K"} rank={13} /> */}
       {/* <Framer /> */}
       {/* <CardBox/> */}
+      <ControlPanel />
       <CardPanel />
     </Providers>
   );

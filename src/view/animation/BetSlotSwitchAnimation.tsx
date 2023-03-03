@@ -34,12 +34,12 @@ export default function useBetSlotSwitchAnimation(controls: AnimationControls, c
               // zIndex = seat.cards.length-index;
               const dif = cardXY["height"] * 0.2;
               y = seatCoord["y"] - dif * (index - (slot.cards.length - 1) / 2) - 150;
-              x = 0 - cardXY["height"] - 30;
+              x = -cardXY["width"];
             } else if (seatCoord.direction === 1) {
               //left
               const dif = cardXY["height"] * 0.2;
               y = seatCoord["y"] - dif * ((slot.cards.length - 1) / 2 - index) - 150;
-              x = cardXY["height"] - viewport["width"] - 30;
+              x = -viewport["width"] + cardXY["width"];
             } else if (seatCoord.direction === 0) {
               const dif = cardXY["width"] * 0.3;
               x = dif * (index - (slot.cards.length - 1) / 2) - seatCoord["x"];
@@ -83,9 +83,36 @@ export default function useBetSlotSwitchAnimation(controls: AnimationControls, c
               const seatCoord = seatCoords.find(
                 (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
               );
-              const x = 0 - seatCoord["x"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
-              const y = seatCoord["y"] - cardXY["height"];
-              const scale = 0.6;
+              let x = 0;
+              let y = 0;
+              let scale = 0.6;
+
+              switch (seatCoord.direction) {
+                case 0:
+                  x = 0 - seatCoord["x"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
+                  y = seatCoord["y"] - cardXY["height"];
+                  break;
+                case 1:
+                  x = seatCoord["x"] - viewport["width"] + cardXY["height"] + cardXY["height"] * 0.6;
+                  y =
+                    seatCoord["y"] -
+                    cardXY["height"] * 2 +
+                    (j - slots.length / 2) * (cardXY["width"] + 20) * scale +
+                    50;
+                  break;
+                case 2:
+                  x = seatCoord["x"] - viewport["width"] - cardXY["height"] * 1.6;
+                  y =
+                    seatCoord["y"] -
+                    cardXY["height"] * 2 +
+                    (j - slots.length / 2) * (cardXY["width"] + 20) * scale +
+                    50;
+                  break;
+
+                default:
+                  break;
+              }
+
               return {
                 x: x,
                 y: y,

@@ -49,7 +49,7 @@ export default function useBlankCardAnimation(
   const handleRelase = useCallback(() => {
     console.log("handle release");
     if (seat?.slots && seat.slots.length == 1 && seat.slots[0].cards.includes(0) && seatCoord) {
-      const x = 50 - seatCoord["x"];
+      const x = - seatCoord["x"] + cardXY['width'] * 0.3;
       const y = seatCoord["y"];
       const rotate = [60, 60, 0, 0];
       const times = [0, 0.4, 0.8, 1];
@@ -75,7 +75,7 @@ export default function useBlankCardAnimation(
 
       console.log("handle replace");
       if (seat && seatCoord) {
-        const x = 50 - seatCoord["x"];
+        const x = cardXY['width'] * 0.3 - seatCoord["x"];
         const y = seatCoord["y"];
         controls.start((i) => {
           if (i === cardNo && seat.slots?.length > 0) {

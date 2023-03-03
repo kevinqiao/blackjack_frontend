@@ -61,8 +61,8 @@ export default function useBetSlotSplitAnimation(controls: AnimationControls, ca
 
   const handleSplit = useCallback(
     (seatNo: number) => {
+      const seat = seats.find((s) => s.no === seatNo);
       controls.start((i) => {
-        const seat = seats.find((s) => s.no === seatNo);
         if (seat?.slots) {
           const slots = seat.slots.filter((s) => s.id !== seat.currentSlot);
           for (let j = 0; j < slots.length; j++) {
@@ -70,9 +70,36 @@ export default function useBetSlotSplitAnimation(controls: AnimationControls, ca
               const seatCoord = seatCoords.find(
                 (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
               );
-              const x = 0 - seatCoord["x"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
-              const y = seatCoord["y"] - cardXY["height"];
-              const scale = 0.6;
+              let x = 0;
+              let y = 0;
+              let scale = 0.6;
+              console.log(seatCoord);
+              switch (seatCoord.direction) {
+                case 0:
+                  x = 0 - seatCoord["x"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
+                  y = seatCoord["y"] - cardXY["height"];
+                  break;
+                case 1:
+                  x = seatCoord["x"] - viewport["width"] + cardXY["height"] + cardXY["height"] * 0.6;
+                  y =
+                    seatCoord["y"] -
+                    cardXY["height"] * 2 +
+                    (j - slots.length / 2) * (cardXY["width"] + 20) * scale +
+                    50;
+                  break;
+                case 2:
+                  x = seatCoord["x"] - viewport["width"] - cardXY["height"] * 1.6;
+                  y =
+                    seatCoord["y"] -
+                    cardXY["height"] * 2 +
+                    (j - slots.length / 2) * (cardXY["width"] + 20) * scale +
+                    50;
+                  break;
+
+                default:
+                  break;
+              }
+              console.log(x + ":" + y);
               return {
                 x: x,
                 y: y,

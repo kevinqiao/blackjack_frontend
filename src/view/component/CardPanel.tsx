@@ -103,7 +103,7 @@ export default function CardPanel() {
           backgroundSize: "cover",
         }}
       ></motion.div>
-      <div
+      {/* <div
         style={{
           cursor: "pointer",
           display: "flex",
@@ -214,7 +214,7 @@ export default function CardPanel() {
         onClick={initGame}
       >
         Initialize
-      </div>
+      </div> */}
     </>
   );
 }
