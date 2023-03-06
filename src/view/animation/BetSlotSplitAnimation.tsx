@@ -76,7 +76,7 @@ export default function useBetSlotSplitAnimation(controls: AnimationControls, ca
               console.log(seatCoord);
               switch (seatCoord.direction) {
                 case 0:
-                  x = 0 - seatCoord["x"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
+                  x = seatCoord["x"] - viewport["width"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
                   y = seatCoord["y"] - cardXY["height"];
                   break;
                 case 1:

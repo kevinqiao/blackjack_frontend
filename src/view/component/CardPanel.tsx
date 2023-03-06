@@ -30,7 +30,7 @@ export default function CardPanel() {
       let open = 0;
       if (seats?.length > 0) {
         const seat = seats.find((s) => s.no === card["seat"]);
-        if (seat?.currentSlot != card["slot"]) open = 1;
+        if (seat?.currentSlot !== card["slot"]) open = 1;
       }
       return open;
     },
@@ -103,118 +103,6 @@ export default function CardPanel() {
           backgroundSize: "cover",
         }}
       ></motion.div>
-      {/* <div
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 120,
-          height: 40,
-          backgroundColor: "red",
-          color: "white",
-        }}
-        onClick={() => hit(0)}
-      >
-        Hit(Seat0)
-      </div>
-      <div style={{ height: 10 }} />
-      <div
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 120,
-          height: 40,
-          backgroundColor: "red",
-          color: "white",
-        }}
-        onClick={() => hit(1)}
-      >
-        Hit(Seat1)
-      </div>
-      <div style={{ height: 10 }} />
-      <div
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 120,
-          height: 40,
-          backgroundColor: "red",
-          color: "white",
-        }}
-        onClick={() => hit(2)}
-      >
-        Hit(Seat2)
-      </div>
-
-      <div style={{ height: 10 }} />
-      <div
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 120,
-          height: 40,
-          backgroundColor: "red",
-          color: "white",
-        }}
-        onClick={() => hitBlank()}
-      >
-        Hit Blank
-      </div>
-      <div style={{ height: 10 }} />
-      <div
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 120,
-          height: 40,
-          backgroundColor: "red",
-          color: "white",
-        }}
-        onClick={() => split(0)}
-      >
-        Split
-      </div>
-      <div style={{ height: 10 }} />
-      <div
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 120,
-          height: 40,
-          backgroundColor: "red",
-          color: "white",
-        }}
-        onClick={() => hitDealer()}
-      >
-        Hit Dealer
-      </div>
-      <div style={{ height: 10 }} />
-      <div
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 120,
-          height: 40,
-          backgroundColor: "red",
-          color: "white",
-        }}
-        onClick={initGame}
-      >
-        Initialize
-      </div> */}
     </>
   );
 }

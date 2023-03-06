@@ -27,7 +27,6 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
         if (seat) {
           const slot = seat.slots.find((s) => s.id === seat.currentSlot);
           if (slot) {
-            console.log(slot);
             const index = slot.cards.findIndex((c) => c === cardNo);
             let x = 0;
             let y = 0;
@@ -35,7 +34,7 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
             let dy = 0;
             let zIndex = index + 1;
             let r: any[] = [];
-            console.log("index:" + index + " card:" + cardNo);
+
             if (seatCoord.direction === 2) {
               //right
               // zIndex = seat.cards.length-index;
@@ -53,8 +52,8 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
               dy = 80;
             } else if (seatCoord.direction === 0) {
               //bottom
-              const dif = cardXY["width"] * 0.3;
-              x = dif * (index - (slot.cards.length - 1) / 2) - seatCoord["x"];
+              const dif = cardXY["width"] * (slot.cards.length < 4 ? seatCoord["dx"] * 2 : seatCoord["dx"]);
+              x = dif * (index - (slot.cards.length - 1) / 2) - (viewport["width"] - seatCoord["x"]);
               // x = -seatCoord["x"] + cardXY["width"] / 2;
               y = seatCoord["y"];
               r = [60, 60, 0, 0];

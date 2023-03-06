@@ -5,7 +5,7 @@ import "./styles.css";
 
 export default function ControlPanel() {
   const [seat, setSeat] = useState(0);
-  const { hit, split, hitBlank, hitDealer, initGame } = useGameManager();
+  const { hit, split, hitDealer, initGame } = useGameManager();
   const hitSeat = () => {
     if (seat === 3) hitDealer();
     else hit(seat);
@@ -108,22 +108,6 @@ export default function ControlPanel() {
         onClick={() => (seat < 3 ? split(seat) : null)}
       >
         Split
-      </div>
-      <div style={{ height: 10 }} />
-      <div
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: 120,
-          height: 30,
-          backgroundColor: "red",
-          color: "white",
-        }}
-        onClick={() => hitDealer()}
-      >
-        Hit Dealer
       </div>
       <div style={{ height: 10 }} />
       <div

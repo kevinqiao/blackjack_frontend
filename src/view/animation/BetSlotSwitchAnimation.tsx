@@ -41,8 +41,8 @@ export default function useBetSlotSwitchAnimation(controls: AnimationControls, c
               y = seatCoord["y"] - dif * ((slot.cards.length - 1) / 2 - index) - 150;
               x = -viewport["width"] + cardXY["width"];
             } else if (seatCoord.direction === 0) {
-              const dif = cardXY["width"] * 0.3;
-              x = dif * (index - (slot.cards.length - 1) / 2) - seatCoord["x"];
+              const dif = cardXY["width"] * seatCoord["dx"];
+              x = dif * (index - (slot.cards.length - 1) / 2) - (viewport["width"] - seatCoord["x"]);
               y = seatCoord["y"];
               scale = 1;
             }
@@ -89,7 +89,7 @@ export default function useBetSlotSwitchAnimation(controls: AnimationControls, c
 
               switch (seatCoord.direction) {
                 case 0:
-                  x = 0 - seatCoord["x"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
+                  x = seatCoord["x"] - viewport["width"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
                   y = seatCoord["y"] - cardXY["height"];
                   break;
                 case 1:

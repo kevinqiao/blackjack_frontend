@@ -1,46 +1,12 @@
-import React, { createContext, useContext, useEffect } from "react";
-import { CardModel, IGameContext, SeatBetSlot, SeatModel } from "../model";
+import React, { createContext, useEffect } from "react";
+import { CardModel, GameAction, IGameContext, SeatBetSlot, SeatModel } from "../model";
 import useEventSubscriber from "./EventManager";
+import useGameService from "./GameService";
 
-const make_deck = () => {
-  const cards: CardModel[] = [];
-  let no = 0;
-  let j = 0;
-  let v = "";
-  for (let i = 2; i <= 14; i++) {
-    v = i + "";
-    switch (i) {
-      case 14:
-        v = "A";
-        break;
-      case 11:
-        v = "J";
-        break;
-      case 12:
-        v = "Q";
-        break;
-      case 13:
-        v = "K";
-        break;
-      default:
-        break;
-    }
-    cards[j++] = { no: ++no, value: v, rank: i, suit: "h", seat: -1, slot: 0 };
-    cards[j++] = { no: ++no, value: v, rank: i, suit: "d", seat: -1, slot: 0 };
-    cards[j++] = { no: ++no, value: v, rank: i, suit: "c", seat: -1, slot: 0 };
-    cards[j++] = { no: ++no, value: v, rank: i, suit: "s", seat: -1, slot: 0 };
-  }
-  return cards;
-};
 const initialState = {
-  gameId: Date.now(),
-  cards: make_deck(),
-  seats: [
-    { no: 0, slots: [], status: 1 },
-    { no: 1, slots: [], status: 1 },
-    { no: 2, slots: [], status: 1 },
-    { no: 3, slots: [], status: 1 },
-  ],
+  gameId: 0,
+  cards: [],
+  seats: [],
   status: 0,
 };
 
@@ -89,8 +55,10 @@ const reducer = (state: any, action: any) => {
         if (cslot) cslot.cards.push(action.data.cardNo);
       }
       card = state.cards.find((c: CardModel) => c.no === action.data.cardNo);
-      card["seat"] = action.data.seatNo;
-      card["slot"] = seat.currentSlot;
+      if (card) {
+        card["seat"] = action.data.seatNo;
+        card["slot"] = seat.currentSlot;
+      }
       return Object.assign({}, state, { seats: [...state.seats], cards: [...state.cards] });
     case actions.HIT_BLANK:
       dealer = state.seats.find((s: SeatModel) => s.no === 3);
@@ -137,8 +105,37 @@ const GameContext = createContext<IGameContext>({
 
 export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const { event, createEvent } = useEventSubscriber(["resetGame"]);
-  useEffect(() => {}, [event]);
+  const { createEvent } = useEventSubscriber(["resetGame"]);
+  const { action, createGame, hit, split, stand } = useGameService();
+  useEffect(() => {
+    if (action?.name === "initGame") {
+      handleInit(action);
+    } else if (action?.name === "releaseCard") {
+      handleRelease(action);
+    }
+  }, [action]);
+  const handleInit = (action: GameAction) => {
+    dispatch({ type: actions.INIT_GAME, game: action.data });
+  };
+
+  const handleRelease = (action: GameAction) => {
+    console.log(action);
+    const data = { seatNo: action.seat, cardNo: action.data.no };
+    dispatch({ type: actions.HIT_CARD, data });
+    createEvent({ name: "hitCreated", data });
+    // if (action.seat === 3) {
+    //   const dealerSeat = state.seats.find((s: SeatModel) => s.no === 3);
+    //   if (dealerSeat.slots?.length > 0 && dealerSeat.slots[0].includes(0))
+    //     createEvent({ name: "blankReplaced", data: action.data });
+    //   else setTimeout(() => createEvent({ name: "blankReleased", data: null }), 400);
+    // }
+  };
+  const handleHit = (seatNo: number, card: CardModel) => {
+    if (card) {
+      dispatch({ type: actions.HIT_CARD, data: { seatNo, cardNo: card.no } });
+      createEvent({ name: "hitCreated", data: { seatNo: seatNo, cardNo: card["no"] } });
+    }
+  };
 
   const value = {
     gameId: state.gameId,
@@ -146,29 +143,16 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     seats: state.seats,
     status: state.status,
     initGame: () => {
-      console.log("initing game...");
-      const game = {
-        gameId: Date.now(),
-        cards: make_deck(),
-        seats: [
-          { no: 0, status: 1, slots: [] },
-          { no: 1, status: 1, slots: [] },
-          { no: 2, status: 1, currentSlot: 1, slots: [{ id: 1, cards: [6, 9] }] },
-          { no: 3, status: 1, slots: [] },
-        ],
-        status: 0,
-      };
-      dispatch({ type: actions.INIT_GAME, game: game });
+      console.log("start New Game");
+      createGame();
     },
     hit: (seatNo: number) => {
-      const releaseds = state.seats.map((s: any) => s["slots"].map((c: SeatBetSlot) => c["cards"])).flat(2);
-      const toReleases = state.cards.filter((c: CardModel) => !releaseds.includes(c.no));
-      const no = Math.floor(Math.random() * toReleases.length);
-      const card = toReleases[no];
-      if (card) {
-        dispatch({ type: actions.HIT_CARD, data: { seatNo, cardNo: card.no } });
-        createEvent({ name: "hitCreated", data: { seatNo: seatNo, cardNo: card["no"] } });
-      }
+      // const releaseds = state.seats.map((s: any) => s["slots"].map((c: SeatBetSlot) => c["cards"])).flat(2);
+      // const toReleases = state.cards.filter((c: CardModel) => !releaseds.includes(c.no));
+      // const no = Math.floor(Math.random() * toReleases.length);
+      // const card = toReleases[no];
+      const card = hit(seatNo);
+      if (card) handleHit(seatNo, card);
     },
     hitDealer: () => {
       const releaseds = state.seats.map((s: any) => s["slots"].map((c: SeatBetSlot) => c["cards"])).flat(2);
@@ -204,7 +188,4 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
-};
-export const useGameManager = () => {
-  return useContext(GameContext);
 };

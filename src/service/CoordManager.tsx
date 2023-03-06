@@ -60,20 +60,20 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     v["cardXY"] = { width: cardWidth, height: cardHeight };
 
     v["seatCoords"] = [];
-    const seat0 = { no: 0, direction: 0, x: w / 2, y: h - cardHeight - 20 };
+    const seat0 = { no: 0, direction: 0, x: w / 2, y: h - cardHeight - 50, dx: 0.3 };
     const seat1 = { no: 1 };
     const seat2 = { no: 2 };
-    const seat3 = { no: 3, direction: 0, x: w / 2, y: 40 };
+    const seat3 = { no: 3, direction: 0, x: w / 2, y: 40, dx: 0.3 };
     v["seatCoords"].push(seat0);
     v["seatCoords"].push(seat1);
     v["seatCoords"].push(seat2);
     v["seatCoords"].push(seat3);
     if (w < h) {
-      Object.assign(seat1, { direction: 1, x: 0, y: h / 2 });
-      Object.assign(seat2, { direction: 2, x: w, y: h / 2 });
+      Object.assign(seat1, { direction: 0, x: cardWidth * 1.3, y: h / 2 - cardHeight / 2, dx: 0.15, cards: 6 });
+      Object.assign(seat2, { direction: 0, x: w - cardWidth, y: h / 2 - cardHeight / 2, dx: 0.15, cards: 6 });
     } else {
-      Object.assign(seat1, { direction: 1, x: 0, y: h / 2 });
-      Object.assign(seat2, { direction: 2, x: w, y: h / 2 });
+      Object.assign(seat1, { direction: 0, x: cardWidth, y: h / 2, dx: 0.15, cards: 0 });
+      Object.assign(seat2, { direction: 0, x: w - cardWidth, y: h / 2, dx: 0.15, cards: 0 });
     }
     setValue(v);
   };
