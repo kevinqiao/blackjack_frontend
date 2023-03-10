@@ -3,7 +3,7 @@ import useEventSubscriber from "../../service/EventManager";
 import "../../styles.css";
 
 const PokeCard = ({ height, width, card }: any) => {
-  const { event, createEvent } = useEventSubscriber(["cardReleased", "gameOver"]);
+  const { event, createEvent } = useEventSubscriber(["cardReleased", "gameOver"], []);
   const faceImg = useMemo(() => {
     let url = "";
     switch (card["suit"]) {

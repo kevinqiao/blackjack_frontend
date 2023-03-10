@@ -2,6 +2,8 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { Subject } from "rxjs";
 export declare type EventModel = {
   name: string;
+  topic: string;
+  delay: number;
   data: any | undefined;
 };
 export interface IContextProps {
@@ -17,22 +19,25 @@ export const EventProvider = ({ children }: { children: React.ReactNode }) => {
   return <EventContext.Provider value={{ subject: subject }}>{children}</EventContext.Provider>;
 };
 
-const useEventSubscriber = (selectors: string[]) => {
+const useEventSubscriber = (selectors: string[], topics: string[]) => {
   const [event, setEvent] = useState<EventModel | null>(null);
   const { subject } = useContext(EventContext);
   useEffect(() => {
     if (selectors && selectors.length > 0 && subject) {
       const observable = subject.asObservable();
       const subscription = observable.subscribe((event: EventModel) => {
-        if (selectors?.includes(event.name)) setEvent(event);
+        if ((!topics || topics.length === 0 || topics?.includes(event.topic)) && selectors?.includes(event.name))
+          setEvent(event);
       });
       return () => subscription.unsubscribe();
     }
-  }, [selectors, subject]);
+  }, [selectors, topics, subject]);
 
   const createEvent = useCallback(
     (event: EventModel) => {
-      if (subject) subject.next(event);
+      if (subject) {
+        setTimeout(() => subject.next(event), event.delay);
+      }
     },
     [subject]
   );

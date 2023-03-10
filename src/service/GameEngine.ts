@@ -59,7 +59,7 @@ const useGameEngine = () => {
                 if ((score + ascore) <= 21)
                     scores.push(score + ascore)
             }
-        } else {
+        } else if (score <= 21) {
             scores.push(score)
         }
         return scores;

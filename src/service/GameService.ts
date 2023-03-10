@@ -24,6 +24,7 @@ const useGameService = () => {
     const createGame = () => {
         const initData: GameModel = {
             gameId: Date.now(),
+            startSeat: lastSeat + 1,
             round: 1,
             cards: gameEngine.shuffle(),
             seats: [
@@ -82,7 +83,7 @@ const useGameService = () => {
         }
         const actionTurn: ActionTurn = { id: Date.now() + 2, act: ActionType.BEGIN, expireTime: Date.now() + 15000, seat: lastSeat + 1, data: null }
         initData.currentTurn = actionTurn;
-        createNewTurn(initData);
+        handleAct(initData, ActionType.BEGIN);
         create(initData)
 
 
@@ -102,7 +103,7 @@ const useGameService = () => {
                         // const actionTurn: ActionTurn = { id: Date.now(), act: ActionType.HIT, expireTime: Date.now() + 15000, seat: lastSeat + 1, data: null }
                         gameObj.currentTurn.act = ActionType.HIT;
                         setAction({ id: Date.now(), name: "releaseCard", seat: seatNo, data });
-                        createNewTurn(gameObj);
+                        handleAct(gameObj, ActionType.HIT);
                         update(gameObj)
                     }
                 }
@@ -126,31 +127,31 @@ const useGameService = () => {
             const gameObj = JSON.parse(JSON.stringify(game));
             const seat = gameObj.seats.find((s: SeatModel) => s.no === seatNo);
             if (seat) {
-                gameObj.currentTurn.act = ActionType.STAND;
-                createNewTurn(gameObj);
+                // gameObj.currentTurn.act = ActionType.STAND;
+                handleAct(gameObj, ActionType.STAND);
                 update(gameObj)
             }
         }
     }
-    const createNewTurn = (gameObj: GameModel) => {
+    const handleAct = (gameObj: GameModel, act: ActionType) => {
+
         const seat = gameObj.seats.find((s: SeatModel) => s.no === gameObj.currentTurn.seat);
         if (!seat)
             return null;
-        if (gameObj.currentTurn?.act === ActionType.BEGIN) {
+        if (act === ActionType.BEGIN) {
             gameObj.currentTurn = { id: Date.now(), act: ActionType.ALL, expireTime: Date.now(), seat: lastSeat + 1, data: null }
             setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: lastSeat + 1, data: Object.assign({}, gameObj.currentTurn, { expireTime: 15000 }) }), 1500)
-        } else if (gameObj.currentTurn.act === ActionType.HIT) {
+        } else if (act === ActionType.HIT) {
             const cards = gameObj.cards.filter((c) => seat.slots[0].cards.includes(c.no));
             const scores = gameEngine.getHandScore(cards);
             if (scores?.length === 0) {//bust
-                Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, act: ActionType.ALL })
-                setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: gameObj.currentTurn.seat, data: Object.assign({}, gameObj.currentTurn, { expireTime: 15000 }) }), 1500)
-
+                seat.status = 1;
+                processNextSeat(gameObj, seat);
             } else {
                 Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, act: ActionType.ALL })
                 setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: gameObj.currentTurn.seat, data: Object.assign({}, gameObj.currentTurn, { expireTime: 15000 }) }), 1500)
             }
-        } else if (gameObj.currentTurn.act === ActionType.STAND) {
+        } else if (act === ActionType.STAND) {
             seat.status = 1;
             processNextSeat(gameObj, seat)
         }  //1-bust check on hit 2-slot check on stand 
@@ -159,7 +160,6 @@ const useGameService = () => {
         const nextSeatNo: number = seat.no + 1 >= gameObj.seats.length - 1 ? seat.no + 1 - (gameObj.seats.length - 1) : seat.no + 1;
         const nextSeat = gameObj.seats.find((s: SeatModel) => s.no === nextSeatNo);
         if (nextSeat?.status === 0) {
-            console.log("new turn seat no:" + nextSeatNo)
             Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, act: ActionType.ALL, seat: nextSeatNo })
             setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: nextSeatNo, data: Object.assign({}, gameObj.currentTurn, { expireTime: 1500 }) }), 10)
         } else {

@@ -8,7 +8,7 @@ import { useGameManager } from "../../service/GameManager";
 export default function useBetSlotSplitAnimation(controls: AnimationControls, cardControls: AnimationControls) {
   const { gameId, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
-  const { event } = useEventSubscriber(["betSplited"]);
+  const { event } = useEventSubscriber(["betSplited"], []);
 
   const getTargetPos = useCallback(
     (seatNo: number, cardNo: number) => {

@@ -6,10 +6,10 @@ import { useGameManager } from "../../../service/GameManager";
 import useInterval from "../../../util/useInterval";
 
 export default function TurnSeatAnimation() {
-  const { gameId, currentTurn, seats } = useGameManager();
+  const { currentTurn, seats } = useGameManager();
   const [display, setDisplay] = useState(false);
   const { cardXY, seatCoords } = useCoordManager();
-  const { event } = useEventSubscriber(["turnOver"]);
+  const { event } = useEventSubscriber(["turnOver"], []);
   const count = useRef(0);
   const [delay, setDelay] = useState(0);
   const pathLength = useSpring(0, {

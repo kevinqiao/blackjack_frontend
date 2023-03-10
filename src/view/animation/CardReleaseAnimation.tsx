@@ -8,7 +8,7 @@ import { useGameManager } from "../../service/GameManager";
 export default function useCardReleaseAnimation(controls: AnimationControls, cardControls: AnimationControls) {
   const { gameId, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
-  const { event } = useEventSubscriber(["hitCreated"]);
+  const { event } = useEventSubscriber(["hitCreated"], []);
 
   const getTargetPos = useCallback(
     (seatNo: number, cardNo: number) => {

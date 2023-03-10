@@ -11,7 +11,7 @@ export default function useBlankCardAnimation(
 ) {
   const { gameId, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
-  const { event } = useEventSubscriber(["blankReleased", "blankReplaced"]);
+  const { event } = useEventSubscriber(["blankReleased", "blankReplaced"], []);
   const seat = useMemo(() => {
     if (seats) return seats.find((s) => s.no === 3);
     else return null;

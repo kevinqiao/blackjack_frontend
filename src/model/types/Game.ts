@@ -4,6 +4,7 @@ import { SeatModel } from "./Seat";
 
 export declare type GameModel = {
   gameId: number;
+  startSeat: number;
   round: number;
   cards: CardModel[];
   seats: SeatModel[];

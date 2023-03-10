@@ -83,7 +83,7 @@ const GameContext = createContext<IGameContext>({
 
 export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const { createEvent } = useEventSubscriber(["resetGame"]);
+  const { createEvent } = useEventSubscriber([], []);
   const { action, createGame, hit, split, switchSlot, stand } = useGameService();
   useEffect(() => {
     if (action?.name === "initGame") {
@@ -99,18 +99,18 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   };
   const handleCreateNewTurn = (action: GameAction) => {
     dispatch({ type: actions.UPDATE_TURN, data: action.data });
-    createEvent({ name: "createNewTurn", data: action.data });
+    createEvent({ name: "createNewTurn", topic: "", data: action.data, delay: 0 });
   };
   const handleRelease = (action: GameAction) => {
     const data = { seatNo: action.data.seat, cardNo: action.data.no };
     dispatch({ type: actions.HIT_CARD, data });
-    setTimeout(() => createEvent({ name: "hitCreated", data }), 20);
+    setTimeout(() => createEvent({ name: "hitCreated", topic: "", data, delay: 0 }), 20);
     if (action.data.seat === 3) {
       const dealerSeat = state.seats.find((s: SeatModel) => s.no === 3);
       if (dealerSeat?.slots?.length === 1)
-        setTimeout(() => createEvent({ name: "blankReplaced", data: action.data }), 20);
+        setTimeout(() => createEvent({ name: "blankReplaced", topic: "", data: action.data, delay: 20 }), 20);
       else if (dealerSeat?.slots?.length === 0)
-        setTimeout(() => createEvent({ name: "blankReleased", data: null }), 400);
+        setTimeout(() => createEvent({ name: "blankReleased", topic: "", data: null, delay: 400 }), 400);
     }
   };
 
@@ -125,12 +125,12 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
       createGame();
     },
     hit: (seatNo: number) => {
-      setTimeout(() => createEvent({ name: "turnOver", data: { seat: seatNo } }), 10);
+      setTimeout(() => createEvent({ name: "turnOver", topic: "", data: { seat: seatNo }, delay: 10 }), 10);
       hit(seatNo);
       // if (card) handleHit(seatNo, card);
     },
     stand: (seatNo: number) => {
-      setTimeout(() => createEvent({ name: "turnOver", data: { seat: seatNo } }), 10);
+      setTimeout(() => createEvent({ name: "turnOver", topic: "", data: { seat: seatNo }, delay: 10 }), 10);
       stand(seatNo);
     },
     split: (seatNo: number) => {
