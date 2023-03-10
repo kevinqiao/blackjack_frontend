@@ -2,7 +2,6 @@ import { motion, useAnimationControls } from "framer-motion";
 import { useCallback } from "react";
 import { CardModel } from "../../model";
 import useCoordManager from "../../service/CoordManager";
-import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
 import useBetSlotSplitAnimation from "../animation/BetSlotSplitAnimation";
 import useBetSlotSwitchAnimation from "../animation/BetSlotSwitchAnimation";
@@ -14,8 +13,7 @@ import "./styles.css";
 
 export default function CardPanel() {
   const { viewport, cardXY } = useCoordManager();
-  const { createEvent } = useEventSubscriber([]);
-  const { gameId, seats, cards, hit, split, switchSlot, hitBlank, hitDealer, initGame } = useGameManager();
+  const { gameId, seats, cards, switchSlot } = useGameManager();
   const blankControls = useAnimationControls();
   const controls = useAnimationControls();
   const cardControls = useAnimationControls();
@@ -24,7 +22,6 @@ export default function CardPanel() {
   useBlankCardAnimation(controls, cardControls, blankControls);
   useCardInitAnimation(controls, cardControls);
   useCardReleaseAnimation(controls, cardControls);
-
   const canOpen = useCallback(
     (card: CardModel) => {
       let open = 0;

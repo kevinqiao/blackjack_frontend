@@ -1,5 +1,5 @@
+import { ActionTurn } from "./ActionTurn";
 import { CardModel } from "./Card";
-import { GameAction } from "./GameAction";
 import { SeatModel } from "./Seat";
 
 export declare type GameModel = {
@@ -7,6 +7,6 @@ export declare type GameModel = {
   round: number;
   cards: CardModel[];
   seats: SeatModel[];
-  currentAction: GameAction | null;
+  currentTurn: ActionTurn;
   status: number;
 };

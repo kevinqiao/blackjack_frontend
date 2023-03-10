@@ -1,20 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
 import { CardModel, GameAction, SeatBetSlot, SeatModel } from "../model";
+import { ActionTurn } from "../model/types/ActionTurn";
+import ActionType from "../model/types/ActionType";
 import { GameModel } from "../model/types/Game";
-import useGameEngine from "../proxy/GameEngine";
-import useGameDao from "../proxy/RepositoryManager";
+import useGameDao from "../respository/RepositoryManager";
 import useInterval from "../util/useInterval";
+import useGameEngine from "./GameEngine";
 
 
 const useGameService = () => {
+    const [lastSeat, setLastSeat] = useState(-1);
     const { game, create, update } = useGameDao();
     const [action, setAction] = useState<GameAction | null>(null);
-    const gameEngine = useGameEngine(game);
+    const gameEngine = useGameEngine();
     const [checkInterval, setCheckInterval] = useState(0)
     const checkGame = useCallback(() => {
-        if (game?.currentAction?.expireTime <= Date.now()) {
-            console.log("current action expired")
-        }
+
     }, [game]);
 
     useInterval(checkGame, checkInterval);//checkInterval-0:disable
@@ -26,85 +27,156 @@ const useGameService = () => {
             round: 1,
             cards: gameEngine.shuffle(),
             seats: [
-                { no: 0, status: 1, slots: [], currentSlot: 0 },
-                { no: 1, status: 1, slots: [], currentSlot: 0 },
-                { no: 2, status: 1, slots: [], currentSlot: 0 },
-                { no: 3, status: 1, slots: [], currentSlot: 0 },
+                { no: 0, status: 0, slots: [], currentSlot: 0 },
+                { no: 1, status: 0, slots: [], currentSlot: 0 },
+                { no: 2, status: 0, slots: [], currentSlot: 0 },
+                { no: 3, status: 0, slots: [], currentSlot: 0 },
             ],
-            currentAction: null,
+            currentTurn: { id: 0, act: -1, seat: -1, expireTime: 0, data: null },
             status: 0,
         };
-        create(initData);
-        const actionData: GameAction = { id: Date.now(), name: "initGame", data: initData, expireTime: 0, seat: 0, slot: 0 }
-        setAction(actionData);
-        const dif = 0;
-        const size = game.seats.length - 1;
-        let count = 0;
-        for (let i = 0; i < size; i++) {
 
-            const no = dif + i >= size ? dif + i - size : dif + i;
-            const seat = game.seats.find((s: SeatModel) => s.no === no);
+        // create(initData);
+        const actionData: GameAction = { id: Date.now(), name: "initGame", data: JSON.parse(JSON.stringify(initData)), seat: 0 }
+        setAction(actionData);
+        const size = initData.seats.length - 1;
+
+        for (let i = 0; i < size; i++) {
+            const no = lastSeat + i + 1 >= size ? lastSeat + i + 1 - size : lastSeat + 1 + i;
+            const seat = initData.seats.find((s: SeatModel) => s.no === no);
             if (seat) {
-                count++;
-                let time = count * 500;
+
                 const currentSlot: SeatBetSlot = { id: Date.now(), cards: [] };
                 seat.slots.push(currentSlot);
                 seat.currentSlot = currentSlot.id;
-                let card = gameEngine.releaseCard();
-                currentSlot.cards.push(card.no)
-                console.log(card.no);
-                let card1 = card.no;
-                setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", expireTime: 0, seat: seat.no, slot: seat.currentSlot, data: { no: card1 } }), time);
-                card = gameEngine.releaseCard();
-                console.log(card.no);
-                let card2 = card.no
-                currentSlot.cards.push(card.no)
-                setTimeout(() => setAction({ id: Date.now() + 2, name: "releaseCard", expireTime: 0, seat: seat.no, slot: seat.currentSlot, data: { no: card2 } }), time + 250)
+                let card = gameEngine.releaseCard(initData);
+                if (card?.no) {
+                    let card1 = card.no;
+                    currentSlot.cards.push(card1)
+                    let time1 = (i + 1) * 500;
+                    if (i === 2)
+                        time1 = 2000
+                    setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", seat: seat.no, data: { seat: seat.no, no: card1 } }), time1);
+                    card = gameEngine.releaseCard(initData);
+                    if (card?.no) {
+                        let card2 = card.no
+                        currentSlot.cards.push(card2)
+                        let time2 = (i + 1) * 500 + 300;
+                        if (i === 2)
+                            time2 = 2500;
+                        setTimeout(() => setAction({ id: Date.now() + 2, name: "releaseCard", seat: seat.no, data: { seat: seat.no, no: card2 } }), time2)
+                    }
+                }
             }
         }
-        const dealerSeat = game.seats.find((s: SeatModel) => s.no === size);
-
+        const dealerSeat = initData.seats.find((s: SeatModel) => s.no === size);
         if (dealerSeat) {
-            console.log(dealerSeat)
-            count++;
-            let time = count * 500;
+            let time = 3000;
             dealerSeat.slots.push({ id: Date.now(), cards: [] })
-            let dealerCard: CardModel = gameEngine.releaseCard();
-            dealerSeat.slots[0]['cards'].push(dealerCard.no)
-            console.log("time:" + time)
-            setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", expireTime: 0, seat: size, slot: dealerSeat.currentSlot, data: { ...dealerCard } }), time)
-            // dealerCard = gameEngine.releaseCard();
-            // dealerSeat.slots[0]['cards'].push(dealerCard.no)
-            setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", expireTime: 0, seat: size, slot: dealerSeat.currentSlot, data: { no: 0 } }), time + 250)
+            const dealerCard: CardModel | null = gameEngine.releaseCard(initData);
+            if (dealerCard) {
+                dealerSeat.slots[0]['cards'].push(dealerCard.no)
+                setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", seat: size, data: { seat: size, no: dealerCard.no } }), time)
+                // setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", seat: size, data: { seat: size, no: 0 } }), time + 250)
+            }
         }
+        const actionTurn: ActionTurn = { id: Date.now() + 2, act: ActionType.BEGIN, expireTime: Date.now() + 15000, seat: lastSeat + 1, data: null }
+        initData.currentTurn = actionTurn;
+        createNewTurn(initData);
+        create(initData)
+
+
+        // setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: lastSeat + 1, data: actionTurn }), count * 500 + 350)
     }
-    const hit = (seatNo: number): CardModel | null => {
-        if (game) {
-            const releaseds = game.seats.map((s: any) => s["slots"].map((c: SeatBetSlot) => c["cards"])).flat(2);
-            const toReleases = game.cards.filter((c: CardModel) => !releaseds.includes(c.no));
-            const no = Math.floor(Math.random() * toReleases.length);
-            const card = toReleases[no];
-            return card;
-        } else
-            return null
+    const hit = (seatNo: number) => {
+        const gameObj = JSON.parse(JSON.stringify(game));
+        if (gameObj?.currentTurn?.seat === seatNo) {
+            const seat = gameObj.seats.find((s: SeatModel) => s.no === seatNo);
+            if (seat) {
+                const currentSlot = seat.slots?.find((s: SeatBetSlot) => s.id === seat.currentSlot);
+                if (currentSlot) {
+                    let card = gameEngine.releaseCard(gameObj);
+                    if (card) {
+                        const data = { seat: seatNo, no: card.no }
+                        currentSlot.cards.push(card.no)
+                        // const actionTurn: ActionTurn = { id: Date.now(), act: ActionType.HIT, expireTime: Date.now() + 15000, seat: lastSeat + 1, data: null }
+                        gameObj.currentTurn.act = ActionType.HIT;
+                        setAction({ id: Date.now(), name: "releaseCard", seat: seatNo, data });
+                        createNewTurn(gameObj);
+                        update(gameObj)
+                    }
+                }
+            }
+        }
     }
     const split = (seatNo: number): SeatBetSlot | null => {
         return null;
+    }
+    const switchSlot = (seatNo: number, slot: number) => {
+        return;
     }
     const double = (seatNo: number): CardModel | null => {
         return null;
 
     }
-    const insure = (seatNo: number) => {
 
+    const stand = (seatNo: number) => {
+
+        if (game && game.currentTurn?.seat === seatNo) {
+            const gameObj = JSON.parse(JSON.stringify(game));
+            const seat = gameObj.seats.find((s: SeatModel) => s.no === seatNo);
+            if (seat) {
+                gameObj.currentTurn.act = ActionType.STAND;
+                createNewTurn(gameObj);
+                update(gameObj)
+            }
+        }
     }
-    const stand = (seatNo: number): boolean => {
-        return true;
+    const createNewTurn = (gameObj: GameModel) => {
+        const seat = gameObj.seats.find((s: SeatModel) => s.no === gameObj.currentTurn.seat);
+        if (!seat)
+            return null;
+        if (gameObj.currentTurn?.act === ActionType.BEGIN) {
+            gameObj.currentTurn = { id: Date.now(), act: ActionType.ALL, expireTime: Date.now(), seat: lastSeat + 1, data: null }
+            setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: lastSeat + 1, data: Object.assign({}, gameObj.currentTurn, { expireTime: 15000 }) }), 1500)
+        } else if (gameObj.currentTurn.act === ActionType.HIT) {
+            const cards = gameObj.cards.filter((c) => seat.slots[0].cards.includes(c.no));
+            const scores = gameEngine.getHandScore(cards);
+            if (scores?.length === 0) {//bust
+                Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, act: ActionType.ALL })
+                setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: gameObj.currentTurn.seat, data: Object.assign({}, gameObj.currentTurn, { expireTime: 15000 }) }), 1500)
+
+            } else {
+                Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, act: ActionType.ALL })
+                setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: gameObj.currentTurn.seat, data: Object.assign({}, gameObj.currentTurn, { expireTime: 15000 }) }), 1500)
+            }
+        } else if (gameObj.currentTurn.act === ActionType.STAND) {
+            seat.status = 1;
+            processNextSeat(gameObj, seat)
+        }  //1-bust check on hit 2-slot check on stand 
     }
+    const processNextSeat = (gameObj: GameModel, seat: SeatModel) => {
+        const nextSeatNo: number = seat.no + 1 >= gameObj.seats.length - 1 ? seat.no + 1 - (gameObj.seats.length - 1) : seat.no + 1;
+        const nextSeat = gameObj.seats.find((s: SeatModel) => s.no === nextSeatNo);
+        if (nextSeat?.status === 0) {
+            console.log("new turn seat no:" + nextSeatNo)
+            Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, act: ActionType.ALL, seat: nextSeatNo })
+            setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: nextSeatNo, data: Object.assign({}, gameObj.currentTurn, { expireTime: 1500 }) }), 10)
+        } else {
+            const dealerNo = gameObj.seats.length - 1;
+            Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: 0, act: ActionType.ALL, seat: dealerNo })
+            setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: dealerNo, data: Object.assign({}, gameObj.currentTurn, { expireTime: 1500 }) }), 10)
+            for (let i = 0; i < 4; i++) {
+                let card = gameEngine.releaseCard(gameObj);
+                setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", seat: dealerNo, data: { seat: dealerNo, no: card?.no } }), (i + 1) * 300)
+            }
+        }
+    }
+
     useEffect(() => {
 
     }, [])
-    return { action, createGame, hit, split, double, insure, stand }
+    return { action, createGame, hit, split, double, switchSlot, stand }
 
 }
 export default useGameService

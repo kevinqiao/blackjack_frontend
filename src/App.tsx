@@ -1,13 +1,13 @@
-import React from "react";
 import { CoordProvider } from "./service/CoordManager";
 import { EventProvider } from "./service/EventManager";
 import { GameProvider } from "./service/GameManager";
 import "./styles.css";
 import CardPanel from "./view/component/CardPanel";
 import ControlPanel from "./view/component/ControlPanel";
+import TurnSeatProgress from "./view/component/common/TurnSeatProgress";
 
 function App() {
-  const FlattenedProviderTree = (providers) => {
+  const FlattenedProviderTree = (providers: any): any => {
     if (providers?.length === 1) {
       return providers[0][0];
     }
@@ -16,7 +16,7 @@ function App() {
 
     return FlattenedProviderTree([
       [
-        ({ children }) => (
+        ({ children }: { children: any }) => (
           <A {...(paramsA || {})}>
             <B {...(paramsB || {})}>{children}</B>
           </A>
@@ -34,6 +34,7 @@ function App() {
       {/* <CardBox/> */}
       <ControlPanel />
       <CardPanel />
+      <TurnSeatProgress />
     </Providers>
   );
 }

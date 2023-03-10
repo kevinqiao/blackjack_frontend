@@ -135,6 +135,7 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
   );
   useEffect(() => {
     if (event?.name === "hitCreated") {
+      // console.log("hitCreated at seat:" + event.data.seatNo + " card no:" + event.data.cardNo);
       // console.log("hit created seat:" + event.data.seatNo + " cardNo:" + event.data.cardNo);
       handleHit(event.data.seatNo, event.data.cardNo);
     }

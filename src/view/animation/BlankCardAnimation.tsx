@@ -47,44 +47,38 @@ export default function useBlankCardAnimation(
   }, [blankControls, seat, seatCoord, gameId]);
 
   const handleRelase = useCallback(() => {
-    console.log("handle release");
-    if (seat?.slots && seat.slots.length == 1 && seat.slots[0].cards.includes(0) && seatCoord) {
-      const x = - seatCoord["x"] + cardXY['width'] * 0.3;
-      const y = seatCoord["y"];
-      const rotate = [60, 60, 0, 0];
-      const times = [0, 0.4, 0.8, 1];
-      const opacity = [null, 0, 0];
-      // const transform = [`rotateX("60deg")`,`rotateX("60deg")`, `rotateX("0deg")`, `rotateX("60deg")`, `rotateX("60deg")`];
+    const x = -seatCoord["x"] + cardXY["width"] * 0.3;
+    const y = seatCoord["y"];
+    const rotate = [60, 60, 0, 0];
+    const times = [0, 0.4, 0.8, 1];
+    const opacity = [null, 0, 0];
+    // const transform = [`rotateX("60deg")`,`rotateX("60deg")`, `rotateX("0deg")`, `rotateX("60deg")`, `rotateX("60deg")`];
 
-      blankControls.start({
-        x: [null, x + 50, x + 50, x],
-        y: [null, y, y, y],
-        rotate: rotate,
-        zIndex: [0, -5, -5, -5],
-        transition: {
-          duration: 0.2,
-          default: { ease: "linear" },
-          times: times,
-        },
-      });
-    }
+    blankControls.start({
+      x: [null, x + 50, x + 50, x],
+      y: [null, y, y, y],
+      rotate: rotate,
+      zIndex: [0, -5, -5, -5],
+      transition: {
+        duration: 0.2,
+        default: { ease: "linear" },
+        times: times,
+      },
+    });
+
     return;
   }, [blankControls, seat, seatCoord]);
   const handleReplace = useCallback(
     async (cardNo) => {
-
-      console.log("handle replace");
       if (seat && seatCoord) {
-        const x = cardXY['width'] * 0.3 - seatCoord["x"];
+        const x = cardXY["width"] * 0.3 - seatCoord["x"];
         const y = seatCoord["y"];
         controls.start((i) => {
           if (i === cardNo && seat.slots?.length > 0) {
-            console.log(seat.slots)
-            const index = seat.slots[0]['cards'].findIndex((c) => c === cardNo);
-            console.log("dealer card index:" + index + " card no:" + cardNo)
+            const index = seat.slots[0]["cards"].findIndex((c) => c === cardNo);
             return {
               opacity: [0, 0, 1, 1],
-              x: [x, x, x + 100, x],
+              x: [x, x, x + 150, x],
               y: [y, y, y, y],
               rotate: [0, 0, 0, 0],
               zIndex: [null, 1 + index, 1 + index, 1 + index],
@@ -98,30 +92,34 @@ export default function useBlankCardAnimation(
           return {};
         });
         blankControls.start({
-          x: [x, x, x, 0],
-          y: [y, y, x, 0],
+          x: [null, x, x, 0],
+          y: [null, y, x, 0],
           rotate: [0, 0, 0, 60],
-          opacity: [1, 1, 0, 0],
+          opacity: [1, 0, 0, 0],
           transition: {
             duration: 0.1,
             default: { ease: "linear" },
             times: [0, 0.1, 0.8, 1],
           },
         });
-        setTimeout(() => cardControls.start((id) => {
-          const ids = id.split("-");
-          if (Number(ids[0]) === cardNo) {
-            const rotate = `rotateY(${Number(ids[1]) === 1 ? "180deg" : "360deg"})`;
-            return {
-              opacity: 1 - Number(ids[1]),
-              transform: rotate,
-              transition: {
-                default: { type: "spring", mass: 0.3, stiffness: 30 },
-                duration: 1,
-              },
-            };
-          } else return {};
-        }), 200)
+        setTimeout(
+          () =>
+            cardControls.start((id) => {
+              const ids = id.split("-");
+              if (Number(ids[0]) === cardNo) {
+                const rotate = `rotateY(${Number(ids[1]) === 1 ? "180deg" : "360deg"})`;
+                return {
+                  opacity: 1 - Number(ids[1]),
+                  transform: rotate,
+                  transition: {
+                    default: { type: "spring", mass: 0.3, stiffness: 30 },
+                    duration: 1,
+                  },
+                };
+              } else return {};
+            }),
+          1000
+        );
       }
       return;
     },
@@ -139,8 +137,8 @@ export default function useBlankCardAnimation(
     if (event?.name === "blankReleased") {
       handleRelase();
     } else if (event?.name === "blankReplaced") {
-      console.log("blank replaced happened");
-      handleReplace(event.data.cardNo);
+      console.log(event.data);
+      handleReplace(event.data.no);
     }
   }, [event]);
   return gameId;

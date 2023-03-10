@@ -68,6 +68,7 @@ export default function useCardInitAnimation(controls: AnimationControls, cardCo
   );
 
   const handleInit = useCallback(() => {
+    console.log(seats);
     controls.start((i) => {
       for (const seat of seats) {
         if (seat.slots.length > 0 && seat.currentSlot > 0) {
