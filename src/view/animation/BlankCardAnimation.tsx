@@ -22,7 +22,7 @@ export default function useBlankCardAnimation(
     else return null;
   }, [seatCoords]);
   const handleInit = useCallback(() => {
-    if (seat?.slots && seat.slots.length > 0 && seat.slots[0].cards.includes(0) && seatCoord) {
+    if (seat?.slots && seat.slots.length > 0 && seat.slots[0].cards.length === 1 && seatCoord) {
       const x = 50 - seatCoord["x"];
       const y = seatCoord["y"];
       const rotate = [60, 0, 0, 0, 0];
@@ -127,7 +127,6 @@ export default function useBlankCardAnimation(
   );
   useEffect(() => {
     if (seat && blankControls && seatCoords && gameId > 0) {
-      console.log("init blank....");
       setTimeout(() => handleInit(), 100);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,7 +136,6 @@ export default function useBlankCardAnimation(
     if (event?.name === "blankReleased") {
       handleRelase();
     } else if (event?.name === "blankReplaced") {
-      console.log(event.data);
       handleReplace(event.data.no);
     }
   }, [event]);

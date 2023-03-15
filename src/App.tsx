@@ -2,8 +2,10 @@ import { CoordProvider } from "./service/CoordManager";
 import { EventProvider } from "./service/EventManager";
 import { GameProvider } from "./service/GameManager";
 import "./styles.css";
+import BlackJack from "./view/component/BlackJack";
 import CardPanel from "./view/component/CardPanel";
 import ControlPanel from "./view/component/ControlPanel";
+import SlotScorePanel from "./view/component/SlotScorePanel";
 import TurnSeatProgress from "./view/component/common/TurnSeatProgress";
 
 function App() {
@@ -35,6 +37,8 @@ function App() {
       <ControlPanel />
       <CardPanel />
       <TurnSeatProgress />
+      <SlotScorePanel />
+      <BlackJack />
     </Providers>
   );
 }

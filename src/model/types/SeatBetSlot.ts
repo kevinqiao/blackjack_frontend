@@ -1,6 +1,6 @@
 export declare type SeatBetSlot = {
-    id:number;
-    cards:number[];
-    chips?:number;
-  };
-  
+  id: number;
+  cards: number[];
+  chips?: number;
+  status?: number;
+};

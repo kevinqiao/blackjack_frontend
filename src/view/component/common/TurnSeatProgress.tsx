@@ -12,14 +12,14 @@ export default function TurnSeatAnimation() {
   const { event } = useEventSubscriber(["turnOver"], []);
   const count = useRef(0);
   const [delay, setDelay] = useState(0);
+
   const pathLength = useSpring(0, {
     stiffness: 10,
     mass: 0.1,
     damping: 10,
   });
   useEffect(() => {
-    console.log(currentTurn);
-    if (currentTurn && currentTurn?.seat < 3 && pathLength) {
+    if (currentTurn && currentTurn?.seat < 3 && currentTurn?.seat >= 0 && pathLength) {
       pathLength.jump(0);
       count.current = 0;
       setDelay(100);
@@ -69,6 +69,7 @@ export default function TurnSeatAnimation() {
     }
     return 0;
   }, [currentTurn, seatCoords, cardXY]);
+
   const pleft = useMemo(() => {
     if (currentTurn && seatCoords && seats && cardXY) {
       const seat = seats.find((s) => s.no === currentTurn.seat);
@@ -84,6 +85,7 @@ export default function TurnSeatAnimation() {
     }
     return 0;
   }, [currentTurn, seatCoords, seats, cardXY]);
+
   const show = {
     opacity: 1,
     display: "block",

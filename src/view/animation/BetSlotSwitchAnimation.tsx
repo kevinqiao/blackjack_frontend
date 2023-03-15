@@ -8,7 +8,7 @@ import { useGameManager } from "../../service/GameManager";
 export default function useBetSlotSwitchAnimation(controls: AnimationControls, cardControls: AnimationControls) {
   const { gameId, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
-  const { event } = useEventSubscriber(["betSwitched"], []);
+  const { event } = useEventSubscriber(["slotActivated"], []);
 
   const getTargetPos = useCallback(
     (seatNo: number, cardNo: number) => {
@@ -60,20 +60,26 @@ export default function useBetSlotSwitchAnimation(controls: AnimationControls, c
 
   const handleSwitch = useCallback(
     (seatNo: number, slot: number) => {
+      const seatCoord = seatCoords.find(
+        (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
+      );
+      const seat = seats.find((s) => s.no === seatNo);
       controls.start((i) => {
-        const seat = seats.find((s) => s.no === seatNo);
         if (seat) {
           const currentSlot = seat.slots.find((s) => s.id === slot);
           if (currentSlot?.cards?.includes(i)) {
-            // const x = -600 + index * 30;
-            const { x, y, scale } = getTargetPos(seatNo, i);
+            const index = currentSlot.cards.findIndex((c) => c === i);
+            const dif = cardXY["width"] * seatCoord["dx"];
+            let x = dif * (index - (currentSlot.cards.length - 1) / 2) - (viewport["width"] - seatCoord["x"]);
+            let y = seatCoord["y"];
+            let scale = 1;
+            // const { x, y, scale } = getTargetPos(seatNo, i);
             return {
               x: x,
               y: y,
               scale: scale,
               transition: {
-                duration: 1,
-                default: { ease: "linear" },
+                duration: 0.5,
               },
             };
           }
@@ -83,43 +89,17 @@ export default function useBetSlotSwitchAnimation(controls: AnimationControls, c
               const seatCoord = seatCoords.find(
                 (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
               );
-              let x = 0;
-              let y = 0;
+
               let scale = 0.6;
-
-              switch (seatCoord.direction) {
-                case 0:
-                  x = seatCoord["x"] - viewport["width"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
-                  y = seatCoord["y"] - cardXY["height"];
-                  break;
-                case 1:
-                  x = seatCoord["x"] - viewport["width"] + cardXY["height"] + cardXY["height"] * 0.6;
-                  y =
-                    seatCoord["y"] -
-                    cardXY["height"] * 2 +
-                    (j - slots.length / 2) * (cardXY["width"] + 20) * scale +
-                    50;
-                  break;
-                case 2:
-                  x = seatCoord["x"] - viewport["width"] - cardXY["height"] * 1.6;
-                  y =
-                    seatCoord["y"] -
-                    cardXY["height"] * 2 +
-                    (j - slots.length / 2) * (cardXY["width"] + 20) * scale +
-                    50;
-                  break;
-
-                default:
-                  break;
-              }
+              let x = seatCoord["x"] - viewport["width"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
+              let y = seatCoord["y"] - cardXY["height"];
 
               return {
                 x: x,
                 y: y,
                 scale: scale,
                 transition: {
-                  duration: 1,
-                  default: { ease: "linear" },
+                  duration: 0.5,
                 },
               };
             }
@@ -128,13 +108,13 @@ export default function useBetSlotSwitchAnimation(controls: AnimationControls, c
         return {};
       });
     },
-    [controls, cardControls, seats]
+    [controls, cardControls, seats, seatCoords]
   );
   useEffect(() => {
-    if (event?.name === "betSwitched") {
-      console.log("betswitched at seat:" + event.data.seatNo);
-      handleSwitch(event.data.seatNo, event.data.slot);
+    if (event?.name === "slotActivated") {
+      // console.log("activate slot at seat:" + event.data.seat + " slot:" + event.data.slot);
+      handleSwitch(event.data.seat, event.data.slot);
     }
-  }, [event]);
+  }, [event, seats]);
   return gameId;
 }

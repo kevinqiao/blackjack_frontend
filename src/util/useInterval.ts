@@ -23,7 +23,6 @@ function useInterval(callback: () => void, delay: number | null) {
         const id = setInterval(() => savedCallback.current(), delay)
 
         return () => {
-            console.log("clear interval:" + id)
             clearInterval(id)
         }
     }, [delay])

@@ -78,7 +78,6 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     setValue(v);
   };
   useEffect(() => {
-    console.log(window.innerWidth + ":" + window.outerWidth);
     updateCoord();
     window.addEventListener("resize", updateCoord, true);
     return () => window.removeEventListener("resize", updateCoord, true);

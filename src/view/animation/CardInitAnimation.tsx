@@ -46,9 +46,8 @@ export default function useCardInitAnimation(controls: AnimationControls, cardCo
               r = [60, 60, 90, 90];
               dy = 80;
             } else if (seatCoord.direction === 0) {
-              //bottom
-              const dif = cardXY["width"] * 0.3;
-              x = dif * (index - (slot.cards.length - 1) / 2) - seatCoord["x"] + cardXY["width"] / 2;
+              const dif = cardXY["width"] * (slot.cards.length < 4 ? seatCoord["dx"] * 2 : seatCoord["dx"]);
+              x = dif * (index - (slot.cards.length - 1) / 2) - (viewport["width"] - seatCoord["x"]);
               y = seatCoord["y"];
               r = [60, 60, 0, 0];
               dx = 80;
@@ -68,7 +67,6 @@ export default function useCardInitAnimation(controls: AnimationControls, cardCo
   );
 
   const handleInit = useCallback(() => {
-    console.log(seats);
     controls.start((i) => {
       for (const seat of seats) {
         if (seat.slots.length > 0 && seat.currentSlot > 0) {

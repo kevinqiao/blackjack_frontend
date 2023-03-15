@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { CardModel, SeatBetSlot, SeatModel } from "../model";
 import { ActionTurn } from "../model/types/ActionTurn";
-import ActionType from "../model/types/ActionType";
 import { GameModel } from "../model/types/Game";
 import useEventSubscriber, { EventModel } from "../service/EventManager";
 import useGameEngine from "../service/GameEngine";
@@ -57,11 +56,9 @@ const useLaunchProcessor = () => {
                 // setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", seat: size, data: { seat: size, no: 0 } }), time + 250)
             }
         }
-        
-        const actionTurn: ActionTurn = { id: Date.now() + 2, act: ActionType.BEGIN, expireTime: Date.now() + 15000, seat: game.startSeat, data: null }
+        const actionTurn: ActionTurn = { id: Date.now() + 2, acts: gameEngine.getActs(game, game.startSeat), expireTime: 15000, seat: game.startSeat, data: null }
         game.currentTurn = actionTurn;
-
-        // setTimeout(() => setAction({ id: Date.now(), name: "createNewTurn", seat: lastSeat + 1, data: actionTurn }), count * 500 + 350)
+        createEvent({ name: "createNewTurn", topic: "model", data: actionTurn, delay: 3500 })
     }
 
 
