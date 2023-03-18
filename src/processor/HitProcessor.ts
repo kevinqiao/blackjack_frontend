@@ -31,16 +31,15 @@ const useHitProcessor = () => {
                 if (gameEngine.turnSlot(gameObj, seat)) {
                     return;
                 }
+                seat.status = 1;
                 if (gameEngine.turnSeat(gameObj, seat)) {
-                    seat.status = 1;
                     return;
                 }
-                gameEngine.turnDealer(gameObj, seat);
+                gameEngine.turnDealer(gameObj);
 
             } else {
                 Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, acts: [ActionType.HIT, ActionType.STAND] })
                 createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: 15000 }), delay: 1500 })
-                console.log(JSON.parse(JSON.stringify(seat)))
             }
 
         }

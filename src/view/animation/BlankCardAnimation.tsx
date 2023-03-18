@@ -77,15 +77,15 @@ export default function useBlankCardAnimation(
           if (i === cardNo && seat.slots?.length > 0) {
             const index = seat.slots[0]["cards"].findIndex((c) => c === cardNo);
             return {
-              opacity: [0, 0, 1, 1],
-              x: [x, x, x + 150, x],
+              opacity: [0, 1, 1, 1],
+              x: [x, x + 30, x + 120, x],
               y: [y, y, y, y],
               rotate: [0, 0, 0, 0],
               zIndex: [null, 1 + index, 1 + index, 1 + index],
               transition: {
-                default: { type: "spring", ease: "linear" },
-                duration: 1.5,
-                times: [0, 0.1, 1.2, 1.5],
+                default: { ease: "linear" },
+                duration: 2.5,
+                times: [0, 0.2, 0.7, 1],
               },
             };
           }
@@ -97,9 +97,9 @@ export default function useBlankCardAnimation(
           rotate: [0, 0, 0, 60],
           opacity: [1, 0, 0, 0],
           transition: {
-            duration: 0.1,
+            duration: 0.5,
             default: { ease: "linear" },
-            times: [0, 0.1, 0.8, 1],
+            times: [0, 0.1, 0.6, 1],
           },
         });
         setTimeout(
@@ -113,12 +113,12 @@ export default function useBlankCardAnimation(
                   transform: rotate,
                   transition: {
                     default: { type: "spring", mass: 0.3, stiffness: 30 },
-                    duration: 1,
+                    duration: 2,
                   },
                 };
               } else return {};
             }),
-          1000
+          500
         );
       }
       return;

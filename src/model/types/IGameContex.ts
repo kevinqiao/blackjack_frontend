@@ -1,6 +1,7 @@
 import { ActionTurn } from "./ActionTurn";
 import { CardModel } from "./Card";
 import { SeatModel } from "./Seat";
+import { SlotBattleResult } from "./SlotBattleResult";
 export interface IGameContext {
   gameId: number,
   startSeat: number,
@@ -8,6 +9,7 @@ export interface IGameContext {
   seats: SeatModel[];
   currentTurn: ActionTurn | null;
   status: number;
+  results: SlotBattleResult[];
   initGame: () => void;
   hit: (seatNo: number) => void;
   stand: (seatNo: number) => void;

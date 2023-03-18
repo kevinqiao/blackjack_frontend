@@ -1,6 +1,7 @@
 import { ActionTurn } from "./ActionTurn";
 import { CardModel } from "./Card";
 import { SeatModel } from "./Seat";
+import { SlotBattleResult } from "./SlotBattleResult";
 
 export declare type GameModel = {
   gameId: number;
@@ -10,4 +11,5 @@ export declare type GameModel = {
   seats: SeatModel[];
   currentTurn: ActionTurn;
   status: number;
+  results?: SlotBattleResult[];
 };

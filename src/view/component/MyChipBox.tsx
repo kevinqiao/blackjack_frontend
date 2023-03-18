@@ -1,14 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { animated, useSpring, useSprings } from "@react-spring/web";
+import { useMemo, useState } from "react";
 import useCoordManager from "../../service/CoordManager";
-import "../../styles.css";
 import useEventSubscriber from "../../service/EventManager";
-import { useGameManager } from "../../service/GameManager";
+import "../../styles.css";
 
 const MyChipBox = () => {
+  const [betChips, setBetChips] = useState([]);
   const [total, setTotal] = useState(4);
   const { myChipXY, betChipXY, chipWidth } = useCoordManager();
-  const { betChips, addChip, removeChip } = useGameManager();
+
   const { createEvent } = useEventSubscriber([]);
 
   const myChips1 = useMemo(() => {

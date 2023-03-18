@@ -8,6 +8,7 @@ const initialState = {
   cards: [],
   seats: [],
   currentTurn: null,
+  results: [],
   status: 0,
 };
 
@@ -18,6 +19,7 @@ const actions = {
   UPDATE_TURN: "UPDATE_TURN",
   SLOT_SPLIT: "SLOT_SPLIT",
   SLOT_OPEN: "SLOT_OPEN",
+  SETTLE_GAME: "GAME_SETTLE",
 };
 
 const reducer = (state: any, action: any) => {
@@ -27,6 +29,8 @@ const reducer = (state: any, action: any) => {
   switch (action.type) {
     case actions.INIT_GAME:
       return Object.assign({}, state, action.game);
+    case actions.SETTLE_GAME:
+      return Object.assign({}, state, { results: action.results });
     case actions.UPDATE_TURN:
       return Object.assign({}, state, { currentTurn: action.data });
     case actions.SLOT_SPLIT:
@@ -47,25 +51,17 @@ const reducer = (state: any, action: any) => {
       seat = state.seats.find((s: SeatModel) => s.no === action.data.seat);
       if (!seat) return state;
       seat.currentSlot = action.data.slot;
-      console.log(JSON.parse(JSON.stringify(seat)));
       return Object.assign({}, state, { seats: [...state.seats] });
     case actions.HIT_CARD:
       seat = state.seats.find((s: SeatModel) => s.no === action.data.seatNo);
       if (!seat) return state;
-      if (!seat.slots || seat.slots.length === 0) {
-        slot = { id: Date.now(), cards: [action.data.cardNo] };
-        seat.slots = [slot];
-        seat.currentSlot = slot["id"];
-      } else {
-        const cslot = seat.slots.find((s: SeatBetSlot) => seat.currentSlot === s.id);
-        if (cslot) cslot.cards.push(action.data.cardNo);
-      }
+      const cslot = seat.slots.find((s: SeatBetSlot) => seat.currentSlot === s.id);
+      if (cslot) cslot.cards.push(action.data.cardNo);
       card = state.cards.find((c: CardModel) => c.no === action.data.cardNo);
       if (card) {
         card["seat"] = action.data.seatNo;
         card["slot"] = seat.currentSlot;
       }
-      console.log(JSON.parse(JSON.stringify(seat)));
       return Object.assign(state, { seats: [...state.seats], cards: [...state.cards] });
 
     default:
@@ -80,6 +76,7 @@ const GameContext = createContext<IGameContext>({
   seats: [],
   status: 0,
   currentTurn: null,
+  results: [],
   initGame: () => {},
   hit: (seatNo: number) => null,
   split: (seatNo: number) => null,
@@ -92,7 +89,7 @@ const GameContext = createContext<IGameContext>({
 export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { event, createEvent } = useEventSubscriber(
-    ["initGame", "releaseCard", "createNewTurn", "splitSlot", "openSlot"],
+    ["initGame", "settleGame", "releaseCard", "createNewTurn", "splitSlot", "openSlot"],
     ["model"]
   );
   const { createGame, hit, split, switchSlot, stand } = useGameService();
@@ -107,17 +104,24 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
       handleSplit(event.data);
     } else if (event?.name === "openSlot") {
       handleSlotOpen(event.data);
+    } else if (event?.name === "settleGame") {
+      handleSettleGame(event.data);
     }
   }, [event]);
   const handleInit = (action: any) => {
+    console.log("hanlde initing game");
     dispatch({ type: actions.INIT_GAME, game: action });
+    createEvent({ name: "gameStart", topic: "", data: action, delay: 10 });
+  };
+  const handleSettleGame = (data: any) => {
+    dispatch({ type: actions.SETTLE_GAME, results: data });
+    createEvent({ name: "gameOver", topic: "", data: data, delay: 3000 });
   };
   const handleCreateNewTurn = (action: any) => {
     dispatch({ type: actions.UPDATE_TURN, data: action });
     // createEvent({ name: "createNewTurn", topic: "", data: action, delay: 0 });
   };
   const handleSplit = (action: any) => {
-    console.log(action);
     dispatch({ type: actions.SLOT_SPLIT, data: action });
     createEvent({ name: "slotSplitted", topic: "", data: { seat: action.seat, slot: action.slot.id }, delay: 300 });
   };
@@ -129,15 +133,16 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     const data = { seatNo: action.seat, cardNo: action.no };
     if (action.seat === 3) {
       const dealerSeat = state.seats.find((s: SeatModel) => s.no === 3);
-      if (dealerSeat?.slots?.length === 0) {
+      if (dealerSeat?.slots[0].cards.length === 0) {
         createEvent({ name: "blankReleased", topic: "", data: null, delay: 400 });
-      } else {
-        const cards = dealerSeat.slots[0]["cards"];
-        if (cards?.length === 1) createEvent({ name: "blankReplaced", topic: "", data: action, delay: 20 });
+      } else if (dealerSeat?.slots[0].cards.length === 1) {
+        createEvent({ name: "blankReplaced", topic: "", data: action, delay: 100 });
+        dispatch({ type: actions.HIT_CARD, data });
+        return;
       }
     }
     dispatch({ type: actions.HIT_CARD, data });
-    createEvent({ name: "hitCreated", topic: "", data, delay: 0 });
+    createEvent({ name: "cardReleased", topic: "", data, delay: 0 });
   };
 
   const value = {
@@ -147,12 +152,12 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     seats: state.seats,
     status: state.status,
     currentTurn: state.currentTurn,
+    results: state.results,
     initGame: () => {
       console.log("start New Game");
       createGame();
     },
     hit: (seatNo: number) => {
-      console.log(JSON.parse(JSON.stringify(state.seats)));
       createEvent({ name: "turnOver", topic: "", data: { seat: seatNo }, delay: 10 });
       hit(seatNo);
       // if (card) handleHit(seatNo, card);

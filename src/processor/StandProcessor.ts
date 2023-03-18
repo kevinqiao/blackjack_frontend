@@ -11,15 +11,19 @@ const useStandProcessor = () => {
         const seat = gameObj.seats.find((s: SeatModel) => s.no === gameObj.currentTurn.seat);
         if (seat) {
             const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
+
             if (currentSlot) {
                 currentSlot.status = 1;
-                if (gameEngine.turnSlot(gameObj, seat))
-                    return;
-                if (gameEngine.turnSeat(gameObj, seat)) {
-                    seat.status = 1;
+                if (gameEngine.turnSlot(gameObj, seat)) {
                     return;
                 }
-                gameEngine.turnDealer(gameObj, seat);
+
+                seat.status = 1;
+                if (gameEngine.turnSeat(gameObj, seat)) {
+                    return;
+                }
+
+                gameEngine.turnDealer(gameObj);
             }
         }
     }

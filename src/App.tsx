@@ -1,12 +1,8 @@
 import { CoordProvider } from "./service/CoordManager";
 import { EventProvider } from "./service/EventManager";
 import { GameProvider } from "./service/GameManager";
+
 import "./styles.css";
-import BlackJack from "./view/component/BlackJack";
-import CardPanel from "./view/component/CardPanel";
-import ControlPanel from "./view/component/ControlPanel";
-import SlotScorePanel from "./view/component/SlotScorePanel";
-import TurnSeatProgress from "./view/component/common/TurnSeatProgress";
 
 function App() {
   const FlattenedProviderTree = (providers: any): any => {
@@ -30,15 +26,19 @@ function App() {
   const Providers = FlattenedProviderTree([[CoordProvider], [EventProvider], [GameProvider]]);
   return (
     <Providers>
-      {/* <ChipBox /> */}
-      {/* <PokeCard height={180} width={130} suit={"♥"} color={"red"} value={"K"} rank={13} /> */}
-      {/* <Framer /> */}
-      {/* <CardBox/> */}
-      <ControlPanel />
-      <CardPanel />
-      <TurnSeatProgress />
-      <SlotScorePanel />
-      <BlackJack />
+      <ChipBox />
+      {/* 
+      <div style={{ position: "absolute", zIndex: 600, width: "100%", height: 50 }}>
+        <ControlPanel />
+      </div>
+      <GameOver />
+
+      <div style={{ position: "absolute", zIndex: 400, width: "100%", height: "100%" }}>
+        <CardPanel />
+        <TurnSeatProgress />
+        <SlotScorePanel />
+        <BlackJack />
+      </div> */}
     </Providers>
   );
 }

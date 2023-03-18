@@ -18,7 +18,6 @@ const useSplitProcessor = () => {
             if (currentSlot) {
                 const cards = gameObj.cards.filter((c) => currentSlot.cards.includes(c.no));
                 const scores = gameEngine.getHandScore(cards);
-                console.log(scores)
                 if (scores.length === 0 || scores.includes(21)) {
                     currentSlot.status = 1;
                     if (gameEngine.turnSlot(gameObj, seat)) {
@@ -28,7 +27,7 @@ const useSplitProcessor = () => {
                         seat.status = 1;
                         return;
                     }
-                    gameEngine.turnDealer(gameObj, seat);
+                    gameEngine.turnDealer(gameObj);
 
                 }
             }

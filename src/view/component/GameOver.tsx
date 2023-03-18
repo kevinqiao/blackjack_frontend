@@ -7,16 +7,19 @@ import useGameEngine from "../../service/GameEngine";
 import { useGameManager } from "../../service/GameManager";
 import "./score.css";
 
-export default function SlotScorePanel() {
+export default function GameOver() {
   const [active, setActive] = useState(false);
-  const { event, createEvent } = useEventSubscriber(["gameStart", "cardReleased", "gameOver"], []);
+  const { cards, seats, results } = useGameManager();
+  const { event, createEvent } = useEventSubscriber(["gameOver", "gameStart"], []);
   const gameEngine = useGameEngine();
   const { viewport, cardXY, seatCoords } = useCoordManager();
-  const { cards, seats } = useGameManager();
+
   useEffect(() => {
-    if (event?.name === "gameStart") setActive(true);
-    else if (event?.name === "gameOver") setActive(false);
+    if (event?.name === "gameOver") {
+      setActive(true);
+    } else setActive(false);
   }, [event]);
+
   const top = (seatNo: number, slot: number): number => {
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     const seat = seats.find((s: SeatModel) => s.no === seatNo);
@@ -42,54 +45,51 @@ export default function SlotScorePanel() {
     }
   };
   const score = (seat: SeatModel, slotId: number): string => {
-    let v: string = "";
-    let s: number[];
-    const slot = seat.slots.find((s) => s.id === slotId);
-    if (slot) {
-      const scards = cards.filter((c) => slot.cards.includes(c.no));
-      s = gameEngine.getHandScore(scards);
-
-      if (s.length === 0) {
-        v = "Bust";
-      } else if (s.includes(21)) {
-        v = "BlackJack";
-      } else {
-        v = v + s[0];
-        for (let i = 1; i < s.length; i++) {
-          v = v + "/" + s[i];
-        }
-      }
+    if (results?.length > 0) {
+      const r = results.find((r) => r.slot === slotId);
+      if (r?.win === 1) return "WIN";
+      else if (r?.win === 2) return "LOSE";
+      else return "PUSH";
     }
-    return v;
+    return "";
   };
   return (
     <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: active ? 0.6 : 0 }}
+        style={{
+          position: "absolute",
+          zIndex: 300,
+          backgroundColor: "black",
+          width: "100%",
+          height: "100%",
+        }}
+      ></motion.div>
       {active &&
-        seats.map((seat) =>
-          seat.slots.map((slot) => (
-            <motion.div
-              key={seat.no + "-" + slot.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: active && slot.cards.length > 0 ? 1 : 0 }}
-              transition={{ duration: 3, type: "spring" }}
-              style={{
-                position: "absolute",
-                top: top(seat.no, slot.id),
-                left: left(seat.no, slot.id),
-              }}
-            >
-              {slot.id === seat.currentSlot ? (
+        seats
+          .filter((s) => s.no !== 3)
+          .map((seat) =>
+            seat.slots.map((slot) => (
+              <motion.div
+                key={seat.no + "-" + slot.id}
+                custom={{ seat: seat.no, slot: slot.id }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: active ? 1 : 0 }}
+                style={{
+                  position: "absolute",
+                  top: top(seat.no, slot.id),
+                  left: left(seat.no, slot.id),
+                  width: 50,
+                  height: 25,
+                }}
+              >
                 <div className="tooltip">
                   <span className="tooltiptext">{score(seat, slot.id)}</span>
                 </div>
-              ) : (
-                <div className="tooltip">
-                  <span className="stooltiptext">{score(seat, slot.id)}</span>
-                </div>
-              )}
-            </motion.div>
-          ))
-        )}
+              </motion.div>
+            ))
+          )}
     </>
   );
 }

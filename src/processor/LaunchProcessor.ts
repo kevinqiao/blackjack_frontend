@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { CardModel, SeatBetSlot, SeatModel } from "../model";
+import { CardModel, SeatModel } from "../model";
 import { ActionTurn } from "../model/types/ActionTurn";
 import { GameModel } from "../model/types/Game";
 import useEventSubscriber, { EventModel } from "../service/EventManager";
@@ -19,27 +19,28 @@ const useLaunchProcessor = () => {
             const no = game.startSeat + i >= size ? game.startSeat + i - size : game.startSeat + i;
             const seat = game.seats.find((s: SeatModel) => s.no === no);
             if (seat) {
-                const currentSlot: SeatBetSlot = { id: Date.now(), cards: [] };
-                seat.slots.push(currentSlot);
-                seat.currentSlot = currentSlot.id;
+                // const currentSlot: SeatBetSlot = { id: Date.now() + i + 10, cards: [], status: 0 };
+                // seat.slots.push(currentSlot);
+                // seat.currentSlot = currentSlot.id;
                 let card = gameEngine.releaseCard(game);
                 if (card?.no) {
                     let card1 = card.no;
-                    currentSlot.cards.push(card1)
+                    seat.slots[0].cards.push(card1)
                     let time1 = (i + 1) * 500;
-                    if (i === 2)
-                        time1 = 2000
-                    // setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", seat: seat.no, data: { seat: seat.no, no: card1 } }), time1);
                     createEvent({ name: "releaseCard", topic: "model", data: { seat: seat.no, no: card1 }, delay: time1 })
                     card = gameEngine.releaseCard(game);
                     if (card?.no) {
                         let card2 = card.no
-                        currentSlot.cards.push(card2)
+                        seat.slots[0].cards.push(card2)
                         let time2 = (i + 1) * 500 + 300;
-                        if (i === 2)
-                            time2 = 2500;
-                        // setTimeout(() => setAction({ id: Date.now() + 2, name: "releaseCard", seat: seat.no, data: { seat: seat.no, no: card2 } }), time2)
                         createEvent({ name: "releaseCard", topic: "model", data: { seat: seat.no, no: card2 }, delay: time2 })
+                    }
+                    const seatCards = game.cards.filter((c) => seat.slots[0].cards.includes(c.no));
+                    const scores = gameEngine.getHandScore(seatCards);
+                    if (scores.includes(21)) {
+                        console.log("blackjack found in seat:" + seat.no);
+                        seat.status = 1;
+                        gameEngine.turnSeat(game, seat)
                     }
                 }
             }
@@ -47,7 +48,7 @@ const useLaunchProcessor = () => {
         const dealerSeat = game.seats.find((s: SeatModel) => s.no === size);
         if (dealerSeat) {
             let time = 3000;
-            dealerSeat.slots.push({ id: Date.now(), cards: [] })
+            // dealerSeat.slots.push({ id: Date.now() + 10, cards: [], status: 0 })
             const dealerCard: CardModel | null = gameEngine.releaseCard(game);
             if (dealerCard) {
                 dealerSeat.slots[0]['cards'].push(dealerCard.no)
@@ -56,9 +57,18 @@ const useLaunchProcessor = () => {
                 // setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", seat: size, data: { seat: size, no: 0 } }), time + 250)
             }
         }
-        const actionTurn: ActionTurn = { id: Date.now() + 2, acts: gameEngine.getActs(game, game.startSeat), expireTime: 15000, seat: game.startSeat, data: null }
-        game.currentTurn = actionTurn;
-        createEvent({ name: "createNewTurn", topic: "model", data: actionTurn, delay: 3500 })
+        const startSeat = game.seats.find((s) => s.no === game.startSeat);
+        if (typeof startSeat !== "undefined") {
+            if (startSeat.status === 0) {
+                const actionTurn: ActionTurn = { id: Date.now() + 2, acts: gameEngine.getActs(game, game.startSeat), expireTime: 15000, seat: game.startSeat, data: null }
+                game.currentTurn = actionTurn;
+                createEvent({ name: "createNewTurn", topic: "model", data: actionTurn, delay: 3500 })
+                return;
+            }
+            if (gameEngine.turnSeat(game, startSeat))
+                return;
+            gameEngine.turnDealer(game)
+        }
     }
 
 

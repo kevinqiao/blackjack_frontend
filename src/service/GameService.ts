@@ -22,16 +22,17 @@ const useGameService = () => {
     const createGame = () => {
         const startSeat: number = lastSeatRef.current + 1 >= 3 ? 0 : lastSeatRef.current + 1;
         lastSeatRef.current = startSeat;
+        const gameId = Date.now();
         const initData: GameModel = {
-            gameId: Date.now(),
+            gameId: gameId,
             startSeat: startSeat,
             round: 1,
             cards: gameEngine.shuffle(),
             seats: [
-                { no: 0, status: 0, acted: [], slots: [], currentSlot: 0 },
-                { no: 1, status: 0, acted: [], slots: [], currentSlot: 0 },
-                { no: 2, status: 0, acted: [], slots: [], currentSlot: 0 },
-                { no: 3, status: 0, acted: [], slots: [], currentSlot: 0 },
+                { no: 0, status: 0, acted: [], slots: [{ id: gameId + 1, cards: [], status: 0 }], currentSlot: gameId + 1 },
+                { no: 1, status: 0, acted: [], slots: [{ id: gameId + 2, cards: [], status: 0 }], currentSlot: gameId + 2 },
+                { no: 2, status: 0, acted: [], slots: [{ id: gameId + 3, cards: [], status: 0 }], currentSlot: gameId + 3 },
+                { no: 3, status: 0, acted: [], slots: [{ id: gameId + 4, cards: [], status: 0 }], currentSlot: gameId + 4 },
             ],
             currentTurn: { id: 0, acts: [], seat: -1, expireTime: 0, data: null },
             status: 0,
@@ -48,13 +49,11 @@ const useGameService = () => {
             hitProcessor.process(game);
             // update(game)
             setGame(JSON.parse(JSON.stringify(game)))
-            console.log(JSON.parse(JSON.stringify(game)))
         }
 
     }
     const split = (seatNo: number) => {
         if (game) {
-            console.log("split actiing....")
             splitProcessor.process(game);
             setGame(JSON.parse(JSON.stringify(game)))
         }

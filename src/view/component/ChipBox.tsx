@@ -1,15 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
-import { animated, useSpring } from "@react-spring/web";
-import "../../styles.css";
-import AnimateBox from "./AnimateBox";
 import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
-import useGameManager from "../../service/GameManager";
+import "../../styles.css";
+import AnimateBox from "./AnimateBox";
 import MyChipBox from "./MyChipBox";
 
 const ChipBox = () => {
   const { myChipXY } = useCoordManager();
-  const { createEvent } = useEventSubscriber([]);
+  const { createEvent } = useEventSubscriber([], []);
 
   return (
     <div
@@ -49,7 +46,7 @@ const ChipBox = () => {
             backgroundColor: "red",
             color: "white",
           }}
-          onClick={() => createEvent({ name: "resetGame" })}
+          onClick={() => createEvent({ name: "resetGame", topic: "", data: null, delay: 0 })}
         >
           New
         </div>
@@ -64,7 +61,7 @@ const ChipBox = () => {
             backgroundColor: "red",
             color: "white",
           }}
-          onClick={() => createEvent({ name: "dealCompleted" })}
+          onClick={() => createEvent({ name: "dealCompleted", topic: "", data: null, delay: 0 })}
         >
           Deal
         </div>

@@ -4,7 +4,7 @@ import { useGameManager } from "../../service/GameManager";
 import "./styles.css";
 
 export default function ControlPanel() {
-  const { event } = useEventSubscriber(["createBust"], []);
+  const { event, createEvent } = useEventSubscriber(["createBust"], []);
   const { currentTurn, hit, split, stand, double, insure, initGame } = useGameManager();
 
   const startGame = () => {
@@ -94,23 +94,22 @@ export default function ControlPanel() {
           </div>
         ) : null}
         <div style={{ height: 10 }} />
-        {currentTurn?.acts?.includes(ActionType.INSURE) ? (
-          <div
-            style={{
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: 120,
-              height: 30,
-              backgroundColor: "red",
-              color: "white",
-            }}
-            onClick={() => (currentTurn ? insure() : null)}
-          >
-            INSURENCE
-          </div>
-        ) : null}
+
+        <div
+          style={{
+            cursor: "pointer",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: 120,
+            height: 30,
+            backgroundColor: "red",
+            color: "white",
+          }}
+          onClick={() => createEvent({ name: "gameOver", topic: "", data: null, delay: 0 })}
+        >
+          Game Over
+        </div>
 
         <div style={{ height: 10 }} />
         <div

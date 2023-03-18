@@ -8,13 +8,13 @@ import "./score.css";
 
 export default function BlackJack() {
   const [code, setCode] = useState(0);
-  const { event } = useEventSubscriber(["hitCreated"], []);
+  const { event } = useEventSubscriber(["cardReleased"], []);
   const gameEngine = useGameEngine();
   const { viewport, cardXY, seatCoords } = useCoordManager();
   const { cards, seats } = useGameManager();
   const controls = useAnimationControls();
   useEffect(() => {
-    if (event?.name === "hitCreated") {
+    if (event?.name === "cardReleased") {
       const seatNo = event.data.seatNo;
       const cardNo = event.data.cardNo;
       const seat = seats.find((s) => s.no === seatNo);
@@ -24,7 +24,6 @@ export default function BlackJack() {
         if (slotCards?.length >= 2) {
           const scores = gameEngine.getHandScore(slotCards);
           if (scores.length === 0) {
-            console.log("Bust happened");
             setCode(1);
             controls.start({
               opacity: [1, 1, 0],
@@ -34,7 +33,6 @@ export default function BlackJack() {
               },
             });
           } else if (scores.includes(21)) {
-            console.log("blackjack happened");
             setCode(2);
             controls.start({
               opacity: [1, 1, 0],

@@ -1,6 +1,5 @@
 import { AnimationControls } from "framer-motion";
 import { useCallback, useEffect } from "react";
-import { SeatModel } from "../../model";
 import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
@@ -8,8 +7,7 @@ import { useGameManager } from "../../service/GameManager";
 export default function useCardReleaseAnimation(controls: AnimationControls, cardControls: AnimationControls) {
   const { gameId, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
-  const { event } = useEventSubscriber(["hitCreated"], []);
-
+  const { event } = useEventSubscriber(["cardReleased"], []);
 
   const handleHit = useCallback(
     (seatNo: number, cardNo: number) => {
@@ -78,7 +76,7 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
     [controls, cardControls, seats]
   );
   useEffect(() => {
-    if (event?.name === "hitCreated") {
+    if (event?.name === "cardReleased") {
       // console.log("hitCreated at seat:" + event.data.seatNo + " card no:" + event.data.cardNo);
       // console.log("hit created seat:" + event.data.seatNo + " cardNo:" + event.data.cardNo);
       handleHit(event.data.seatNo, event.data.cardNo);
