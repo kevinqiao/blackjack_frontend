@@ -21,8 +21,9 @@ export default function useBetSlotSplitAnimation(controls: AnimationControls, ca
                 (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
               );
               let scale = 0.6;
-              let x = seatCoord["x"] - viewport["width"] + (0.5 + j - slots.length / 2) * cardXY["width"] * 0.8;
-              let y = seatCoord["y"] - cardXY["height"] - 15;
+              let x =
+                seatCoord["x"] - viewport["width"] + (0.5 + j - slots.length / 2) * (cardXY["width"] + 95) * scale;
+              let y = seatCoord["y"] - (cardXY["height"] + 65) * 0.8;
               return {
                 x: x,
                 y: y,

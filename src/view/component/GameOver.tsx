@@ -23,21 +23,20 @@ export default function GameOver() {
   const top = (seatNo: number, slot: number): number => {
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     const seat = seats.find((s: SeatModel) => s.no === seatNo);
-    if (seat?.currentSlot === slot) return seatCoord["y"] + cardXY["height"] + 25;
+    if (seat?.currentSlot === slot) return seatCoord["y"] - 15;
     else return seatCoord ? seatCoord["y"] - cardXY["height"] : 0;
   };
 
   const left = (seatNo: number, slot: number): number => {
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     const seat = seats.find((s: SeatModel) => s.no === seatNo);
-    if (seat?.currentSlot === slot)
-      return seatCoord ? seatCoord["x"] - seatCoord["dx"] * cardXY["width"] + cardXY["width"] / 2 : 0;
+    if (seat?.currentSlot === slot) return seatCoord ? seatCoord["x"] : 0;
     else {
       const slots = seat?.slots.filter((s) => s.id !== seat.currentSlot);
       if (slots) {
         let index = slots?.map((s) => s.id).findIndex((s) => s === slot);
         if (index >= 0) {
-          const l = seatCoord["x"] + (0.5 + index - slots.length / 2) * cardXY["width"] * 0.8;
+          const l = seatCoord["x"] + (0.8 + index - slots.length / 2) * (cardXY["width"] + 95) * 0.6;
           return l;
         }
       }
@@ -85,7 +84,7 @@ export default function GameOver() {
                 }}
               >
                 <div className="tooltip">
-                  <span className="tooltiptext">{score(seat, slot.id)}</span>
+                  <span className="stooltiptext">{score(seat, slot.id)}</span>
                 </div>
               </motion.div>
             ))

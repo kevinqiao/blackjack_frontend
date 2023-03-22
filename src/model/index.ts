@@ -1,4 +1,5 @@
 export * from "./types/Card";
+export * from "./types/Chip";
 export * from "./types/Game";
 export * from "./types/GameAction";
 export * from "./types/ICardControls";

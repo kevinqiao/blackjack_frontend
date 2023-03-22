@@ -90,6 +90,44 @@ a {
   background-size: var(--cx) var(--cx);
   background-position: center center;
 }
+.betchip {
+  margin: 5px;
+  position: relative;
+  display: inline-block;
+  width: var(--cx);
+  height: var(--cx);
+  box-shadow: 0 0 var(--bs3) 1px rgba(0, 0, 0, 0.5), 0 0 var(--bs2) 0 rgba(0, 0, 0, 0.4) inset;
+  border-radius: 50%;
+  background-size: var(--cx) var(--cx);
+  background-position: center center;
+}
+.betchip:before {
+  position: absolute;
+  content: "";
+  z-index: 1;
+  width: var(--c1x);
+  height: var(--c1x);
+  border-radius: 50%;
+  top: var(--tx);
+  left: var(--tx);
+  background-size: var(--cx) var(--cx);
+  background-position: center center;
+}
+.betchip:after {
+  z-index: 2;
+  position: absolute;
+  content: "25";
+  text-align: center;
+  font: bold 50px/111px Arial;
+  white-space: pre;
+  width: var(--c2x);
+  height: var(--c2x);
+  border-radius: 50%;
+  top: var(--t2x);
+  left: var(--t2x);
+  text-shadow: var(--bs0) var(--bs0) 0px rgba(0, 0, 0, 0.3), var(--bs1) var(--bs1) 0px rgba(255, 255, 255, 0.2);
+}
+
 .pokerchip {
   margin: 5px;
   position: relative;
@@ -154,14 +192,20 @@ a {
   }
 }
 /* Colors */
+
+
 .white {
-  background-image: linear-gradient(0deg, transparent 0, transparent 64.5px, #fff 64.5px, #fff 86.5px, transparent 86.5px, transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent 94.4304px, #fff 94.4304px, #fff 116.4304px, transparent 116.4304px, transparent var(--cx)), linear-gradient(120deg, #dddddd 0, #dddddd 94.4304px, #fff 94.4304px, #fff 116.4304px, #dddddd 116.4304px, #dddddd var(--cx));
+  background-image: linear-gradient(0deg, transparent 0, transparent var(--lg1), #fff var(--lg1), #fff var(--lg2), transparent var(--lg2), transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent var(--lg3), #fff var(--lg3), #fff var(--lg4), transparent var(--lg4), transparent var(--cx)), linear-gradient(120deg, #dddddd 0, #dddddd var(--lg3), #fff var(--lg3), #fff var(--lg4), #dddddd var(--lg4), #dddddd var(--cx));
 }
 .white:before {
   border: var(--br1) solid #dddddd;
-  background-image: linear-gradient(0deg, transparent 0, transparent 69.5px, #EBEBEB 69.5px, #EBEBEB 81.5px, transparent 81.5px, transparent 151px), linear-gradient(30deg, transparent 0, transparent 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, transparent 110.7104px, transparent 151px), linear-gradient(60deg, transparent 0, transparent 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, transparent 110.7104px, transparent 151px), linear-gradient(90deg, transparent 0, transparent 69.5px, #EBEBEB 69.5px, #EBEBEB 81.5px, transparent 81.5px, transparent 151px), linear-gradient(120deg, transparent 0, transparent 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, transparent 110.7104px, transparent 151px), linear-gradient(150deg, #C1C1C1 0, #C1C1C1 98.7104px, #EBEBEB 98.7104px, #EBEBEB 110.7104px, #C1C1C1 110.7104px, #C1C1C1 151px);
+  background-image: linear-gradient(0deg, transparent 0, transparent var(--lgb1), #EBEBEB var(--lgb1), #EBEBEB var(--lgb2), transparent var(--lgb2), transparent var(--cx)), linear-gradient(30deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(90deg, transparent 0, transparent var(--lgb1), #EBEBEB var(--lgb1), #EBEBEB var(--lgb2), transparent var(--lgb2), transparent var(--cx)), linear-gradient(120deg, transparent 0, transparent var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), transparent var(--lgb4), transparent var(--cx)), linear-gradient(150deg, #C1C1C1 0, #C1C1C1 var(--lgb3), #EBEBEB var(--lgb3), #EBEBEB var(--lgb4), #C1C1C1 var(--lgb4), #C1C1C1 var(--cx));
 }
-
+.white:after {
+  content: var(--content1);
+  background: #dddddd;
+  color: #C1C1C1;
+}
 
 .red {
   background-image: linear-gradient(0deg, transparent 0, transparent var(--lg1), #fff var(--lg1), #fff var(--lg2), transparent var(--lg2), transparent var(--cx)), linear-gradient(60deg, transparent 0, transparent var(--lg3), #fff var(--lg3), #fff var(--lg4), transparent var(--lg4), transparent var(--cx)), linear-gradient(120deg, #800000 0, #800000 var(--lg3), #fff var(--lg3), #fff var(--lg4), #800000 var(--lg4), #800000 var(--cx));

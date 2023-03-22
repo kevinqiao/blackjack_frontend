@@ -41,15 +41,16 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const v: any = { width: w, height: h };
-    const scale: number = (w * 0.5) / (5 * 151);
-    initChipCSS(scale >= 1 ? 1 : scale);
-    const myChipW = scale * 151 * 5 + 60;
-    const myChipX = (w - myChipW) / 2;
-    const myChipY = h - scale * 151 - 90;
-    const myChip = { x: myChipX, y: myChipY, width: myChipW, height: scale * 151 + 90 };
+    const scale: number = w > 700 ? (700 * 0.5) / (5 * CHIP_RADIUS) : (w * 0.5) / (5 * CHIP_RADIUS);
+    // initChipCSS(scale >= 1 ? 1 : scale);
+    initChipCSS(0.2);
+    const myChipX = w / 2;
+    const myChipY = h - scale * CHIP_RADIUS - 90;
+    const myChip = { x: myChipX, y: myChipY, width: scale * CHIP_RADIUS, height: scale * CHIP_RADIUS, scale: scale };
 
     v["myChipXY"] = myChip;
-    v["chipWidth"] = scale * 151;
+
+    v["chipWidth"] = scale * 121;
     v["viewport"] = { width: w, height: h };
 
     let cardWidth = (130 / 1000) * (w > 1000 ? 1000 : w);
