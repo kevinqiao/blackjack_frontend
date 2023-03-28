@@ -163,19 +163,23 @@ const useGameEngine = () => {
         let ok = false;
         const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
         if (currentSlot?.cards.length === 2) {
-            const newSlot = { id: Date.now(), status: 0, cards: [currentSlot.cards[1]] }
+            const transferCardNo = currentSlot.cards[1];
+            const newSlot = { id: Date.now(), status: 0, cards: [transferCardNo] }
             seat.slots.push(newSlot);
-            currentSlot.cards.splice(1, 1);
-            let card = releaseCard(gameObj);
-            if (card) {
-                card.seat = seat.no;
-                currentSlot.cards.push(card.no);
-                createEvent({ name: "splitSlot", topic: "model", data: { seat: seat.no, slot: newSlot }, delay: 10 });
-                createEvent({ name: "releaseCard", topic: "model", data: { seat: seat.no, no: card.no }, delay: 500 });
-                Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, acts: getActs(gameObj, seat.no), seat: seat.no })
-                createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: 16000 }), delay: 1000 })
-                ok = true;
-
+            const transferCard = gameObj.cards.find((c) => c.no === transferCardNo);
+            if (transferCard) {
+                transferCard.slot = newSlot.id;
+                currentSlot.cards.splice(1, 1);
+                let card = releaseCard(gameObj);
+                if (card) {
+                    card.seat = seat.no;
+                    currentSlot.cards.push(card.no);
+                    createEvent({ name: "splitSlot", topic: "model", data: { seat: seat.no, slot: newSlot }, delay: 10 });
+                    createEvent({ name: "releaseCard", topic: "model", data: { seat: seat.no, no: card.no }, delay: 500 });
+                    Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, acts: getActs(gameObj, seat.no), seat: seat.no })
+                    createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: 16000 }), delay: 1000 })
+                    ok = true;
+                }
             }
         }
         return ok;
@@ -190,7 +194,7 @@ const useGameEngine = () => {
                     for (let slot of s.slots) {
                         const slotCards = gameObj.cards.filter((c) => slot.cards.includes(c.no))
                         const scores = getHandScore(slotCards);
-                        const item: SlotBattleResult = { slot: slot.id, score: scores?.length > 0 ? scores[0] : 0, win: 0, chips: 0 }
+                        const item: SlotBattleResult = { seat: s.no, slot: slot.id, score: scores?.length > 0 ? scores[0] : 0, win: 0, chips: 0 }
                         if (!scores || scores.length === 0 || dealerScore > scores[0]) {
                             item['win'] = 2;
                         } else if (dealerScore === 0 || dealerScore < scores[0]) {

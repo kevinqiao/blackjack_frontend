@@ -49,7 +49,6 @@ export default function SlotScorePanel() {
         }
       }
     } else if (event?.name === "slotSplitted") {
-      console.log(event);
       const data = event.data;
       controls.start((o) => {
         if (o.seatNo === data.seat && o.slot === data.slot)
@@ -67,23 +66,24 @@ export default function SlotScorePanel() {
   const top = (seatNo: number, slot: number): number => {
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     const seat = seats.find((s: SeatModel) => s.no === seatNo);
-    if (seat?.currentSlot === slot) return seatCoord["y"] + cardXY["height"] + 45;
-    else return seatCoord ? seatCoord["y"] - (cardXY["height"] + 15) * 0.8 - 5 : 0;
+    if (seat?.currentSlot === slot) return seatNo === 3 ? seatCoord["y"] + cardXY["height"] + 45 : seatCoord["y"] - 10;
+    else return seatCoord ? seatCoord["y"] - (cardXY["height"] + 95) * 0.6 : 0;
   };
 
   const left = (seatNo: number, slot: number): number => {
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     const seat = seats.find((s: SeatModel) => s.no === seatNo);
-    if (seat?.currentSlot === slot)
-      return seatCoord ? seatCoord["x"] - seatCoord["dx"] * cardXY["width"] + cardXY["width"] / 2 : 0;
+    if (seatNo === 3) return seatCoord["x"] + cardXY["width"] * 0.15;
+    if (seat?.currentSlot === slot && seatCoord)
+      return seatNo === 2 ? seatCoord["x"] + cardXY["width"] : seatCoord["x"] + cardXY["width"] * 0.15;
     else {
-      const slots = seat?.slots.filter((s) => s.id !== seat.currentSlot);
+      const slots = seat?.slots.filter((s) => s.id !== seat.currentSlot).sort((a, b) => a.id - b.id);
       if (slots) {
-        let index = slots?.map((s) => s.id).findIndex((s) => s === slot);
-        if (index >= 0) {
-          const l = seatCoord["x"] + (0.3 + index - slots.length / 2) * (cardXY["width"] + 95) * 0.6;
-          return l;
-        }
+        let index = slots?.findIndex((s) => s.id === slot);
+        if (index >= 0)
+          return seatNo === 2
+            ? seatCoord["x"] + (0.7 + index - slots.length / 2) * (cardXY["width"] + 95) * 0.6
+            : seatCoord["x"] + (0.35 + index - slots.length / 2) * (cardXY["width"] + 95) * 0.6;
       }
       return 0;
     }
@@ -129,7 +129,7 @@ export default function SlotScorePanel() {
           >
             {slot.id === seat.currentSlot ? (
               <div className="tooltip">
-                <span className="tooltiptext">{score(seat, slot.id)}</span>
+                <span className={seat.no === 3 ? "dtooltiptext" : "tooltiptext"}>{score(seat, slot.id)}</span>
               </div>
             ) : (
               <div className="tooltip">

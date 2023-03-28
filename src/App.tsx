@@ -7,6 +7,7 @@ import BlackJack from "./view/component/BlackJack";
 import CardPanel from "./view/component/CardPanel";
 import ControlPanel from "./view/component/ControlPanel";
 import GameOver from "./view/component/GameOver";
+import MyChipBox from "./view/component/MyChipBox";
 import SlotScorePanel from "./view/component/SlotScorePanel";
 import SlotChipPanel from "./view/component/common/SlotChipPanel";
 import TurnSeatProgress from "./view/component/common/TurnSeatProgress";
@@ -33,20 +34,16 @@ function App() {
   const Providers = FlattenedProviderTree([[CoordProvider], [EventProvider], [GameProvider]]);
   return (
     <Providers>
-      {/* <MyChipBox /> */}
+      <MyChipBox />
 
-      <div style={{ position: "absolute", zIndex: 600, width: "100%", height: 50 }}>
-        <ControlPanel />
-      </div>
+      <ControlPanel />
       <GameOver />
 
-      <div style={{ position: "absolute", zIndex: 400, width: "100%", height: "100%" }}>
-        <CardPanel />
-        <TurnSeatProgress />
-        <SlotScorePanel />
-        <SlotChipPanel />
-        <BlackJack />
-      </div>
+      <CardPanel />
+      <TurnSeatProgress />
+      <SlotScorePanel />
+      <SlotChipPanel />
+      <BlackJack />
     </Providers>
   );
 }

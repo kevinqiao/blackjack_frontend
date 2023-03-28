@@ -4,7 +4,7 @@ import useCoordManager from "../../service/CoordManager";
 import { useGameManager } from "../../service/GameManager";
 
 export default function useBetSlotInitAnimation(controls: AnimationControls, cardControls: AnimationControls) {
-  const { gameId, seats } = useGameManager();
+  const { gameId, cards, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
 
   const handleInit = useCallback(() => {

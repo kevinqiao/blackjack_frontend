@@ -3,11 +3,10 @@ import { useCallback } from "react";
 import { CardModel } from "../../model";
 import useCoordManager from "../../service/CoordManager";
 import { useGameManager } from "../../service/GameManager";
-import useBetSlotInitAnimation from "../animation/BetSlotInitAnimation";
 import useBetSlotSplitAnimation from "../animation/BetSlotSplitAnimation";
 import useBlankCardAnimation from "../animation/BlankCardAnimation";
-import useCardInitAnimation from "../animation/CardInitAnimation";
 import useCardReleaseAnimation from "../animation/CardReleaseAnimation";
+import useGameInitAnimation from "../animation/GameInitAnimation";
 import PokeCard from "./PokeCard";
 import "./styles.css";
 
@@ -17,11 +16,12 @@ export default function CardPanel() {
   const blankControls = useAnimationControls();
   const controls = useAnimationControls();
   const cardControls = useAnimationControls();
-  useBetSlotInitAnimation(controls, cardControls);
+  // useBetSlotInitAnimation(controls, cardControls);
+  useGameInitAnimation(controls, cardControls);
   useBetSlotSplitAnimation(controls, cardControls);
   // useBetSlotSwitchAnimation(controls, cardControls);
   useBlankCardAnimation(controls, cardControls, blankControls);
-  useCardInitAnimation(controls, cardControls);
+  // useCardInitAnimation(controls, cardControls);
   useCardReleaseAnimation(controls, cardControls);
   const canOpen = useCallback(
     (card: CardModel) => {
@@ -39,13 +39,13 @@ export default function CardPanel() {
     initGame();
   };
   return (
-    <>
+    <div style={{ position: "absolute", zIndex: 1600 }}>
       {viewport &&
-        cards &&
+        cards.length >= 52 &&
         cards.map((c, index) => (
           <motion.div
             key={gameId + "-" + c["no"] + ""}
-            custom={c["no"]}
+            custom={c}
             style={{
               cursor: canOpen(c) === 1 ? "pointer" : "default",
               position: "absolute",
@@ -60,7 +60,7 @@ export default function CardPanel() {
           >
             <motion.div
               // className={"card"}
-              custom={c["no"] + "-1"}
+              custom={{ cardNo: c["no"], face: 1 }}
               initial={{ opacity: 1, transform: `rotateY(0deg)` }}
               animate={cardControls}
               style={{
@@ -75,7 +75,7 @@ export default function CardPanel() {
               }}
             ></motion.div>
             <motion.div
-              custom={c["no"] + "-0"}
+              custom={{ cardNo: c["no"], face: 0 }}
               initial={{ opacity: 0, transform: `rotateY(180deg)` }}
               animate={cardControls}
               style={{
@@ -90,23 +90,25 @@ export default function CardPanel() {
             </motion.div>
           </motion.div>
         ))}
-      <motion.div
-        key={gameId + "-0"}
-        animate={blankControls}
-        style={{
-          cursor: "pointer",
-          position: "absolute",
-          top: 0,
-          left: viewport?.width ? viewport["width"] - cardXY["width"] / 2 : 0,
-          width: cardXY?.width ? cardXY["width"] : 0,
-          height: cardXY?.height ? cardXY["height"] : 0,
-          transform: "rotate(60deg)",
-          backgroundImage: `url("/images/faces/back.svg")`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-        }}
-        onClick={startGame}
-      ></motion.div>
-    </>
+      {cards.length >= 52 ? (
+        <motion.div
+          key={gameId + "-0"}
+          animate={blankControls}
+          style={{
+            cursor: "pointer",
+            position: "absolute",
+            top: 0,
+            left: viewport?.width ? viewport["width"] - cardXY["width"] / 2 : 0,
+            width: cardXY?.width ? cardXY["width"] : 0,
+            height: cardXY?.height ? cardXY["height"] : 0,
+            transform: "rotate(60deg)",
+            backgroundImage: `url("/images/faces/back.svg")`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+          }}
+          onClick={startGame}
+        ></motion.div>
+      ) : null}
+    </div>
   );
 }

@@ -23,8 +23,8 @@ export default function GameOver() {
   const top = (seatNo: number, slot: number): number => {
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     const seat = seats.find((s: SeatModel) => s.no === seatNo);
-    if (seat?.currentSlot === slot) return seatCoord["y"] - 15;
-    else return seatCoord ? seatCoord["y"] - cardXY["height"] : 0;
+    if (seat?.currentSlot === slot) return seatCoord["y"] + cardXY["height"] / 2;
+    else return seatCoord ? seatCoord["y"] - (cardXY["height"] + 115) * 0.3 : 0;
   };
 
   const left = (seatNo: number, slot: number): number => {
@@ -36,7 +36,7 @@ export default function GameOver() {
       if (slots) {
         let index = slots?.map((s) => s.id).findIndex((s) => s === slot);
         if (index >= 0) {
-          const l = seatCoord["x"] + (0.8 + index - slots.length / 2) * (cardXY["width"] + 95) * 0.6;
+          const l = seatCoord["x"] + (0.5 + index - slots.length / 2) * (cardXY["width"] + 95) * 0.6;
           return l;
         }
       }
@@ -59,7 +59,7 @@ export default function GameOver() {
         animate={{ opacity: active ? 0.6 : 0 }}
         style={{
           position: "absolute",
-          zIndex: 300,
+          zIndex: 1400,
           backgroundColor: "black",
           width: "100%",
           height: "100%",
@@ -77,6 +77,7 @@ export default function GameOver() {
                 animate={{ opacity: active ? 1 : 0 }}
                 style={{
                   position: "absolute",
+                  zIndex: 1700,
                   top: top(seat.no, slot.id),
                   left: left(seat.no, slot.id),
                   width: 50,

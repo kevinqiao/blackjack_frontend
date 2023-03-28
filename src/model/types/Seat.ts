@@ -5,5 +5,6 @@ export declare type SeatModel = {
   currentSlot: number;
   slots: SeatBetSlot[];
   acted: number[];
+  bet: number;
   status: number;
 };

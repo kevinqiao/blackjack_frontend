@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { CardModel, SeatModel } from "../model";
 import { ActionTurn } from "../model/types/ActionTurn";
 import { GameModel } from "../model/types/Game";
-import useEventSubscriber, { EventModel } from "../service/EventManager";
+import useEventSubscriber from "../service/EventManager";
 import useGameEngine from "../service/GameEngine";
 
 
@@ -12,8 +12,7 @@ const useLaunchProcessor = () => {
 
     const process = (game: GameModel) => {
 
-        const event: EventModel = { name: "initGame", topic: "model", data: JSON.parse(JSON.stringify(game)), delay: 0 }
-        createEvent(event);
+        createEvent({ name: "startGame", topic: "model", data: { round: 1 }, delay: 0 })
         const size = game.seats.length - 1;
         for (let i = 0; i < size; i++) {
             const no = game.startSeat + i >= size ? game.startSeat + i - size : game.startSeat + i;

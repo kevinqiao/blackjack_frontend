@@ -17,7 +17,7 @@ const useGameDao = () => {
   }
   const create = (gameModel: GameModel) => {
     window.localStorage.setItem("game", JSON.stringify(gameModel))
-    setGame(gameModel)
+    setGame(JSON.parse(JSON.stringify(gameModel)))
   }
   return { game, create, update }
 }

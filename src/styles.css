@@ -23,12 +23,32 @@
   --bs1:1px;
   --bs2:3px;
   --bs3:5px;
+
+  --bcx:151px;
+  --bc1x:117px;
+  --bc2x:111px;
+  --btx:9px;
+  --bt2x:20px;
+  --fontSize:50px/111px;
+  --blg1:67.5px;
+  --blg2:83.5px;
+  --blg3:97.4304px;
+  --blg4:113.4304px;
+  --blgb1:69.5px;
+  --blgb2:81.5px;
+  --blgb3:98.7104px;
+  --blgb4:110.7104px;
+  --bbr1:8px;
+  --bbs0:-1px;
+  --bbs1:1px;
+  --bbs2:3px;
+  --bbs3:5px;
   --accent: var(--blue);
   --card-font-size:1.2em;
   --card-star-size:2em;
 }
 body {
-  background: #404040;
+  background: #373636;
 }
 h1 {
   text-align: center;
@@ -48,127 +68,7 @@ h2 {
 a {
   color: #89310F;
 }
-.chips {
-  width:"100%";
-  min-width: 300px;
-  padding: 2px 0;
-  text-align: center;
-  background-color: #014D43;
-  box-shadow: 0 0 0 5px #282828 inset, 0 0 0 10px #969696 inset, 0 0 6px rgba(255, 255, 255, 0.2);
-}
 
-.testchip {
-  margin: 1em;
-  position: relative;
-  display: inline-block;
-  width: 151px;
-  height: 151px;
-  box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.5), 0 0 3px 0 rgba(0, 0, 0, 0.4) inset;
-  border-radius: 50%;
-  background-size: 151px 151px;
-  background-position: center center;
-}
-.testchip:before {
-  position: absolute;
-  content: "";
-  z-index: 1;
-  width: 97px;
-  height: 97px;
-  border-radius: 50%;
-  top: 19px;
-  left: 19px;
-  background-size: 151px 151px;
-  background-position: center center;
-}
-.blankchip {
-  margin: 5px;
-  position: relative;
-  display: inline-block;
-  width: var(--cx);
-  height: var(--cx);
-  border-radius: 50%;
-  background-size: var(--cx) var(--cx);
-  background-position: center center;
-}
-.betchip {
-  margin: 5px;
-  position: relative;
-  display: inline-block;
-  width: var(--cx);
-  height: var(--cx);
-  box-shadow: 0 0 var(--bs3) 1px rgba(0, 0, 0, 0.5), 0 0 var(--bs2) 0 rgba(0, 0, 0, 0.4) inset;
-  border-radius: 50%;
-  background-size: var(--cx) var(--cx);
-  background-position: center center;
-}
-.betchip:before {
-  position: absolute;
-  content: "";
-  z-index: 1;
-  width: var(--c1x);
-  height: var(--c1x);
-  border-radius: 50%;
-  top: var(--tx);
-  left: var(--tx);
-  background-size: var(--cx) var(--cx);
-  background-position: center center;
-}
-.betchip:after {
-  z-index: 2;
-  position: absolute;
-  content: "25";
-  text-align: center;
-  font: bold 50px/111px Arial;
-  white-space: pre;
-  width: var(--c2x);
-  height: var(--c2x);
-  border-radius: 50%;
-  top: var(--t2x);
-  left: var(--t2x);
-  text-shadow: var(--bs0) var(--bs0) 0px rgba(0, 0, 0, 0.3), var(--bs1) var(--bs1) 0px rgba(255, 255, 255, 0.2);
-}
-
-.pokerchip {
-  margin: 5px;
-  position: relative;
-  display: inline-block;
-  width: var(--cx);
-  height: var(--cx);
-  box-shadow: 0 0 var(--bs3) 1px rgba(0, 0, 0, 0.5), 0 0 var(--bs2) 0 rgba(0, 0, 0, 0.4) inset;
-  border-radius: 50%;
-  background-size: var(--cx) var(--cx);
-  background-position: center center;
-}
-.pokerchip:before {
-  position: absolute;
-  content: "";
-  z-index: 1;
-  width: var(--c1x);
-  height: var(--c1x);
-  border-radius: 50%;
-  top: var(--tx);
-  left: var(--tx);
-  background-size: var(--cx) var(--cx);
-  background-position: center center;
-}
-.pokerchip:after {
-  z-index: 2;
-  position: absolute;
-  content: "25";
-  text-align: center;
-  font: bold var(--fontSize) Arial;
-  white-space: pre;
-  width: var(--c2x);
-  height: var(--c2x);
-  border-radius: 50%;
-  top: var(--t2x);
-  left: var(--t2x);
-  text-shadow: var(--bs0) var(--bs0) 0px rgba(0, 0, 0, 0.3), var(--bs1) var(--bs1) 0px rgba(255, 255, 255, 0.2);
-}
-/* .pokerchip:hover {
-  -webkit-animation: 2s rotate-right linear infinite;
-          animation: 2s rotate-right linear infinite;
-} */
 
 @-webkit-keyframes rotate-right {
   0% {
@@ -255,7 +155,7 @@ a {
   content: "100";
   background: #222222;
   color: #000000;
-}
+} */
 .circle {
   width: 100px;
   height: 100px;
@@ -288,9 +188,9 @@ a {
   align-self: center;
   font-size: var(--card-star-size);
 }
-.box {
+/* .box {
   width: 200px;
   height: 200px;
   border-radius: 50%;
   background: var(--accent);
-}
+} */

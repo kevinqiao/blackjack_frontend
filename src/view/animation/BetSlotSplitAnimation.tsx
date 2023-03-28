@@ -8,15 +8,42 @@ export default function useBetSlotSplitAnimation(controls: AnimationControls, ca
   const { gameId, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
   const { event } = useEventSubscriber(["slotSplitted"], []);
-
+  const handleInit = () => {
+    // controls.start((o) => {
+    //   const seat = seats.find((s) => s.no === seatNo);
+    //   if (seat?.slots) {
+    //     const slots = seat.slots.filter((s) => s.id !== seat.currentSlot);
+    //     for (let j = 0; j < slots.length; j++) {
+    //       if (slots[j].cards.includes(i)) {
+    //         const seatCoord = seatCoords.find(
+    //           (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
+    //         );
+    //         let scale = 0.6;
+    //         let x = seatCoord["x"] - viewport["width"] + (0.5 + j - slots.length / 2) * (cardXY["width"] + 95) * scale;
+    //         let y = seatCoord["y"] - (cardXY["height"] + 65) * 0.8;
+    //         return {
+    //           x: x,
+    //           y: y,
+    //           scale: scale,
+    //           transition: {
+    //             duration: 1,
+    //             default: { ease: "linear" },
+    //           },
+    //         };
+    //       }
+    //     }
+    //   }
+    //   return {};
+    // });
+  };
   const handleSplit = useCallback(
     (seatNo: number) => {
       const seat = seats.find((s) => s.no === seatNo);
-      controls.start((i) => {
+      controls.start((card) => {
         if (seat?.slots) {
           const slots = seat.slots.filter((s) => s.id !== seat.currentSlot);
           for (let j = 0; j < slots.length; j++) {
-            if (slots[j].cards.includes(i)) {
+            if (slots[j].cards.includes(card["no"])) {
               const seatCoord = seatCoords.find(
                 (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
               );

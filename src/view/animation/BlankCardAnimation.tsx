@@ -21,6 +21,7 @@ export default function useBlankCardAnimation(
     if (seatCoords) return seatCoords.find((s: any) => s.no === 3);
     else return null;
   }, [seatCoords]);
+
   const handleInit = useCallback(() => {
     if (seat?.slots && seat.slots.length > 0 && seat.slots[0].cards.length === 1 && seatCoord) {
       const x = 50 - seatCoord["x"];
@@ -73,8 +74,8 @@ export default function useBlankCardAnimation(
       if (seat && seatCoord) {
         const x = cardXY["width"] * 0.3 - seatCoord["x"];
         const y = seatCoord["y"];
-        controls.start((i) => {
-          if (i === cardNo && seat.slots?.length > 0) {
+        controls.start((o) => {
+          if (o.no === cardNo && seat.slots?.length > 0) {
             const index = seat.slots[0]["cards"].findIndex((c) => c === cardNo);
             return {
               opacity: [0, 1, 1, 1],
@@ -104,12 +105,11 @@ export default function useBlankCardAnimation(
         });
         setTimeout(
           () =>
-            cardControls.start((id) => {
-              const ids = id.split("-");
-              if (Number(ids[0]) === cardNo) {
-                const rotate = `rotateY(${Number(ids[1]) === 1 ? "180deg" : "360deg"})`;
+            cardControls.start((o) => {
+              if (o.cardNo === cardNo) {
+                const rotate = `rotateY(${o.face === 1 ? "180deg" : "360deg"})`;
                 return {
-                  opacity: 1 - Number(ids[1]),
+                  opacity: 1 - o.face,
                   transform: rotate,
                   transition: {
                     default: { type: "spring", mass: 0.3, stiffness: 30 },

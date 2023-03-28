@@ -1,8 +1,10 @@
 import { motion, useAnimationControls } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChipModel } from "../../model";
 import useCoordManager from "../../service/CoordManager";
-import "../../styles.css";
+import useEventSubscriber from "../../service/EventManager";
+import { useGameManager } from "../../service/GameManager";
+import "./chip.css";
 const CHIP_SIZE = 3;
 const chip_btns = [
   { id: 1, amount: 1 },
@@ -10,15 +12,25 @@ const chip_btns = [
   { id: 3, amount: 3 },
 ];
 const MyChipBox = () => {
+  const { createEvent } = useEventSubscriber([], []);
   const [betChips, setBetChips] = useState<ChipModel[]>([]);
-  // const [total, setTotal] = useState(5000);
-  const { myChipXY, viewport, betChipXY, chipWidth, seatCoords } = useCoordManager();
-  const controls = useAnimationControls();
 
+  const { myChipXY, chipScale, viewport, betChipXY, chipWidth, seatCoords } = useCoordManager();
+  const { deal, initGame } = useGameManager();
+  const btnControls = useAnimationControls();
+  const chipControls = useAnimationControls();
+  // const betChipControls = useAnimationControls();
+  const dealControls = useAnimationControls();
+  useEffect(() => {
+    initGame();
+  }, []);
   const total = useMemo(() => {
     const t = betChips.map((c) => c.amount).reduce((sub, c) => sub + c, 0);
     return t;
   }, [betChips]);
+  const top = (chipId: number) => {
+    return myChipXY["y"];
+  };
   const left = (chipId: number) => {
     const x =
       myChipXY["x"] +
@@ -40,8 +52,16 @@ const MyChipBox = () => {
     }
   };
   const putChip = (chipId: number) => {
+    console.log("putting chip");
     const isIndex = betChips.findIndex((c) => c.id === chipId);
-    const chip = { no: Date.now(), id: chipId, status: 0, amount: chipId, slot: 0 };
+    betChips.sort((a, b) => a.no - b.no);
+    const chip = {
+      no: betChips.length === 0 ? 1 : betChips[betChips.length - 1]["no"] + 1,
+      id: chipId,
+      status: 0,
+      amount: chipId,
+      slot: 0,
+    };
     betChips.push(chip);
     setBetChips(JSON.parse(JSON.stringify(betChips)));
 
@@ -57,7 +77,7 @@ const MyChipBox = () => {
 
     setTimeout(
       () =>
-        controls.start((o) => {
+        chipControls.start((o) => {
           if (isIndex < 0 || o.id === chipId) {
             let index = firstIndexs.findIndex((c) => c.id === o.id);
             const x =
@@ -68,7 +88,7 @@ const MyChipBox = () => {
             return {
               x: x - left(o.id),
               y: -200,
-              zIndex: 100 + o.no,
+              zIndex: 3000 + o.no,
               transition: {
                 duration: 1.5,
                 default: { ease: "linear" },
@@ -81,9 +101,10 @@ const MyChipBox = () => {
     );
   };
   const retreatChip = async (c: ChipModel) => {
+    console.log("retreating chip no:" + c.no);
     const bchips = betChips.filter((b) => b.no !== c.no);
     const isIndex = bchips.findIndex((b) => b.id === c.id);
-    controls.start((o) => {
+    chipControls.start((o) => {
       if (o.no === c.no) {
         return {
           x: 0,
@@ -128,57 +149,83 @@ const MyChipBox = () => {
     if (chipId !== 4) return true;
     else return false;
   };
-  const deal = () => {
+  const completeDeal = () => {
+    createEvent({ name: "dealCompleted", topic: "", data: null, delay: 10 });
     const firstIndexs = chip_btns
       .map((p) => {
         const cindex = betChips.findIndex((c) => c.id === p.id);
         return { id: p.id, index: cindex };
       })
-      .filter((c) => c.index >= 0)
-      .sort((a, b) => a.index - b.index);
-    controls.start((o) => {
-      const index = firstIndexs.findIndex((c) => c.id === o.id);
+      .filter((c) => c.index >= 0);
+    chipControls.start((o) => {
+      const findex = firstIndexs.find((c) => c.id === o.id);
+
+      const scale = 0.2 / chipScale;
+      const x = viewport["width"] / 2 - left(o.id) - chipWidth * scale + 3;
+      // const y = -chipWidth * scale + 3;
       return {
-        x: viewport["width"] / 2 - left(o.id) - myChipXY["width"] / 2,
-        y: -400,
-        scale: 0.7,
-        zIndex: index + 100,
+        opacity: 0,
+        x: x - 10,
+        y: -200,
+        scale: [scale, scale, scale],
+        zIndex: (findex ? findex["index"] : 0) + 500,
         transition: {
           duration: 1.5,
           default: { ease: "linear" },
         },
       };
     });
+    // betChipControls.start({ opacity: 1, transition: { duration: 1.5 } });
+    btnControls.start({
+      y: 200,
+      transition: {
+        type: "spring",
+        duration: 1.5,
+      },
+    });
+    dealControls.start({
+      opacity: 0,
+      transition: {
+        duration: 1.5,
+        type: "spring",
+      },
+    });
+    deal(0, total);
   };
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "space-around", width: "100%" }}>
+      <motion.div
+        animate={dealControls}
+        style={{
+          position: "absolute",
+          zIndex: 2000,
+          bottom: 60,
+          right: 50,
+          display: "flex",
+          justifyContent: "flex-end",
+          width: "100%",
+        }}
+      >
         <div
           style={{
             cursor: "pointer",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            width: 120,
-            height: 30,
+            width: 70,
+            height: 40,
             backgroundColor: "red",
+            borderRadius: 5,
             color: "white",
           }}
-          onClick={deal}
+          onClick={completeDeal}
         >
           Deal
         </div>
-      </div>
+      </motion.div>
 
       {myChipXY ? (
-        <motion.div
-          style={{
-            position: "absolute",
-            display: "flex",
-            top: myChipXY["y"],
-            left: 0,
-          }}
-        >
+        <>
           {betChips.map((c) => (
             <motion.div
               key={c["no"] + ""}
@@ -186,37 +233,51 @@ const MyChipBox = () => {
               style={{
                 cursor: "pointer",
                 position: "absolute",
-                top: 0,
+                top: top(c.id),
                 left: left(c.id),
               }}
-              initial={{ zIndex: c["no"] }}
-              animate={controls}
+              initial={{ display: "block", zIndex: 3000 + c["no"] }}
+              animate={chipControls}
               onClick={() => retreatChip(c)}
             >
               <div key={c["no"] + ""} className={`pokerchip ${getColor(c.id)}`}></div>
             </motion.div>
           ))}
-        </motion.div>
+        </>
       ) : null}
-
       {myChipXY &&
         chip_btns
           .filter((c) => checkChip(c.id))
           .map((c) => (
-            <div
+            <motion.div
               key={c["id"] + ""}
               style={{
                 cursor: "pointer",
                 position: "absolute",
-                zIndex: 100,
+                zIndex: 2500,
                 top: myChipXY ? myChipXY["y"] : 0,
                 left: left(c.id),
               }}
+              animate={btnControls}
               onClick={() => putChip(c.id)}
             >
               <div key={c["id"] + ""} className={`pokerchip ${getColor(c.id)}`}></div>
-            </div>
+            </motion.div>
           ))}
+      {/* {myChipXY && (
+        <motion.div
+          style={{
+            position: "absolute",
+            zIndex: 500,
+            top: myChipXY["y"] - 300,
+            left: viewport["width"] / 2,
+          }}
+          initial={{ opacity: 0, zIndex: 1000 }}
+          animate={betChipControls}
+        >
+          <div className="betchip bred"></div>
+        </motion.div>
+      )} */}
     </>
   );
 };

@@ -16,16 +16,16 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
       );
       const seat = seats.find((s) => s.no === seatNo);
       if (!seat) return {};
-      controls.start((i) => {
+      controls.start((card) => {
         const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
-        if (currentSlot?.cards.includes(i)) {
-          const index = currentSlot.cards.findIndex((c) => c === i);
+        if (currentSlot?.cards.includes(card["no"])) {
+          const index = currentSlot.cards.findIndex((c) => c === card["no"]);
           const dif = cardXY["width"] * (currentSlot.cards.length < 4 ? seatCoord["dx"] * 2 : seatCoord["dx"]);
           let x = dif * (index - (currentSlot.cards.length - 1) / 2) - (viewport["width"] - seatCoord["x"]);
           let y = seatCoord["y"];
           let r = [60, 60, 0, 0];
           // const { x, y, zIndex, rotate, times } = getTargetPos(seatNo, i);
-          if (i === cardNo) {
+          if (card["no"] === cardNo) {
             // console.log("seatNo:" + seatNo + " cardNo:" + cardNo + " slotId:" + slot.id);
             return {
               x: x,
@@ -56,12 +56,11 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
 
       setTimeout(
         () =>
-          cardControls.start((id) => {
-            const ids = id.split("-");
-            if (cardNo === Number(ids[0])) {
-              const rotate = `rotateY(${Number(ids[1]) === 1 ? "180deg" : "360deg"})`;
+          cardControls.start((o) => {
+            if (cardNo === o.cardNo) {
+              const rotate = `rotateY(${Number(o.face) === 1 ? "180deg" : "360deg"})`;
               return {
-                opacity: 1 - Number(ids[1]),
+                opacity: 1 - Number(o.face),
                 transform: rotate,
                 transition: {
                   type: "spring",
@@ -77,8 +76,6 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
   );
   useEffect(() => {
     if (event?.name === "cardReleased") {
-      // console.log("hitCreated at seat:" + event.data.seatNo + " card no:" + event.data.cardNo);
-      // console.log("hit created seat:" + event.data.seatNo + " cardNo:" + event.data.cardNo);
       handleHit(event.data.seatNo, event.data.cardNo);
     }
   }, [event]);

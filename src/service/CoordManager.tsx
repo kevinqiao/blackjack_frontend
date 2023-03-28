@@ -27,6 +27,31 @@ const initChipCSS = (scale: number) => {
     r.style.setProperty("--bs3", 5 * scale + "px");
   }
 };
+const initBetChipCSS = (scale: number) => {
+  const r: HTMLElement | null = document.querySelector(":root");
+  // var rs = getComputedStyle(r);
+  if (r?.style) {
+    r.style.setProperty("--bcx", CHIP_RADIUS * scale + "px");
+    r.style.setProperty("--bc1x", 117 * scale + "px");
+    r.style.setProperty("--bc2x", 111 * scale + "px");
+    r.style.setProperty("--btx", 9 * scale * 1.1 + "px");
+    r.style.setProperty("--bt2x", 20 * scale + "px");
+    r.style.setProperty("--bfontSize", 50 * scale + "px/" + 111 * scale + "px");
+    r.style.setProperty("--blg1", 67.5 * scale + "px");
+    r.style.setProperty("--blg2", 83.5 * scale + "px");
+    r.style.setProperty("--blg3", 97.4304 * scale + "px");
+    r.style.setProperty("--blg4", 113.4304 * scale + "px");
+    r.style.setProperty("--blgb1", 69.5 * scale + "px");
+    r.style.setProperty("--blgb2", 81.5 * scale + "px");
+    r.style.setProperty("--blgb3", 98.7104 * scale + "px");
+    r.style.setProperty("--blgb4", 110.7104 * scale + "px");
+    r.style.setProperty("--bbr1", 8 * scale + "px");
+    r.style.setProperty("--bbs0", -1 * scale + "px");
+    r.style.setProperty("--bbs1", 1 * scale + "px");
+    r.style.setProperty("--bbs2", 3 * scale + "px");
+    r.style.setProperty("--bbs3", 5 * scale + "px");
+  }
+};
 const initCardCSS = (scale: number) => {
   const r: HTMLElement | null = document.querySelector(":root");
   // var rs = getComputedStyle(r);
@@ -43,12 +68,14 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     const v: any = { width: w, height: h };
     const scale: number = w > 700 ? (700 * 0.5) / (5 * CHIP_RADIUS) : (w * 0.5) / (5 * CHIP_RADIUS);
     // initChipCSS(scale >= 1 ? 1 : scale);
-    initChipCSS(0.2);
+    initChipCSS(scale);
+    initBetChipCSS(0.2);
     const myChipX = w / 2;
     const myChipY = h - scale * CHIP_RADIUS - 90;
     const myChip = { x: myChipX, y: myChipY, width: scale * CHIP_RADIUS, height: scale * CHIP_RADIUS, scale: scale };
 
     v["myChipXY"] = myChip;
+    v["chipScale"] = scale;
 
     v["chipWidth"] = scale * 121;
     v["viewport"] = { width: w, height: h };
@@ -61,7 +88,7 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     v["cardXY"] = { width: cardWidth, height: cardHeight };
 
     v["seatCoords"] = [];
-    const seat0 = { no: 0, direction: 0, x: w / 2, y: h - cardHeight - 50, dx: 0.3 };
+    const seat0 = { no: 0, direction: 0, x: w / 2, y: h - cardHeight - 10, dx: 0.3 };
     const seat1 = { no: 1 };
     const seat2 = { no: 2 };
     const seat3 = { no: 3, direction: 0, x: w / 2, y: 40, dx: 0.3 };
