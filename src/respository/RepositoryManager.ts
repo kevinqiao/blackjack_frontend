@@ -1,24 +1,26 @@
-import { useEffect, useState } from "react";
 import { GameModel } from "../model/types/Game";
 
 const useGameDao = () => {
-  const [game, setGame] = useState<GameModel | null>(null);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const gamestr = window.localStorage.getItem("game");
-      if (gamestr)
-        setGame(JSON.parse(gamestr));
-    }
-  }, [])
+
+
   const update = (data: any) => {
     window.localStorage.setItem("game", JSON.stringify(data));
-    setGame(data)
-
   }
   const create = (gameModel: GameModel) => {
     window.localStorage.setItem("game", JSON.stringify(gameModel))
-    setGame(JSON.parse(JSON.stringify(gameModel)))
   }
-  return { game, create, update }
+  const remove = () => {
+    window.localStorage.removeItem("game")
+  }
+  const find = (): GameModel | null => {
+
+    if (typeof window !== "undefined") {
+      const gamestr = window.localStorage.getItem("game");
+      if (typeof gamestr != "undefined" && gamestr != null)
+        return JSON.parse(gamestr);
+    }
+    return null;
+  }
+  return { find, create, update, remove }
 }
 export default useGameDao

@@ -11,7 +11,7 @@ const useLaunchProcessor = () => {
     const gameEngine = useGameEngine();
 
     const process = (game: GameModel) => {
-
+        game.round = 1;
         createEvent({ name: "startGame", topic: "model", data: { round: 1 }, delay: 0 })
         const size = game.seats.length - 1;
         for (let i = 0; i < size; i++) {
@@ -21,13 +21,13 @@ const useLaunchProcessor = () => {
                 // const currentSlot: SeatBetSlot = { id: Date.now() + i + 10, cards: [], status: 0 };
                 // seat.slots.push(currentSlot);
                 // seat.currentSlot = currentSlot.id;
-                let card = gameEngine.releaseCard(game);
+                let card = gameEngine.releaseCard(game, seat.no, seat.currentSlot);
                 if (card?.no) {
                     let card1 = card.no;
                     seat.slots[0].cards.push(card1)
                     let time1 = (i + 1) * 500;
                     createEvent({ name: "releaseCard", topic: "model", data: { seat: seat.no, no: card1 }, delay: time1 })
-                    card = gameEngine.releaseCard(game);
+                    card = gameEngine.releaseCard(game, seat.no, seat.currentSlot);
                     if (card?.no) {
                         let card2 = card.no
                         seat.slots[0].cards.push(card2)
@@ -48,7 +48,7 @@ const useLaunchProcessor = () => {
         if (dealerSeat) {
             let time = 3000;
             // dealerSeat.slots.push({ id: Date.now() + 10, cards: [], status: 0 })
-            const dealerCard: CardModel | null = gameEngine.releaseCard(game);
+            const dealerCard: CardModel | null = gameEngine.releaseCard(game, dealerSeat.no, dealerSeat.currentSlot);
             if (dealerCard) {
                 dealerSeat.slots[0]['cards'].push(dealerCard.no)
                 // setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", seat: size, data: { seat: size, no: dealerCard.no } }), time)

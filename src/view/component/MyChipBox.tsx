@@ -16,7 +16,7 @@ const MyChipBox = () => {
   const [betChips, setBetChips] = useState<ChipModel[]>([]);
 
   const { myChipXY, chipScale, viewport, betChipXY, chipWidth, seatCoords } = useCoordManager();
-  const { deal, initGame } = useGameManager();
+  const { round, gameId, deal, initGame } = useGameManager();
   const btnControls = useAnimationControls();
   const chipControls = useAnimationControls();
   // const betChipControls = useAnimationControls();
@@ -24,6 +24,44 @@ const MyChipBox = () => {
   useEffect(() => {
     initGame();
   }, []);
+  useEffect(() => {
+    if (gameId > 0) setBetChips([]);
+  }, [gameId]);
+  useEffect(() => {
+    if (round === 0 && gameId > 0) {
+      console.log("place bet");
+      btnControls.start({
+        opacity: 1,
+        y: 0,
+        transition: {
+          type: "spring",
+          duration: 1.5,
+        },
+      });
+      dealControls.start({
+        opacity: 1,
+        transition: {
+          duration: 1.5,
+          type: "spring",
+        },
+      });
+    } else if (round > 0 || gameId <= 0) {
+      btnControls.start({
+        y: 0,
+        transition: {
+          type: "spring",
+          duration: 0.1,
+        },
+      });
+      dealControls.start({
+        opacity: 0,
+        transition: {
+          duration: 0.1,
+          type: "spring",
+        },
+      });
+    }
+  }, [round, gameId]);
   const total = useMemo(() => {
     const t = betChips.map((c) => c.amount).reduce((sub, c) => sub + c, 0);
     return t;
@@ -52,7 +90,6 @@ const MyChipBox = () => {
     }
   };
   const putChip = (chipId: number) => {
-    console.log("putting chip");
     const isIndex = betChips.findIndex((c) => c.id === chipId);
     betChips.sort((a, b) => a.no - b.no);
     const chip = {
@@ -150,81 +187,85 @@ const MyChipBox = () => {
     else return false;
   };
   const completeDeal = () => {
-    createEvent({ name: "dealCompleted", topic: "", data: null, delay: 10 });
-    const firstIndexs = chip_btns
-      .map((p) => {
-        const cindex = betChips.findIndex((c) => c.id === p.id);
-        return { id: p.id, index: cindex };
-      })
-      .filter((c) => c.index >= 0);
-    chipControls.start((o) => {
-      const findex = firstIndexs.find((c) => c.id === o.id);
+    if (betChips?.length > 0) {
+      createEvent({ name: "dealCompleted", topic: "", data: null, delay: 10 });
+      const firstIndexs = chip_btns
+        .map((p) => {
+          const cindex = betChips.findIndex((c) => c.id === p.id);
+          return { id: p.id, index: cindex };
+        })
+        .filter((c) => c.index >= 0);
+      chipControls.start((o) => {
+        const findex = firstIndexs.find((c) => c.id === o.id);
 
-      const scale = 0.2 / chipScale;
-      const x = viewport["width"] / 2 - left(o.id) - chipWidth * scale + 3;
-      // const y = -chipWidth * scale + 3;
-      return {
+        const scale = 0.2 / chipScale;
+        const x = viewport["width"] / 2 - left(o.id) - chipWidth * scale + 3;
+        // const y = -chipWidth * scale + 3;
+        return {
+          opacity: 0,
+          x: x - 10,
+          y: -200,
+          scale: [scale, scale, scale],
+          zIndex: (findex ? findex["index"] : 0) + 500,
+          transition: {
+            duration: 1.5,
+            default: { ease: "linear" },
+          },
+        };
+      });
+      // betChipControls.start({ opacity: 1, transition: { duration: 1.5 } });
+      btnControls.start({
+        y: 200,
+        transition: {
+          type: "spring",
+          duration: 1.5,
+        },
+      });
+      dealControls.start({
         opacity: 0,
-        x: x - 10,
-        y: -200,
-        scale: [scale, scale, scale],
-        zIndex: (findex ? findex["index"] : 0) + 500,
         transition: {
           duration: 1.5,
-          default: { ease: "linear" },
+          type: "spring",
         },
-      };
-    });
-    // betChipControls.start({ opacity: 1, transition: { duration: 1.5 } });
-    btnControls.start({
-      y: 200,
-      transition: {
-        type: "spring",
-        duration: 1.5,
-      },
-    });
-    dealControls.start({
-      opacity: 0,
-      transition: {
-        duration: 1.5,
-        type: "spring",
-      },
-    });
-    deal(0, total);
+      });
+      deal(0, total);
+    }
   };
   return (
     <>
-      <motion.div
-        animate={dealControls}
-        style={{
-          position: "absolute",
-          zIndex: 2000,
-          bottom: 60,
-          right: 50,
-          display: "flex",
-          justifyContent: "flex-end",
-          width: "100%",
-        }}
-      >
-        <div
+      {round === 0 ? (
+        <motion.div
+          animate={dealControls}
           style={{
-            cursor: "pointer",
+            position: "absolute",
+            zIndex: 2000,
+            bottom: 60,
+            right: 50,
             display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: 70,
-            height: 40,
-            backgroundColor: "red",
-            borderRadius: 5,
-            color: "white",
+            justifyContent: "flex-end",
+            width: "100%",
           }}
-          onClick={completeDeal}
         >
-          Deal
-        </div>
-      </motion.div>
+          <div
+            style={{
+              cursor: "pointer",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: 70,
+              height: 40,
+              backgroundColor: betChips?.length > 0 ? "red" : "grey",
+              borderRadius: 5,
+              color: "white",
+            }}
+            onClick={completeDeal}
+          >
+            Deal
+          </div>
+        </motion.div>
+      ) : null}
 
-      {myChipXY ? (
+      {myChipXY && round === 0 ? (
         <>
           {betChips.map((c) => (
             <motion.div
@@ -246,12 +287,14 @@ const MyChipBox = () => {
         </>
       ) : null}
       {myChipXY &&
+        round === 0 &&
         chip_btns
           .filter((c) => checkChip(c.id))
           .map((c) => (
             <motion.div
               key={c["id"] + ""}
               style={{
+                opacity: 0,
                 cursor: "pointer",
                 position: "absolute",
                 zIndex: 2500,

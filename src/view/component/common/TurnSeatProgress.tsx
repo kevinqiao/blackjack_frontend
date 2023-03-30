@@ -53,19 +53,19 @@ export default function TurnSeatAnimation() {
       if (currentSlot?.cards?.length) {
         const seatCoord = seatCoords.find((s: any) => s.no === currentTurn.seat);
         const dif = (currentSlot.cards.length - 1) * seatCoord["dx"] * cardXY["width"];
-        const w = cardXY["width"] + 40 + (currentSlot.cards.length < 4 ? dif * 2 : dif);
+        const w = cardXY["width"] + 8 + (currentSlot.cards.length < 4 ? dif * 2 : dif);
         return w;
       }
     }
     return 0;
   }, [currentTurn, seatCoords, seats, cardXY]);
   const pheight = useMemo(() => {
-    return cardXY ? cardXY["height"] + 40 : 0;
+    return cardXY ? cardXY["height"] + 10 : 0;
   }, [cardXY]);
   const ptop = useMemo(() => {
     if (currentTurn && seatCoords && cardXY) {
       const seatCoord = seatCoords.find((s: any) => s.no === currentTurn.seat);
-      if (seatCoord) return seatCoord["y"] - 20;
+      if (seatCoord) return seatCoord["y"] - 5;
     }
     return 0;
   }, [currentTurn, seatCoords, cardXY]);
@@ -78,7 +78,7 @@ export default function TurnSeatAnimation() {
         const seatCoord = seatCoords.find((s: any) => s.no === currentTurn.seat);
         if (seatCoord) {
           const dif = ((currentSlot.cards.length - 1) * seatCoord["dx"] * cardXY["width"]) / 2;
-          const x = seatCoord["x"] - 20 - (currentSlot.cards.length < 4 ? dif * 2 : dif) - cardXY["width"] / 2;
+          const x = seatCoord["x"] - 5 - (currentSlot.cards.length < 4 ? dif * 2 : dif) - cardXY["width"] / 2;
           return x;
         }
       }
@@ -89,10 +89,18 @@ export default function TurnSeatAnimation() {
   const show = {
     opacity: 1,
     display: "block",
+    transition: {
+      type: "spring",
+      duration: 0.5,
+    },
   };
 
   const hide = {
     opacity: 0,
+    transition: {
+      type: "spring",
+      duration: 0.5,
+    },
     transitionEnd: {
       display: "none",
     },
@@ -106,13 +114,14 @@ export default function TurnSeatAnimation() {
             height={pheight}
             style={{
               border: "2px solid grey",
+              borderRadius: 5,
             }}
           >
             <motion.rect
               width={pwidth}
               height={pheight}
               stroke="red"
-              strokeWidth={5}
+              strokeWidth={8}
               style={{
                 fill: "none",
                 border: "none",

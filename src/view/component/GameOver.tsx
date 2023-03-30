@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SeatModel } from "../../model";
 import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
@@ -9,16 +9,10 @@ import "./score.css";
 
 export default function GameOver() {
   const [active, setActive] = useState(false);
-  const { cards, seats, results } = useGameManager();
+  const { cards, seats, results, newGame } = useGameManager();
   const { event, createEvent } = useEventSubscriber(["gameOver", "gameStart"], []);
   const gameEngine = useGameEngine();
   const { viewport, cardXY, seatCoords } = useCoordManager();
-
-  useEffect(() => {
-    if (event?.name === "gameOver") {
-      setActive(true);
-    } else setActive(false);
-  }, [event]);
 
   const top = (seatNo: number, slot: number): number => {
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
@@ -43,15 +37,7 @@ export default function GameOver() {
       return 0;
     }
   };
-  const score = (seat: SeatModel, slotId: number): string => {
-    if (results?.length > 0) {
-      const r = results.find((r) => r.slot === slotId);
-      if (r?.win === 1) return "WIN";
-      else if (r?.win === 2) return "LOSE";
-      else return "PUSH";
-    }
-    return "";
-  };
+
   return (
     <>
       <motion.div
@@ -65,31 +51,26 @@ export default function GameOver() {
           height: "100%",
         }}
       ></motion.div>
-      {active &&
-        seats
-          .filter((s) => s.no !== 3)
-          .map((seat) =>
-            seat.slots.map((slot) => (
-              <motion.div
-                key={seat.no + "-" + slot.id}
-                custom={{ seat: seat.no, slot: slot.id }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: active ? 1 : 0 }}
-                style={{
-                  position: "absolute",
-                  zIndex: 1700,
-                  top: top(seat.no, slot.id),
-                  left: left(seat.no, slot.id),
-                  width: 50,
-                  height: 25,
-                }}
-              >
-                <div className="tooltip">
-                  <span className="stooltiptext">{score(seat, slot.id)}</span>
-                </div>
-              </motion.div>
-            ))
-          )}
+      <div
+        style={{
+          cursor: "pointer",
+          position: "absolute",
+          zIndex: 1400,
+          top: 10,
+          left: 20,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: 80,
+          height: 40,
+          backgroundColor: "red",
+          borderRadius: 5,
+          color: "white",
+        }}
+        onClick={newGame}
+      >
+        New Game
+      </div>
     </>
   );
 }

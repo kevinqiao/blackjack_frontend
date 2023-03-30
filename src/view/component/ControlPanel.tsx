@@ -1,5 +1,6 @@
 import { motion, useAnimationControls } from "framer-motion";
 import { useCallback, useEffect } from "react";
+import ActionType from "../../model/types/ActionType";
 import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
 import "./styles.css";
@@ -12,6 +13,14 @@ export default function ControlPanel() {
     if (round > 0)
       panelControls.start({
         y: -150,
+        transition: {
+          duration: 1.5,
+          type: "spring",
+        },
+      });
+    else
+      panelControls.start({
+        y: 0,
         transition: {
           duration: 1.5,
           type: "spring",
@@ -34,7 +43,7 @@ export default function ControlPanel() {
     //     },
     //   });
     // }
-  }, [currentTurn]);
+  }, [round]);
 
   const standSeat = () => {
     if (currentTurn) stand(currentTurn.seat);
@@ -45,18 +54,22 @@ export default function ControlPanel() {
     }
   };
   const canInsure = useCallback((): boolean => {
-    const dealer = seats.find((s) => s.no === 3);
-    if (currentTurn && dealer?.slots.length === 1 && dealer.slots[0].cards?.length === 1) {
-      const card = cards.find((c) => c.no === dealer.slots[0]["cards"][0]);
-      if (card?.rank === 14) {
-        const seat = seats.find((s) => s.no === currentTurn.seat);
-        if (seat?.slots.length === 1 && seat.slots[0].cards.length === 2) return true;
+    if (typeof currentTurn != "undefined" && currentTurn && currentTurn.seat < 3) {
+      const seat = seats.find((s) => s.no === currentTurn.seat);
+      if (!seat?.acted.includes(ActionType.INSURE)) return true;
+      if (!seat?.acted.includes(ActionType.INSURE) && seat?.slots.length === 1 && seat.slots[0].cards.length === 2) {
+        const dealer = seats.find((s) => s.no === 3);
+        if (dealer?.slots.length === 1 && dealer.slots[0].cards?.length === 1) {
+          const card = cards.find((c) => c.no === dealer.slots[0]["cards"][0]);
+          if (card?.rank === 14) return true;
+        }
       }
-    }
-    return false;
+      return true;
+    } else return false;
   }, [currentTurn]);
-  const canDouble = (): boolean => {
-    if (currentTurn) {
+
+  const canDouble = useCallback((): boolean => {
+    if (typeof currentTurn != "undefined" && currentTurn && currentTurn.seat < 3) {
       const seat = seats.find((s) => s.no === currentTurn.seat);
       if (seat?.slots.length === 1 && seat.slots[0].cards.length === 2) {
         const scards = cards.filter((c) => seat.slots[0]["cards"].includes(c.no));
@@ -69,11 +82,12 @@ export default function ControlPanel() {
           if (score - 13 === 11) return true;
         }
       }
+      return true;
     }
     return false;
-  };
+  }, [currentTurn]);
   const canSplit = (): boolean => {
-    if (currentTurn) {
+    if (typeof currentTurn != "undefined" && currentTurn && currentTurn.seat < 3) {
       const seat = seats.find((s) => s.no === currentTurn.seat);
       if (seat?.slots && seat.slots.length <= 2) {
         const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
@@ -83,8 +97,14 @@ export default function ControlPanel() {
         }
       }
     }
-    return false;
+    return true;
   };
+  const canHitAndStand = (): boolean => {
+    if (typeof currentTurn != "undefined" && currentTurn && currentTurn.seat < 3) {
+      return true;
+    } else return false;
+  };
+
   return (
     <>
       <motion.div
@@ -166,54 +186,53 @@ export default function ControlPanel() {
           ) : null}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-around",
-            alignItems: "center",
-            width: "25%",
-            height: 100,
-          }}
-        >
-          {/* {currentTurn?.acts?.includes(ActionType.HIT) ? ( */}
+        {canHitAndStand() ? (
           <div
             style={{
-              cursor: "pointer",
               display: "flex",
-              justifyContent: "center",
+              flexDirection: "column",
+              justifyContent: "space-around",
               alignItems: "center",
-              width: 80,
-              height: 40,
-              borderRadius: 5,
-              backgroundColor: "red",
-              color: "white",
+              width: "25%",
+              height: 100,
             }}
-            onClick={() => hitCard()}
           >
-            Hit
+            {/* {currentTurn?.acts?.includes(ActionType.HIT) ? ( */}
+            <div
+              style={{
+                cursor: "pointer",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: 80,
+                height: 40,
+                borderRadius: 5,
+                backgroundColor: "red",
+                color: "white",
+              }}
+              onClick={() => hitCard()}
+            >
+              Hit
+            </div>
+            <div style={{ height: 10 }} />
+            <div
+              style={{
+                cursor: "pointer",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: 80,
+                height: 40,
+                backgroundColor: "red",
+                borderRadius: 5,
+                color: "white",
+              }}
+              onClick={() => standSeat()}
+            >
+              Stand
+            </div>
           </div>
-          {/* ) : null} */}
-          <div style={{ height: 10 }} />
-          {/* {currentTurn?.acts?.includes(ActionType.STAND) ? ( */}
-          <div
-            style={{
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: 80,
-              height: 40,
-              backgroundColor: "red",
-              borderRadius: 5,
-              color: "white",
-            }}
-            onClick={() => standSeat()}
-          >
-            Stand
-          </div>
-          {/* ) : null} */}
-        </div>
+        ) : null}
 
         {/* <div style={{ height: 10 }} />
         <div

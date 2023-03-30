@@ -11,6 +11,7 @@ export interface IGameContext {
   currentTurn: ActionTurn | null;
   status: number;
   results: SlotBattleResult[];
+  newGame: () => void;
   initGame: () => void;
   deal: (seatNo: number, chips: number) => void;
   shuffle: () => void;

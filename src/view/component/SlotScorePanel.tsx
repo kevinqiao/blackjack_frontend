@@ -16,14 +16,24 @@ export default function SlotScorePanel() {
   ]);
   const { event, createEvent } = useEventSubscriber(["gameStart", "cardReleased", "slotSplitted", "gameOver"], []);
   const gameEngine = useGameEngine();
-  const { viewport, cardXY, seatCoords } = useCoordManager();
-  const { cards, seats } = useGameManager();
+  const { cardXY, seatCoords } = useCoordManager();
+  const { gameId, round, cards, seats } = useGameManager();
   const controls = useAnimationControls();
   useEffect(() => {
-    if (event?.name === "gameStart") {
-      const counts = releaseCountRef.current;
-      counts.forEach((c) => (c.count = 0));
-    } else if (event?.name === "cardReleased") {
+    const counts = releaseCountRef.current;
+    counts.forEach((c) => (c.count = 0));
+    controls.start((o) => {
+      return {
+        opacity: round > 0 ? 1 : 0,
+        transition: {
+          duration: 0.5,
+          default: { ease: "linear" },
+        },
+      };
+    });
+  }, [gameId]);
+  useEffect(() => {
+    if (event?.name === "cardReleased") {
       const counts = releaseCountRef.current;
       const data = event.data;
       if (counts && data.seatNo >= 0) {
@@ -111,34 +121,35 @@ export default function SlotScorePanel() {
   };
   return (
     <>
-      {seats.map((seat) =>
-        seat.slots.map((slot) => (
-          <motion.div
-            key={seat.no + "-" + slot.id}
-            custom={{ seatNo: seat.no, slot: slot.id }}
-            initial={{ opacity: 0 }}
-            animate={controls}
-            transition={{ duration: 3, type: "spring" }}
-            style={{
-              display: "flex",
-              justifyContent: "flex-start",
-              position: "absolute",
-              top: top(seat.no, slot.id),
-              left: left(seat.no, slot.id),
-            }}
-          >
-            {slot.id === seat.currentSlot ? (
-              <div className="tooltip">
-                <span className={seat.no === 3 ? "dtooltiptext" : "tooltiptext"}>{score(seat, slot.id)}</span>
-              </div>
-            ) : (
-              <div className="tooltip">
-                <span className="stooltiptext">{score(seat, slot.id)}</span>
-              </div>
-            )}
-          </motion.div>
-        ))
-      )}
+      {round > 0 &&
+        seats.map((seat) =>
+          seat.slots.map((slot) => (
+            <motion.div
+              key={seat.no + "-" + slot.id}
+              custom={{ seatNo: seat.no, slot: slot.id }}
+              initial={{ opacity: 0 }}
+              animate={controls}
+              transition={{ duration: 3, type: "spring" }}
+              style={{
+                display: "flex",
+                justifyContent: "flex-start",
+                position: "absolute",
+                top: top(seat.no, slot.id),
+                left: left(seat.no, slot.id),
+              }}
+            >
+              {slot.id === seat.currentSlot ? (
+                <div className="tooltip">
+                  <span className={seat.no === 3 ? "dtooltiptext" : "tooltiptext"}>{score(seat, slot.id)}</span>
+                </div>
+              ) : (
+                <div className="tooltip">
+                  <span className="stooltiptext">{score(seat, slot.id)}</span>
+                </div>
+              )}
+            </motion.div>
+          ))
+        )}
     </>
   );
 }

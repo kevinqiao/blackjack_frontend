@@ -60,7 +60,7 @@ export default function CardPanel() {
           >
             <motion.div
               // className={"card"}
-              custom={{ cardNo: c["no"], face: 1 }}
+              custom={{ cardNo: c["no"], seat: c.seat, slot: c.slot, face: 1 }}
               initial={{ opacity: 1, transform: `rotateY(0deg)` }}
               animate={cardControls}
               style={{
@@ -75,7 +75,7 @@ export default function CardPanel() {
               }}
             ></motion.div>
             <motion.div
-              custom={{ cardNo: c["no"], face: 0 }}
+              custom={{ cardNo: c["no"], seat: c.seat, slot: c.slot, face: 0 }}
               initial={{ opacity: 0, transform: `rotateY(180deg)` }}
               animate={cardControls}
               style={{

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect } from "react";
 import { CardModel, IGameContext, SeatBetSlot, SeatModel } from "../model";
+import ActionType from "../model/types/ActionType";
 import useEventSubscriber from "./EventManager";
 import useGameService from "./GameService";
 
@@ -16,6 +17,8 @@ const initialState = {
 const actions = {
   INIT_GAME: "INIT_GAME",
   PLACE_BET: "PLACE_BET",
+  INSURE_BET: "INSURE_BET",
+  DOUBLE_BET: "DOUBLE_BET",
   START_GAME: "START_GAME",
   HIT_CARD: "HIT_CARD",
   HIT_DEALER: "HIT_DEALER",
@@ -31,12 +34,26 @@ const reducer = (state: any, action: any) => {
   let card: CardModel;
   switch (action.type) {
     case actions.INIT_GAME:
-      return Object.assign({}, state, action.game);
+      return action.game;
     case actions.PLACE_BET:
       if (action.data.seatNo >= 0) {
         seat = state.seats.find((s: SeatModel) => s.no === action.data.seatNo);
         seat.bet = action.data.chips;
         return Object.assign({}, state, { round: 1, seats: state.seats });
+      }
+      return state;
+    case actions.INSURE_BET:
+      if (action.data.seatNo >= 0) {
+        seat = state.seats.find((s: SeatModel) => s.no === action.data.seatNo);
+        seat.acted.push(ActionType.INSURE);
+        return Object.assign({}, state, { seats: state.seats });
+      }
+      return state;
+    case actions.DOUBLE_BET:
+      if (action.data.seatNo >= 0) {
+        seat = state.seats.find((s: SeatModel) => s.no === action.data.seatNo);
+        seat.acted.push(ActionType.DOUBLE);
+        return Object.assign({}, state, { seats: state.seats });
       }
       return state;
     case actions.START_GAME:
@@ -91,6 +108,7 @@ const GameContext = createContext<IGameContext>({
   status: 0,
   currentTurn: null,
   results: [],
+  newGame: () => null,
   initGame: () => {},
   deal: () => null,
   shuffle: () => null,
@@ -113,6 +131,10 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     if (event?.name === "initGame") {
       handleInit(event.data);
     } else if (event?.name === "placeBet") {
+      handlePlaceBet(event.data);
+    } else if (event?.name === "insureBet") {
+      handlePlaceBet(event.data);
+    } else if (event?.name === "doubleBet") {
       handlePlaceBet(event.data);
     } else if (event?.name === "startGame") {
       handleStartGame(event.data);
@@ -184,14 +206,17 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     results: state.results,
     initGame: () => {
       console.log("start New Game");
-      gameService.createGame();
+      gameService.initGame();
+    },
+    newGame: () => {
+      gameService.newGame();
     },
     shuffle: () => {
       gameService.shuffle();
     },
     deal: (seatNo: number, chips: number) => {
       gameService.deal(seatNo, chips);
-      gameService.startGame();
+      // gameService.startGame();
     },
     hit: (seatNo: number) => {
       createEvent({ name: "turnOver", topic: "", data: { seat: seatNo }, delay: 10 });
@@ -204,11 +229,12 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     },
     double: () => {
       console.log("double bet");
-      return;
+      gameService.double();
     },
     insure: () => {
       console.log("make insurence");
-      return;
+      gameService.insure();
+      dispatch({ type: actions.INSURE_BET, data: { seatNo: state.currentTurn.seat } });
     },
     split: () => {
       createEvent({ name: "turnOver", topic: "", data: { seat: state.currentTurn.seat }, delay: 10 });

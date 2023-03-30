@@ -50,6 +50,7 @@ export default function useGameInitAnimation(controls: AnimationControls, cardCo
                 opacity: [0, 0, 1, 1, 1],
                 x: [0, x, x, x, x],
                 y: [0, y, y, y, y],
+                scale: [0.6, 0.6, 0.6, 0.6, 0.6],
                 rotate: r,
                 zIndex: [0, index + 1, index + 1, index + 1],
                 transition: {
@@ -64,8 +65,9 @@ export default function useGameInitAnimation(controls: AnimationControls, cardCo
       }
       return {};
     });
+
     cardControls.start((o) => {
-      if (o.seat >= 0 && o.slot > 0) {
+      if (o.seat >= 0) {
         const rotate = `rotateY(${o.face === 1 ? "180deg" : "360deg"})`;
         return {
           opacity: [0, 0, 0, 0, 1 - o.face],
@@ -77,7 +79,6 @@ export default function useGameInitAnimation(controls: AnimationControls, cardCo
           },
         };
       }
-
       return {};
     });
   }, [controls, cardControls, seatCoords, seats]);
@@ -87,6 +88,4 @@ export default function useGameInitAnimation(controls: AnimationControls, cardCo
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardControls, controls, seatCoords, gameId]);
-
-  return gameId;
 }

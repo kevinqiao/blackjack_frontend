@@ -38,13 +38,15 @@ const useGameEngine = () => {
     const shuffle = (): CardModel[] => {
         return make_deck()
     }
-    const releaseCard = (game: GameModel): CardModel | null => {
+    const releaseCard = (game: GameModel, seatNo: number, slotId: number): CardModel | null => {
         if (game) {
             const releaseds = game.seats.map((s: any) => s["slots"].map((c: SeatBetSlot) => c["cards"])).flat(2);
             const toReleases = game.cards.filter((c: CardModel) => !releaseds.includes(c.no));
             const no = Math.floor(Math.random() * toReleases.length);
             // console.log(no)
             const card = toReleases[no];
+            card['seat'] = seatNo;
+            card['slot'] = slotId;
             // console.log(card)
             return card;
         } else
@@ -108,7 +110,7 @@ const useGameEngine = () => {
         let ok = false;
         const activeSlots = seat.slots.filter((s) => s.id != seat.currentSlot && (!s.status || s.status === 0)).sort((a, b) => a.id - b.id);
         for (let i = 0; i < activeSlots.length; i++) {
-            let card = releaseCard(gameObj);
+            let card = releaseCard(gameObj, seat.no, activeSlots[i].id);
             if (!card)
                 return false;
             activeSlots[i]['cards'].push(card.no)
@@ -135,7 +137,7 @@ const useGameEngine = () => {
             let i = 0;
             while (true) {
                 i++;
-                let card = releaseCard(gameObj);
+                let card = releaseCard(gameObj, dealerNo, dealerSeat.currentSlot);
                 if (!card)
                     break;
                 createEvent({ name: "releaseCard", topic: "model", data: { seat: dealerNo, no: card?.no }, delay: i * 800 })
@@ -170,7 +172,7 @@ const useGameEngine = () => {
             if (transferCard) {
                 transferCard.slot = newSlot.id;
                 currentSlot.cards.splice(1, 1);
-                let card = releaseCard(gameObj);
+                let card = releaseCard(gameObj, seat.no, seat.currentSlot);
                 if (card) {
                     card.seat = seat.no;
                     currentSlot.cards.push(card.no);
