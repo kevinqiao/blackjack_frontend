@@ -82,7 +82,6 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     let offset = 0;
-    console.log(uid + ":" + tableId);
     if (uid && state.tournament && (state.tournament.table || state.tournament.match)) {
       let seats: TableSeat[] =
         state.tournament.type === 0 ? state.tournament.table.seats : state.tournament.match.seats;
@@ -126,7 +125,10 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
     tournaments: state.tournaments,
     sitDown: (seatNo: number) => {
       console.log("sit down at table:" + state.tournament.table.id + " seat:" + seatNo);
-      if (uid) tournamentService.sitDown(state.tournament.table.id, uid, seatNo);
+      let sno = seatNo + seatOffset;
+      if (sno > 2) sno = sno - 3;
+      console.log("sit down at table:" + state.tournament.table.id + " seat:" + sno);
+      if (uid) tournamentService.sitDown(state.tournament.table.id, uid, sno);
     },
     join: (tournament: TournamentModel) => {
       dispatch({ type: actions.SELECT_TOURNAMENT, data: tournament });

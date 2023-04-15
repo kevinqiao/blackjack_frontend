@@ -5,7 +5,7 @@ import { useUserManager } from "../../service/UserManager";
 const Login = () => {
   const { viewport } = useCoordManager();
   const { uid, token, login, logout } = useUserManager();
-  const { leave } = useTournamentManager();
+  const { leave, standup } = useTournamentManager();
   const signout = () => {
     logout();
     // leave();
@@ -120,6 +120,22 @@ const Login = () => {
             onClick={leave}
           >
             Leave
+          </div>
+          <div
+            style={{
+              cursor: "pointer",
+              width: 80,
+              height: 40,
+              borderRadius: 5,
+              backgroundColor: "red",
+              color: "white",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            onClick={standup}
+          >
+            standup
           </div>
         </div>
       )}
