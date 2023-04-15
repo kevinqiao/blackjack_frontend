@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { CardModel, IGameContext, SeatBetSlot, SeatModel } from "../model";
 import ActionType from "../model/types/ActionType";
 import useEventSubscriber from "./EventManager";
 import useGameService from "./GameService";
+import { useTournamentManager } from "./TournamentManager";
+import { useUserManager } from "./UserManager";
 
 const initialState = {
   gameId: 0,
@@ -62,7 +64,8 @@ const reducer = (state: any, action: any) => {
     case actions.SETTLE_GAME:
       return Object.assign({}, state, { results: action.results });
     case actions.UPDATE_TURN:
-      return Object.assign({}, state, { currentTurn: action.data });
+      const expire = action.data.expireTime + Date.now();
+      return Object.assign({}, state, { currentTurn: { ...action.data, expireTime: expire } });
     case actions.SLOT_SPLIT:
       const seatNo = action.data.seat;
       slot = action.data.slot;
@@ -101,6 +104,7 @@ const reducer = (state: any, action: any) => {
 
 const GameContext = createContext<IGameContext>({
   gameId: 0,
+  seatOffset: 0,
   round: 0,
   startSeat: -1,
   cards: [],
@@ -108,14 +112,11 @@ const GameContext = createContext<IGameContext>({
   status: 0,
   currentTurn: null,
   results: [],
-  newGame: () => null,
-  initGame: () => {},
   deal: () => null,
   shuffle: () => null,
   hit: (seatNo: number) => null,
   split: () => null,
   stand: (seatNo: number) => null,
-  switchSlot: (seatNo: number) => null,
   insure: () => null,
   double: () => null,
 });
@@ -127,6 +128,9 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     ["model"]
   );
   const gameService = useGameService();
+  const { tournament } = useTournamentManager();
+  const { uid } = useUserManager();
+
   useEffect(() => {
     if (event?.name === "initGame") {
       handleInit(event.data);
@@ -194,9 +198,18 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     dispatch({ type: actions.HIT_CARD, data });
     createEvent({ name: "cardReleased", topic: "", data, delay: 0 });
   };
+  const seatOffset = useMemo(() => {
+    let offset = 0;
+    if (Boolean(uid) && state.seats?.length > 0) {
+      const seat = state.seats.find((s: SeatModel) => s.uid === uid);
+      offset = 3 - seat.no < 3 ? 3 - seat.no : 0;
+    }
+    return offset;
+  }, [uid, state.seats]);
 
   const value = {
     gameId: state.gameId,
+    seatOffset: seatOffset,
     round: state.round,
     startSeat: state.startSeat,
     cards: state.cards,
@@ -204,10 +217,10 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     status: state.status,
     currentTurn: state.currentTurn,
     results: state.results,
-    initGame: () => {
-      console.log("start New Game");
-      gameService.initGame();
-    },
+    // initGame: () => {
+    //   console.log("start New Game");
+    //   gameService.initGame();
+    // },
     newGame: () => {
       gameService.newGame();
     },
@@ -239,9 +252,6 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     split: () => {
       createEvent({ name: "turnOver", topic: "", data: { seat: state.currentTurn.seat }, delay: 10 });
       gameService.split(state.currentTurn.seat);
-    },
-    switchSlot: (seatNo: number, slot: number) => {
-      gameService.switchSlot(seatNo, slot);
     },
   };
 

@@ -10,7 +10,7 @@ const useDealProcessor = () => {
         for (let seat of game.seats) {
             if (seat.no === 3)
                 continue;
-            seat.bet = chips;
+            seat.bet = chips + seat.no;
             const event: EventModel = { name: "placeBet", topic: "model", data: { seatNo: seat.no, chips: chips + seat.no }, delay: 0 }
             setTimeout(() => createEvent(event), seat.no * 100)
         }

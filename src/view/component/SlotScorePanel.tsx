@@ -17,7 +17,7 @@ export default function SlotScorePanel() {
   const { event, createEvent } = useEventSubscriber(["gameStart", "cardReleased", "slotSplitted", "gameOver"], []);
   const gameEngine = useGameEngine();
   const { cardXY, seatCoords } = useCoordManager();
-  const { gameId, round, cards, seats } = useGameManager();
+  const { gameId, seatOffset, round, cards, seats } = useGameManager();
   const controls = useAnimationControls();
   useEffect(() => {
     const counts = releaseCountRef.current;
@@ -74,15 +74,25 @@ export default function SlotScorePanel() {
     }
   }, [event]);
   const top = (seatNo: number, slot: number): number => {
-    const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     const seat = seats.find((s: SeatModel) => s.no === seatNo);
+    if (seatNo < 3) {
+      seatNo = seatOffset + seatNo;
+      if (seatNo > 2) seatNo = seatNo - 3;
+    }
+    const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
+
     if (seat?.currentSlot === slot) return seatNo === 3 ? seatCoord["y"] + cardXY["height"] + 45 : seatCoord["y"] - 10;
     else return seatCoord ? seatCoord["y"] - (cardXY["height"] + 95) * 0.6 : 0;
   };
 
   const left = (seatNo: number, slot: number): number => {
-    const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     const seat = seats.find((s: SeatModel) => s.no === seatNo);
+    if (seatNo < 3) {
+      seatNo = seatOffset + seatNo;
+      if (seatNo > 2) seatNo = seatNo - 3;
+    }
+    const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
+
     if (seatNo === 3) return seatCoord["x"] + cardXY["width"] * 0.15;
     if (seat?.currentSlot === slot && seatCoord)
       return seatNo === 2 ? seatCoord["x"] + cardXY["width"] : seatCoord["x"] + cardXY["width"] * 0.15;

@@ -5,13 +5,17 @@ import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
 
 export default function useBetSlotSplitAnimation(controls: AnimationControls, cardControls: AnimationControls) {
-  const { gameId, seats } = useGameManager();
+  const { gameId, seatOffset, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
   const { event } = useEventSubscriber(["slotSplitted"], []);
 
   const handleSplit = useCallback(
     (seatNo: number) => {
       const seat = seats.find((s) => s.no === seatNo);
+      if (seatNo < 3) {
+        seatNo = seatOffset + seatNo;
+        if (seatNo > 2) seatNo = seatNo - 3;
+      }
       controls.start((card) => {
         if (seat?.slots) {
           const slots = seat.slots.filter((s) => s.id !== seat.currentSlot);

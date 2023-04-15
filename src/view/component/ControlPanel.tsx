@@ -7,7 +7,7 @@ import "./styles.css";
 
 export default function ControlPanel() {
   const { event, createEvent } = useEventSubscriber(["dealCompleted", "gameOver"], []);
-  const { cards, seats, round, currentTurn, deal, hit, split, stand, double, insure, initGame } = useGameManager();
+  const { cards, seats, round, currentTurn, deal, hit, split, stand, double, insure } = useGameManager();
   const panelControls = useAnimationControls();
   useEffect(() => {
     if (round > 0)

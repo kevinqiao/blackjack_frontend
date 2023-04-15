@@ -5,17 +5,22 @@ import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
 
 export default function useCardReleaseAnimation(controls: AnimationControls, cardControls: AnimationControls) {
-  const { gameId, seats } = useGameManager();
+  const { gameId, seatOffset, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
   const { event } = useEventSubscriber(["cardReleased"], []);
 
   const handleHit = useCallback(
     (seatNo: number, cardNo: number) => {
+      const seat = seats.find((s) => s.no === seatNo);
+      if (!seat) return {};
+      if (seatNo < 3) {
+        seatNo = seatOffset + seatNo;
+        if (seatNo > 2) seatNo = seatNo - 3;
+      }
       const seatCoord = seatCoords.find(
         (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
       );
-      const seat = seats.find((s) => s.no === seatNo);
-      if (!seat) return {};
+
       controls.start((card) => {
         const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
         if (currentSlot?.cards.includes(card["no"])) {

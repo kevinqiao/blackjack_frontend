@@ -6,6 +6,7 @@ import { SlotBattleResult } from "../../../model/types/SlotBattleResult";
 import useCoordManager from "../../../service/CoordManager";
 import useEventSubscriber from "../../../service/EventManager";
 import { useGameManager } from "../../../service/GameManager";
+import { useUserManager } from "../../../service/UserManager";
 import "../chip.css";
 import "../score.css";
 
@@ -15,28 +16,37 @@ export default function SlotChipPanel() {
     []
   );
   const { viewport, myChipXY, cardXY, seatCoords } = useCoordManager();
-  const { gameId, round, cards, seats, results } = useGameManager();
+  const { gameId, seatOffset, round, cards, seats, results } = useGameManager();
+  const { uid } = useUserManager();
   const controls = useAnimationControls();
 
   const getCurrentY = (seat: SeatModel, slotId: number) => {
-    const seatCoord = seatCoords.find((s: any) => s.no === seat.no);
+    let seatNo = seat.no;
+    if (seatNo < 3) {
+      seatNo = seatOffset + seat.no;
+      if (seatNo > 2) seatNo = seatNo - 3;
+    }
+    const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     let y = seat.no === 3 ? seatCoord["y"] + cardXY["height"] + 20 : seatCoord["y"] - 40;
-    if (seat.slots.length > 1) {
-      // y = seatCoord["y"] - (cardXY["height"] + 95) * 0.6 - 40;
-      if (seat?.currentSlot !== slotId) {
-        const slots = seat?.slots.filter((s) => s.id !== seat.currentSlot);
-        if (slots) {
-          let index = slots?.map((s) => s.id).findIndex((s) => s === slotId);
-          if (index >= 0) y = seatCoord["y"] - (cardXY["height"] + 65) * 0.6 - 40;
-        }
+    if (seat?.currentSlot !== slotId) {
+      const slots = seat?.slots.filter((s) => s.id !== seat.currentSlot);
+      if (slots) {
+        let index = slots?.map((s) => s.id).findIndex((s) => s === slotId);
+        if (index >= 0) y = seatCoord["y"] - (cardXY["height"] + 65) * 0.6 - 40;
       }
     }
+    // }
     return y;
   };
 
   const getCurrentX = (seat: SeatModel, slotId: number) => {
-    const seatCoord = seatCoords.find((s: any) => s.no === seat.no);
-    let x = seat.no === 2 ? seatCoord["x"] - cardXY["width"] / 2 : seatCoord["x"] + cardXY["width"] / 2;
+    let seatNo = seat.no;
+    if (seatNo < 3) {
+      seatNo = seatOffset + seat.no;
+      if (seatNo > 2) seatNo = seatNo - 3;
+    }
+    const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
+    let x = seatNo === 2 ? seatCoord["x"] - cardXY["width"] / 2 : seatCoord["x"] + cardXY["width"] / 2;
     if (seat?.currentSlot !== slotId) {
       const slots = seat?.slots.filter((s) => s.id !== seat.currentSlot).sort((a, b) => b.id - a.id);
       if (slots) {
@@ -137,7 +147,8 @@ export default function SlotChipPanel() {
         const y = cy - top(seat.no);
         animationProps["x"] = [x, x, x];
         animationProps["y"] = [y, y, y];
-        animationProps["opacity"] = [0, 0, 1];
+        if (seatBet(seat.no, o.slot.id) > 0) animationProps["opacity"] = [0, 0, 1];
+        else animationProps["opacity"] = [0, 0, 0];
         animationProps["transition"] = {
           duration: 0.5,
           default: { ease: "linear" },
@@ -151,9 +162,10 @@ export default function SlotChipPanel() {
     if (event?.name === "betPlaced") {
       controls.start((o) => {
         const animationProps: any = {};
-        if (o.seatNo === 0) {
-          const x = viewport["width"] / 2 - left(0);
-          const y = myChipXY["y"] - top(0) - 200;
+        const seat = seats.find((s) => s.no === o.seatNo);
+        if (seat?.uid === uid) {
+          const x = viewport["width"] / 2 - left(o.seatNo);
+          const y = myChipXY["y"] - top(o.seatNo) - 200;
           animationProps["x"] = [x, x, 0];
           animationProps["y"] = [y, y, 0];
           animationProps["opacity"] = [0, 0, 1];
@@ -162,21 +174,17 @@ export default function SlotChipPanel() {
             duration: 1.5,
             times: [0, 0.2, 1],
           };
-        } else {
-          const seat = seats.find((s) => s.no === o.seatNo);
-          if (seat) {
-            const cx = getCurrentX(seat, o.slot.id);
-            const cy = getCurrentY(seat, o.slot.id);
-            animationProps["x"] = cx - left(seat.no);
-            animationProps["y"] = cy - top(seat.no);
-            animationProps["opacity"] = 1;
-            animationProps["transition"] = {
-              duration: 0.1,
-              default: { ease: "linear" },
-            };
-          }
+        } else if (seat) {
+          const cx = getCurrentX(seat, o.slot.id);
+          const cy = getCurrentY(seat, o.slot.id);
+          animationProps["x"] = cx - left(seat.no);
+          animationProps["y"] = cy - top(seat.no);
+          animationProps["opacity"] = 1;
+          animationProps["transition"] = {
+            duration: 0.1,
+            default: { ease: "linear" },
+          };
         }
-
         return animationProps;
       });
     }
@@ -224,7 +232,7 @@ export default function SlotChipPanel() {
       }
     } else if (event?.name === "slotSplitted" || event?.name === "slotActivated") {
       const data = event?.data;
-      const seatNo = data.seat;
+      let seatNo = data.seat;
       controls.start((o) => {
         const animationProps: any = {};
         if (o.seatNo === seatNo && seatNo < 3) {
@@ -247,6 +255,10 @@ export default function SlotChipPanel() {
   }, [event]);
 
   const top = (seatNo: number): number => {
+    if (seatNo < 3) {
+      seatNo = seatOffset + seatNo;
+      if (seatNo > 2) seatNo = seatNo - 3;
+    }
     if (!seatCoords) return 0;
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     if (seatNo === 3) return seatCoord["y"] + cardXY["height"] + 20;
@@ -255,6 +267,10 @@ export default function SlotChipPanel() {
 
   const left = (seatNo: number): number => {
     if (!seatCoords) return 0;
+    if (seatNo < 3) {
+      seatNo = seatOffset + seatNo;
+      if (seatNo > 2) seatNo = seatNo - 3;
+    }
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
     if (seatNo === 2) return seatCoord["x"] - cardXY["width"] / 2;
     else return seatCoord["x"] + cardXY["width"] / 2;

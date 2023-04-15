@@ -3,16 +3,16 @@ import { CardModel } from "./Card";
 import { SeatModel } from "./Seat";
 import { SlotBattleResult } from "./SlotBattleResult";
 export interface IGameContext {
-  gameId: number,
-  round: number,
-  startSeat: number,
+  gameId: number;
+  seatOffset: number;
+  round: number;
+  startSeat: number;
   cards: CardModel[];
   seats: SeatModel[];
   currentTurn: ActionTurn | null;
   status: number;
   results: SlotBattleResult[];
-  newGame: () => void;
-  initGame: () => void;
+  // newGame: () => void;
   deal: (seatNo: number, chips: number) => void;
   shuffle: () => void;
   hit: (seatNo: number) => void;
@@ -20,5 +20,4 @@ export interface IGameContext {
   split: () => void;
   double: () => void;
   insure: () => void;
-  switchSlot: (seatNo: number, slot: number) => void;
 }

@@ -46,9 +46,11 @@
   --accent: var(--blue);
   --card-font-size:1.2em;
   --card-star-size:2em;
+  --avatar-radius:100px;
 }
 body {
-  background: #373636;
+  background: #eae6e6;
+  margin:0;
 }
 h1 {
   text-align: center;
@@ -157,8 +159,8 @@ a {
   color: #000000;
 } */
 .circle {
-  width: 100px;
-  height: 100px;
+  width:  var(--avatar-radius);
+  height: var(--avatar-radius);
   background: red;
   border-radius: 50%
 }

@@ -12,7 +12,7 @@ import "./styles.css";
 
 export default function CardPanel() {
   const { viewport, cardXY } = useCoordManager();
-  const { gameId, seats, cards, initGame, switchSlot } = useGameManager();
+  const { gameId, seats, cards } = useGameManager();
   const blankControls = useAnimationControls();
   const controls = useAnimationControls();
   const cardControls = useAnimationControls();
@@ -34,10 +34,7 @@ export default function CardPanel() {
     },
     [seats]
   );
-  const startGame = () => {
-    console.log("initing game");
-    initGame();
-  };
+
   return (
     <div style={{ position: "absolute", zIndex: 1600 }}>
       {viewport &&
@@ -56,7 +53,6 @@ export default function CardPanel() {
               transform: "rotate(60deg)",
             }}
             animate={controls}
-            onClick={() => (canOpen(c) > 0 ? switchSlot(c["seat"], c["slot"]) : null)}
           >
             <motion.div
               // className={"card"}
@@ -106,7 +102,6 @@ export default function CardPanel() {
             backgroundPosition: "center",
             backgroundSize: "cover",
           }}
-          onClick={startGame}
         ></motion.div>
       ) : null}
     </div>

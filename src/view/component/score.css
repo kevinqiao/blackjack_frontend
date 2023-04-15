@@ -1,3 +1,4 @@
+
 .tooltip {
   position: relative;
   display: inline-block;
@@ -88,4 +89,26 @@
   border-style: solid;
   border-color: black transparent transparent transparent;
 
+}
+.battle_result {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: visible;
+  width: auto;
+  min-width: 30px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  font-size: 12px;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -60px;
 }

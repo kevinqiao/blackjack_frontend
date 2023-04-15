@@ -1,16 +1,11 @@
 import { CoordProvider } from "./service/CoordManager";
 import { EventProvider } from "./service/EventManager";
 import { GameProvider } from "./service/GameManager";
+import { TournamentProvider } from "./service/TournamentManager";
+import { UserProvider } from "./service/UserManager";
 
 import "./styles.css";
-import BlackJack from "./view/component/BlackJack";
-import CardPanel from "./view/component/CardPanel";
-import ControlPanel from "./view/component/ControlPanel";
-import GameOver from "./view/component/GameOver";
-import MyChipBox from "./view/component/MyChipBox";
-import SlotScorePanel from "./view/component/SlotScorePanel";
-import SlotChipPanel from "./view/component/common/SlotChipPanel";
-import TurnSeatProgress from "./view/component/common/TurnSeatProgress";
+import MainHome from "./view/component/MainHome";
 
 function App() {
   const FlattenedProviderTree = (providers: any): any => {
@@ -31,19 +26,16 @@ function App() {
       ...providers,
     ]);
   };
-  const Providers = FlattenedProviderTree([[CoordProvider], [EventProvider], [GameProvider]]);
+  const Providers = FlattenedProviderTree([
+    [CoordProvider],
+    [EventProvider],
+    [UserProvider],
+    [TournamentProvider],
+    [GameProvider],
+  ]);
   return (
     <Providers>
-      <MyChipBox />
-
-      <ControlPanel />
-      <GameOver />
-
-      <CardPanel />
-      <TurnSeatProgress />
-      <SlotScorePanel />
-      <SlotChipPanel />
-      <BlackJack />
+      <MainHome />
     </Providers>
   );
 }

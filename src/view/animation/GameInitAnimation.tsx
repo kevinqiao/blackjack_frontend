@@ -4,7 +4,7 @@ import useCoordManager from "../../service/CoordManager";
 import { useGameManager } from "../../service/GameManager";
 
 export default function useGameInitAnimation(controls: AnimationControls, cardControls: AnimationControls) {
-  const { gameId, cards, seats } = useGameManager();
+  const { gameId, seatOffset, cards, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
 
   const handleInit = useCallback(() => {
@@ -12,8 +12,12 @@ export default function useGameInitAnimation(controls: AnimationControls, cardCo
       if (o.seat >= 0 && o.slot > 0) {
         const seat = seats.find((s) => s.no === o.seat);
         if (seat) {
-          const seatCoord = seatCoords.find((s: any) => s.no === seat.no);
-
+          let seatNo = o.seat;
+          if (seatNo < 3) {
+            seatNo = seatOffset + seatNo;
+            if (seatNo > 2) seatNo = seatNo - 3;
+          }
+          const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
           const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
           const index = currentSlot?.cards.findIndex((c) => c === o.no);
           if (currentSlot?.cards && typeof index != "undefined" && index >= 0) {

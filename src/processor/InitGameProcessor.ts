@@ -8,7 +8,6 @@ const useInitGameProcessor = () => {
     const process = (game: GameModel) => {
         const event: EventModel = { name: "initGame", topic: "model", data: JSON.parse(JSON.stringify(game)), delay: 0 }
         createEvent(event);
-
     }
 
 

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 const CHIP_RADIUS = 151;
+const AVATAR_RADIUS = 100;
 const CoordContext = createContext<any>(null);
 
 const initChipCSS = (scale: number) => {
@@ -52,6 +53,10 @@ const initBetChipCSS = (scale: number) => {
     r.style.setProperty("--bbs3", 5 * scale + "px");
   }
 };
+const initAvatarCSS = (scale: number) => {
+  const r: HTMLElement | null = document.querySelector(":root");
+  if (r?.style) r.style.setProperty("--avatar-radius", AVATAR_RADIUS * scale + "px");
+};
 const initCardCSS = (scale: number) => {
   const r: HTMLElement | null = document.querySelector(":root");
   // var rs = getComputedStyle(r);
@@ -70,8 +75,9 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     // initChipCSS(scale >= 1 ? 1 : scale);
     initChipCSS(scale);
     initBetChipCSS(0.2);
+    initAvatarCSS(scale);
     const myChipX = w / 2;
-    const myChipY = h - scale * CHIP_RADIUS - 90;
+    const myChipY = h - scale * CHIP_RADIUS - 60;
     const myChip = { x: myChipX, y: myChipY, width: scale * CHIP_RADIUS, height: scale * CHIP_RADIUS, scale: scale };
 
     v["myChipXY"] = myChip;

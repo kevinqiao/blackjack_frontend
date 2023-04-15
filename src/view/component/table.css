@@ -1,0 +1,11 @@
+.wood {
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 1px, transparent 1px, transparent 7px);
+  background-size: 16px;
+  background-color: chocolate;
+}
+.table {
+  background-color: green;
+  margin: 0 auto;
+  border: none;
+  box-shadow: 10px 10px 10px 10px grey;
+}

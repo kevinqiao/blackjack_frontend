@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { SeatBetSlot, SeatModel } from "../model";
 import ActionType from "../model/types/ActionType";
+import Constants from "../model/types/Constants";
 import { GameModel } from "../model/types/Game";
 import useEventSubscriber from "../service/EventManager";
 import useGameEngine from "../service/GameEngine";
@@ -38,8 +39,8 @@ const useHitProcessor = () => {
                 gameEngine.turnDealer(gameObj);
 
             } else {
-                Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + 15000, acts: [ActionType.HIT, ActionType.STAND] })
-                createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: 15000 }), delay: 100 })
+                Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + Constants.TURN_INTERVAL, acts: [ActionType.HIT, ActionType.STAND] })
+                createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: Constants.TURN_INTERVAL }), delay: 100 })
             }
 
         }
