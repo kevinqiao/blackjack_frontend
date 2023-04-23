@@ -13,6 +13,6 @@ export declare type GameModel = {
   cards: CardModel[];
   seats: SeatModel[];
   currentTurn: ActionTurn;
-  status: number;
+  status: number;//0-open 1-over 2-settled 3-cancelled
   results?: SlotBattleResult[];
 };

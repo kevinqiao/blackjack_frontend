@@ -50,7 +50,7 @@ export const useTableDao = () => {
       const tablestr = window.localStorage.getItem("tables");
       if (typeof tablestr != "undefined" && tablestr != null) {
         const tables = JSON.parse(tablestr);
-        console.log(tables)
+
         if (tables?.length > 0)
           return tables.find((t: TableModel) => t.id === id);
       }

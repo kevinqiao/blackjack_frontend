@@ -1,11 +1,14 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { TableSeat, TournamentModel } from "../model";
+import { TableModel, TableSeat, TournamentModel } from "../model";
 import { ITournamentContext } from "../model/types/ITournamentContex";
+import useGameDao from "../respository/GameDao";
 import useEventSubscriber from "./EventManager";
+import useGameService from "./GameService";
 import useTournamentService from "./TournamentService";
 import { useUserManager } from "./UserManager";
 
 const initialState = {
+  table:null,
   tournament: null,
   tournaments: [],
 };
@@ -15,6 +18,9 @@ const actions = {
   UPDATE_TOURNAMENT: "UPDATE_TOURNAMENT",
   LOAD_TOURNAMENT: "LOAD_TOURNAMENT",
   CLEAR_TOURNAMENT: "CLEAR_TOURNAMENT",
+  INIT_TABLE:"INIT_TABLE",
+  UPDATE_TABLE:"UPDATE_TABLE",
+  CLEAR_TABLE:"CLEAR_TABLE"
 };
 
 const reducer = (state: any, action: any) => {
@@ -28,16 +34,24 @@ const reducer = (state: any, action: any) => {
       return Object.assign({}, state, { tournament: tobj });
     case actions.CLEAR_TOURNAMENT:
       return Object.assign({}, state, { tournament: null });
+    case actions.INIT_TABLE:
+        return Object.assign({}, state, { table:action.data});
+    case actions.UPDATE_TABLE:
+        return Object.assign({}, state, { table: Object.assign({},state.table,action.data) });
+    case actions.CLEAR_TABLE:
+        return Object.assign({},state,{table:null})
     default:
       return state;
   }
 };
 
 const TournamentContext = createContext<ITournamentContext>({
-  seats: [],
+  table: null,
   seatOffset: 0,
   tournament: null,
   tournaments: [],
+  initTournament:(tournament:TournamentModel)=>null,
+  initTable:(table:TableModel)=>null,
   sitDown: (seatNo: number) => null,
   join: (tournament: TournamentModel) => null,
   leave: () => null,
@@ -49,112 +63,78 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const [seatOffset, setSeatOffset] = useState(0);
   const { event, createEvent } = useEventSubscriber(
-    ["initTable", "updateTable", "sitDown", "standUp", "quitMatch", "settleMatch"],
+    ["initTable", "updateTable", "sitDown", "standUp", "quitMatch", "settleMatch","finishTournament"],
     ["model"]
   );
   const tournamentService = useTournamentService();
-  const { uid, token, tableId } = useUserManager();
-  useEffect(() => {
-    if (tableId > 0) {
-      const table = tournamentService.findTable(tableId);
-      if (table) {
-        const tournament = tournamentService.findTournament(table.tournamentId);
-        tournament.table = table;
-        if (tournament) dispatch({ type: actions.SELECT_TOURNAMENT, data: tournament });
-      }
-    }
-  }, [tableId]);
+  const { uid, token} = useUserManager();
+
 
   useEffect(() => {
-    if (event?.name === "initTable") {
-      handleInitTable(event.data);
-    } else if (event?.name === "updateTable") {
-      handleUpdateTable(event.data);
+    if (event?.name === "updateTable") {
+      dispatch({ type: actions.UPDATE_TABLE, data: event.data});
+    }else if(event?.name==="finishTournament"){
+      console.log("clear table")
+      dispatch({type:actions.CLEAR_TABLE})
     }
   }, [event]);
   useEffect(() => {
-    // window.localStorage.removeItem("tables");
-    // tournamentService.initTournaments();
+      // window.localStorage.removeItem("tables");
+     tournamentService.initTournaments();
     let tournaments = tournamentService.findAllTournaments();
-    if (tournaments == null) tournaments = tournamentService.initTournaments();
     dispatch({ type: actions.LOAD_TOURNAMENT, data: tournaments });
   }, []);
 
   useEffect(() => {
     let offset = 0;
-    if (uid && state.tournament && (state.tournament.table || state.tournament.match)) {
-      let seats: TableSeat[] =
-        state.tournament.type === 0 ? state.tournament.table.seats : state.tournament.match.seats;
-      if (Boolean(uid) && seats?.length > 0) {
-        const seat = seats.find((s: TableSeat) => s.uid === uid);
-        if (seat) offset = 3 - seat.no < 3 ? 3 - seat.no : 0;
-        if (offset > 0) setSeatOffset(offset);
-      }
+    if(!uid||!state.table)
+       setSeatOffset(0)
+    else if (state.table&&state.table.seats?.length > 0) {
+        const seat = state.table.seats.find((s: TableSeat) => s.uid === uid&&s.no<3);
+        if (seat){
+          offset = seat.no===0?0:3 - seat.no;
+          setSeatOffset(offset);
+        }     
     }
-  }, [uid, state.tournament]);
-  const handleInitTable = (data: any) => {
-    console.log(data);
-    dispatch({ type: actions.UPDATE_TOURNAMENT, data: { table: data } });
-  };
-  const handleUpdateTable = (data: any) => {
-    console.log(data);
-    dispatch({ type: actions.UPDATE_TOURNAMENT, data: { table: data } });
-  };
-  const seats = useMemo(() => {
-    if (!state.tournament || (!state.tournament.table && !state.tournament.match)) return null;
-    if (state.tournament.type === 0) return state.tournament.table.seats;
-    else if (state.tournament.type === 1) return state.tournament.match.seats;
-  }, [state.tournament]);
+  }, [uid,state.table]);
 
-  // const seatOffset = useMemo(() => {
-  //   let offset = 0;
-  //   if (tableId > 0 && state.tournament && (state.tournament.table || state.tournament.match)) {
-  //     let seats: TableSeat[] =
-  //       state.tournament.type === 0 ? state.tournament.table.seats : state.tournament.match.seats;
-  //     if (Boolean(uid) && seats?.length > 0) {
-  //       const seat = seats.find((s: TableSeat) => s.uid === uid);
-  //       if (seat) offset = 3 - seat.no < 3 ? 3 - seat.no : 0;
-  //     }
-  //   }
-  //   return offset;
-  // }, [uid, tableId, state.tournament]);
   const value = {
-    seats: seats,
+    table: state.table,
     seatOffset: seatOffset,
     tournament: state.tournament,
     tournaments: state.tournaments,
+    initTournament:(tournament:TournamentModel)=>{
+      dispatch({ type: actions.SELECT_TOURNAMENT, data: tournament });
+    },
+    initTable:(table:TableModel)=>{
+      dispatch({ type: actions.INIT_TABLE, data: table });
+    },
     sitDown: (seatNo: number) => {
-      console.log("sit down at table:" + state.tournament.table.id + " seat:" + seatNo);
-      let sno = seatNo + seatOffset;
-      if (sno > 2) sno = sno - 3;
-      console.log("sit down at table:" + state.tournament.table.id + " seat:" + sno);
-      if (uid) tournamentService.sitDown(state.tournament.table.id, uid, sno);
+      // let sno = seatNo - seatOffset;
+      // if (sno < 0) sno = sno + 3;
+      if (uid) tournamentService.sitDown(state.table.id, uid, seatNo);
     },
     join: (tournament: TournamentModel) => {
       dispatch({ type: actions.SELECT_TOURNAMENT, data: tournament });
       if (tournament != null && uid != null && token != null) {
         const table = tournamentService.join(tournament.id, uid, token);
-        console.log(table);
-        if (table) dispatch({ type: actions.UPDATE_TOURNAMENT, data: { table: table } });
+        console.log(table)
+        if (table){
+          // if(table.games?.length>0){
+          //    const game = gameDao.find(table.games[0]);
+          //    console.log(game)
+          // }
+            
+          dispatch({ type: actions.INIT_TABLE, data:table });
+        }
       }
-      // setTimeout(() => {
-      //   dispatch({ type: actions.UPDATE_TOURNAMENT, data: { table: { id: 1, size: 3, gameId: Date.now() } } });
-      // }, 2000);
     },
     leave: useCallback(() => {
-      if (state.tournament?.table) {
-        console.log("leaving....");
-        setSeatOffset(0);
-        const tableId = state.tournament.table.id;
-        if (uid && tableId) tournamentService.leave(uid, tableId);
-      }
-    }, [uid, state.tournament]),
+      if (uid &&state.table&& state.table.id>0) tournamentService.leave(uid, state.table.id);
+
+    }, [uid, state.table]),
     standup: useCallback(() => {
-      if (state.tournament?.table) {
-        console.log("standup....");
-        const tableId = state.tournament.table.id;
-        if (uid && tableId) tournamentService.leave(uid, tableId);
-      }
+      if (uid &&state.table&& state.table.id>0) tournamentService.leave(uid, state.table.id);
     }, [uid, state.tournament]),
     selectTournament: (t: TournamentModel) => {
       console.log(t);

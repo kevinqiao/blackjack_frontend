@@ -49,6 +49,8 @@ export default function ControlPanel() {
     if (currentTurn) stand(currentTurn.seat);
   };
   const hitCard = () => {
+    console.log("hitting")
+    console.log(currentTurn)
     if (currentTurn && currentTurn?.seat >= 0) {
       hit(currentTurn.seat);
     }

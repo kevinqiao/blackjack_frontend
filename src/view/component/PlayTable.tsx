@@ -5,15 +5,16 @@ import "./table.css";
 
 const PlayTable = () => {
   const { viewport } = useCoordManager();
-  const { tournament } = useTournamentManager();
+  const { table} = useTournamentManager();
   const { event, createEvent } = useEventSubscriber([""], []);
 
   return (
     <>
-      {tournament?.table || tournament?.match ? (
+      {table ? (
         <div
           style={{
             position: "absolute",
+            zIndex:500,
             top: 0,
             left: 0,
             width: "100%",

@@ -5,13 +5,14 @@ import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
 import useGameEngine from "../../service/GameEngine";
 import { useGameManager } from "../../service/GameManager";
+import { useTournamentManager } from "../../service/TournamentManager";
 import { useUserManager } from "../../service/UserManager";
 import "./score.css";
 
 export default function GameOver() {
   const [active, setActive] = useState(false);
-  const { uid } = useUserManager();
-  const { cards, seatOffset, seats, results } = useGameManager();
+  const {seatOffset} = useTournamentManager();
+  const {seats, results } = useGameManager();
   const { event, createEvent } = useEventSubscriber(["gameOver", "gameStart"], []);
   const gameEngine = useGameEngine();
   const { viewport, cardXY, seatCoords } = useCoordManager();

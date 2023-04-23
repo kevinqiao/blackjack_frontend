@@ -15,7 +15,7 @@ const initialState = {
   uid: null,
   token: null,
   chips: 0,
-  tableId: 0,
+  gameId: 0,
 };
 
 const actions = {
@@ -27,13 +27,12 @@ const actions = {
 const reducer = (state: any, action: any) => {
   switch (action.type) {
     case actions.SIGNIN_SUCCESS:
-      console.log(action.data);
       return action.data;
     case actions.LOGOUT_COMPLETE:
       return initialState;
     case actions.UPDATE_USER:
       const u = Object.assign({}, state, action.data);
-      console.log(u);
+
       return u;
     default:
       return state;
@@ -54,17 +53,18 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { event } = useEventSubscriber(["updateUser"], ["model"]);
   const userService = useUserService();
   useEffect(() => {
+    //  window.localStorage.removeItem("users")
+    //  window.localStorage.removeItem("user")
     const user = userService.signin();
-    console.log(user);
+    // console.log(user)
     if (user) dispatch({ type: actions.SIGNIN_SUCCESS, data: user });
   }, []);
 
   useEffect(() => {
     if (event?.name === "updateUser") {
-      console.log("updateUser");
-      console.log(event.data);
+     
       const u = Object.assign({}, state, event.data);
-      console.log(u);
+      
       window.localStorage.setItem("user", JSON.stringify(u));
       dispatch({ type: actions.UPDATE_USER, data: u });
     }

@@ -6,6 +6,7 @@ import { SlotBattleResult } from "../../../model/types/SlotBattleResult";
 import useCoordManager from "../../../service/CoordManager";
 import useEventSubscriber from "../../../service/EventManager";
 import { useGameManager } from "../../../service/GameManager";
+import { useTournamentManager } from "../../../service/TournamentManager";
 import { useUserManager } from "../../../service/UserManager";
 import "../chip.css";
 import "../score.css";
@@ -15,8 +16,9 @@ export default function SlotChipPanel() {
     ["slotSplitted", "slotActivated", "dealCompleted", "betPlaced", "gameStart", "gameOver"],
     []
   );
+  const {seatOffset} = useTournamentManager();
   const { viewport, myChipXY, cardXY, seatCoords } = useCoordManager();
-  const { gameId, seatOffset, round, cards, seats, results } = useGameManager();
+  const { gameId,  round, cards, seats, results } = useGameManager();
   const { uid } = useUserManager();
   const controls = useAnimationControls();
 

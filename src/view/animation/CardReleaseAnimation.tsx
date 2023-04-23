@@ -3,24 +3,29 @@ import { useCallback, useEffect } from "react";
 import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
+import { useTournamentManager } from "../../service/TournamentManager";
 
 export default function useCardReleaseAnimation(controls: AnimationControls, cardControls: AnimationControls) {
-  const { gameId, seatOffset, seats } = useGameManager();
+  const { gameId, seats } = useGameManager();
+  const {seatOffset} = useTournamentManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
   const { event } = useEventSubscriber(["cardReleased"], []);
 
   const handleHit = useCallback(
     (seatNo: number, cardNo: number) => {
+      // console.log("seatNo:"+seatNo)
       const seat = seats.find((s) => s.no === seatNo);
+
       if (!seat) return {};
       if (seatNo < 3) {
         seatNo = seatOffset + seatNo;
         if (seatNo > 2) seatNo = seatNo - 3;
       }
+      // console.log("seatNo:"+seatNo)
       const seatCoord = seatCoords.find(
         (s: { no: number; direction: number; x: number; y: number }) => s.no === seatNo
       );
-
+      
       controls.start((card) => {
         const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
         if (currentSlot?.cards.includes(card["no"])) {
@@ -81,6 +86,7 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
   );
   useEffect(() => {
     if (event?.name === "cardReleased") {
+      // console.log(event)
       handleHit(event.data.seatNo, event.data.cardNo);
     }
   }, [event]);

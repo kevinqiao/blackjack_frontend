@@ -2,15 +2,20 @@ import { AnimationControls } from "framer-motion";
 import { useCallback, useEffect } from "react";
 import useCoordManager from "../../service/CoordManager";
 import { useGameManager } from "../../service/GameManager";
+import { useTournamentManager } from "../../service/TournamentManager";
 
 export default function useGameInitAnimation(controls: AnimationControls, cardControls: AnimationControls) {
-  const { gameId, seatOffset, cards, seats } = useGameManager();
+  const {seatOffset} = useTournamentManager();
+  const { gameId,  cards, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
 
   const handleInit = useCallback(() => {
-    controls.start((o) => {
+    controls.start((o) => { 
+  
+
       if (o.seat >= 0 && o.slot > 0) {
         const seat = seats.find((s) => s.no === o.seat);
+  
         if (seat) {
           let seatNo = o.seat;
           if (seatNo < 3) {
@@ -87,6 +92,7 @@ export default function useGameInitAnimation(controls: AnimationControls, cardCo
     });
   }, [controls, cardControls, seatCoords, seats]);
   useEffect(() => {
+  
     if (cardControls && seatCoords && gameId > 0) {
       setTimeout(() => handleInit(), 100);
     }

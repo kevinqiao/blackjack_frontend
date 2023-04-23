@@ -1,15 +1,16 @@
 import { useEffect } from "react";
 import { SeatBetSlot, SeatModel } from "../model";
-import ActionType from "../model/types/ActionType";
 import Constants from "../model/types/Constants";
 import { GameModel } from "../model/types/Game";
 import useEventSubscriber from "../service/EventManager";
 import useGameEngine from "../service/GameEngine";
+import useTournamentService from "../service/TournamentService";
 
 
 const useHitProcessor = () => {
     const { createEvent } = useEventSubscriber([], []);
     const gameEngine = useGameEngine();
+
     const process = (gameObj: GameModel) => {
 
         const seat = gameObj.seats.find((s: SeatModel) => s.no === gameObj.currentTurn.seat);
@@ -24,7 +25,6 @@ const useHitProcessor = () => {
                 currentSlot.cards.push(card.no)
                 createEvent({ name: "releaseCard", topic: "model", data, delay: 0 });
             }
-
             const cards = gameObj.cards.filter((c) => currentSlot.cards.includes(c.no));
             const scores = gameEngine.getHandScore(cards);
             if (scores.length === 0 || scores.includes(21)) {
@@ -32,14 +32,16 @@ const useHitProcessor = () => {
                 if (gameEngine.turnSlot(gameObj, seat)) {
                     return;
                 }
-                seat.status = 1;
+                seat.status = 1;      
                 if (gameEngine.turnSeat(gameObj, seat)) {
                     return;
                 }
                 gameEngine.turnDealer(gameObj);
+                gameObj.status=1;
+                // tournamentService.handleGameOver(gameObj)
 
             } else {
-                Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + Constants.TURN_INTERVAL, acts: [ActionType.HIT, ActionType.STAND] })
+                Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + Constants.TURN_INTERVAL, acts: [] })
                 createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: Constants.TURN_INTERVAL }), delay: 100 })
             }
 

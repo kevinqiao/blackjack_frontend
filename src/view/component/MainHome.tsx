@@ -4,15 +4,18 @@ import { useGameManager } from "../../service/GameManager";
 import Loading from "./Loading";
 import LobbyHome from "./LobbyHome";
 import PlayHome from "./PlayHome";
+import { useTournamentManager } from "../../service/TournamentManager";
 
 function MainHome() {
-  const { gameId } = useGameManager();
+
+  const {table} = useTournamentManager();
+
   return (
     <>
-      <Loading />
+      {/* <Loading /> */}
       <Login />
       <LobbyHome />
-      <PlayHome />
+      {table?<PlayHome />:null}
     </>
   );
 }

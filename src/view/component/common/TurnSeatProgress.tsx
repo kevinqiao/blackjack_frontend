@@ -3,10 +3,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import useCoordManager from "../../../service/CoordManager";
 import useEventSubscriber from "../../../service/EventManager";
 import { useGameManager } from "../../../service/GameManager";
+import { useTournamentManager } from "../../../service/TournamentManager";
 import useInterval from "../../../util/useInterval";
 
 export default function TurnSeatAnimation() {
-  const { round, currentTurn, seatOffset, seats } = useGameManager();
+  const {seatOffset} =useTournamentManager();
+  const { round, currentTurn, seats } = useGameManager();
 
   const { cardXY, seatCoords } = useCoordManager();
   const { event } = useEventSubscriber(["turnOver"], []);

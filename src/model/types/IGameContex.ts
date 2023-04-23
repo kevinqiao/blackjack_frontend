@@ -4,7 +4,6 @@ import { SeatModel } from "./Seat";
 import { SlotBattleResult } from "./SlotBattleResult";
 export interface IGameContext {
   gameId: number;
-  seatOffset: number;
   round: number;
   startSeat: number;
   cards: CardModel[];
@@ -13,7 +12,7 @@ export interface IGameContext {
   status: number;
   results: SlotBattleResult[];
   // newGame: () => void;
-  deal: (seatNo: number, chips: number) => void;
+  deal: (chips: number) => void;
   shuffle: () => void;
   hit: (seatNo: number) => void;
   stand: (seatNo: number) => void;

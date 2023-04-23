@@ -10,14 +10,14 @@ const Login = () => {
     logout();
     // leave();
   };
-  console.log(uid);
+ 
   return (
     <>
       {!uid ? (
         <div
           style={{
             position: "absolute",
-            zIndex: 1000,
+            zIndex: 8000,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -81,7 +81,7 @@ const Login = () => {
         <div
           style={{
             position: "absolute",
-            zIndex: 1000,
+            zIndex: 8000,
             top: 0,
             left: 100,
             width: 250,

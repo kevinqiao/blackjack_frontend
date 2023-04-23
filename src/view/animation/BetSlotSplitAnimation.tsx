@@ -3,9 +3,11 @@ import { useCallback, useEffect } from "react";
 import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
+import { useTournamentManager } from "../../service/TournamentManager";
 
 export default function useBetSlotSplitAnimation(controls: AnimationControls, cardControls: AnimationControls) {
-  const { gameId, seatOffset, seats } = useGameManager();
+  const {seatOffset} = useTournamentManager();
+  const { gameId, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
   const { event } = useEventSubscriber(["slotSplitted"], []);
 

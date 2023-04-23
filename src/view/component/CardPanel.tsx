@@ -16,6 +16,7 @@ export default function CardPanel() {
   const blankControls = useAnimationControls();
   const controls = useAnimationControls();
   const cardControls = useAnimationControls();
+
   // useBetSlotInitAnimation(controls, cardControls);
   useGameInitAnimation(controls, cardControls);
   useBetSlotSplitAnimation(controls, cardControls);
@@ -36,7 +37,7 @@ export default function CardPanel() {
   );
 
   return (
-    <div style={{ position: "absolute", zIndex: 1600 }}>
+    <div style={{ position: "absolute", zIndex: 8600 }}>
       {viewport &&
         cards.length >= 52 &&
         cards.map((c, index) => (
@@ -93,6 +94,7 @@ export default function CardPanel() {
           style={{
             cursor: "pointer",
             position: "absolute",
+            zIndex:9000,
             top: 0,
             left: viewport?.width ? viewport["width"] - cardXY["width"] / 2 : 0,
             width: cardXY?.width ? cardXY["width"] : 0,

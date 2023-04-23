@@ -8,6 +8,8 @@ const TournamentList = () => {
   return (
     <div
       style={{
+        position:"absolute",
+        zIndex:100,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

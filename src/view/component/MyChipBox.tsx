@@ -21,13 +21,14 @@ const MyChipBox = () => {
   const chipControls = useAnimationControls();
   // const betChipControls = useAnimationControls();
   const dealControls = useAnimationControls();
+ 
   useEffect(() => {
-    // initGame();
-  }, []);
-  useEffect(() => {
-    if (gameId > 0) setBetChips([]);
+    if (gameId > 0){
+      setBetChips([]);
+    }
   }, [gameId]);
   useEffect(() => {
+
     if (round === 0 && gameId > 0) {
       btnControls.start({
         opacity: 1,
@@ -61,7 +62,7 @@ const MyChipBox = () => {
         },
       });
     }
-  }, [round, gameId]);
+  }, [btnControls,dealControls,round, gameId]);
   const total = useMemo(() => {
     const t = betChips.map((c) => c.amount).reduce((sub, c) => sub + c, 0);
     return t;
@@ -159,7 +160,7 @@ const MyChipBox = () => {
           transitionEnd: { display: "none" },
         };
       } else if (isIndex < 0) {
-        console.log("isIndex:" + isIndex);
+
         const centerX = viewport["width"] / 2;
         const firstIndexs = chip_btns
           .map((p) => {
@@ -234,7 +235,7 @@ const MyChipBox = () => {
         },
         transitionEnd: { display: "none" },
       });
-      deal(0, total);
+      deal(total);
     }
   };
   return (

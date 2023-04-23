@@ -24,6 +24,7 @@ const useStandProcessor = () => {
                 }
 
                 gameEngine.turnDealer(gameObj);
+                gameObj.status=1;
             }
         }
     }

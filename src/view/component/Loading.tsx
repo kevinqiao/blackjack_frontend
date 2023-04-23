@@ -4,13 +4,13 @@ import { useTournamentManager } from "../../service/TournamentManager";
 
 function Loading() {
   const { viewport } = useCoordManager();
-  const { tournament } = useTournamentManager();
+  const { table,tournament } = useTournamentManager();
 
   useEffect(() => {}, []);
-  console.log(tournament);
+
   return (
     <>
-      {tournament && !tournament.table && !tournament.match ? (
+      {tournament &&table? (
         <div
           style={{
             position: "absolute",
@@ -25,8 +25,8 @@ function Loading() {
             fontSize: 30,
           }}
         >
-          {tournament.type === 0 && !tournament.table ? <span>Loading Table</span> : null}
-          {tournament.type === 1 && !tournament.match ? <span>Loading Match</span> : null}
+          {tournament.type === 0 ? <span>Loading Table</span> : null}
+          {tournament.type === 1 ? <span>Loading Match</span> : null}
         </div>
       ) : null}
     </>

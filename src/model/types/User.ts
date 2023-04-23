@@ -4,4 +4,5 @@ export declare type UserModel = {
   name: string;
   chips: number;
   tableId: number;
+  ver:number;
 };

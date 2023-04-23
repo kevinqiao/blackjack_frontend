@@ -6,12 +6,13 @@ import useUserDao from "../respository/UserDao";
 
 
 const useUserService = () => {
-    const { findUser, updateUser, createUser } = useUserDao();
+    const { findUser,  createUser } = useUserDao();
     const signin = (): UserModel | null => {
         if (typeof window !== "undefined") {
             const userstr = window.localStorage.getItem("user");
             if (userstr) {
                 let user = JSON.parse(userstr);
+                user =findUser(user.uid)
                 return user;
             }
         }
@@ -28,15 +29,14 @@ const useUserService = () => {
         window.localStorage.removeItem("user")
     }
     useEffect(() => {
-        window.localStorage.removeItem("users")
+        // window.localStorage.removeItem("users")
         const userstr = window.localStorage.getItem("users");
         if (!userstr) {
             for (let i = 0; i < 5; i++) {
-                const user: UserModel = { uid: (i + 1) + "", token: Date.now() + "", name: "user" + (i + 1), chips: 0, tableId: 0 }
+                const user: UserModel = { uid: (i + 1) + "", token: Date.now() + "", name: "user" + (i + 1), chips: 0, tableId: 0,ver:0 }
                 createUser(user);
             }
-        } else
-            console.log(JSON.parse(userstr))
+        } 
     }, [])
     return { signin, login, logout }
 

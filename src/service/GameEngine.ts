@@ -92,12 +92,11 @@ const useGameEngine = () => {
     const turnSeat = (gameObj: GameModel, seat: SeatModel): boolean => {
         let ok = false;
         const size = gameObj.seats.length - 1;
-        let nextSeatNo = seat.no + 1 >= size ? seat.no + 1 - size : seat.no + 1;
-        for (let i = 0; i < size; i++) {
+        
+        for (let i = 0; i < 3; i++) {
+            const nextSeatNo = seat.no + i >= 3 ? seat.no + i - 3 : seat.no + i;
             const nextSeat = gameObj.seats.find((s) => s.no === nextSeatNo);
-            if (nextSeat?.status === 1)
-                nextSeatNo = nextSeat.no + 1 >= size ? nextSeat.no + 1 - size : nextSeat.no + 1;
-            else {
+            if (nextSeat&&nextSeat.status === 0){
                 gameObj.currentTurn = { id: Date.now(), expireTime: Date.now() + Constants.TURN_INTERVAL, acts: [], seat: nextSeatNo, data: null };
                 createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: Constants.TURN_INTERVAL }), delay: 10 });
                 ok = true;
@@ -130,18 +129,18 @@ const useGameEngine = () => {
         return ok
     }
     const turnDealer = (gameObj: GameModel) => {
-        const dealerNo = gameObj.seats.length - 1;
-        Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: 0, acts: [], seat: dealerNo })
+      
+        Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: 0, acts: [], seat: 3 })
         createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: 0 }), delay: 10 });
-        const dealerSeat = gameObj.seats.find((s) => s.no === dealerNo);
+        const dealerSeat = gameObj.seats.find((s) => s.no === 3);
         if (dealerSeat) {
             let i = 0;
             while (true) {
                 i++;
-                let card = releaseCard(gameObj, dealerNo, dealerSeat.currentSlot);
+                let card = releaseCard(gameObj, 3, dealerSeat.currentSlot);
                 if (!card)
                     break;
-                createEvent({ name: "releaseCard", topic: "model", data: { seat: dealerNo, no: card?.no }, delay: i * 800 })
+                createEvent({ name: "releaseCard", topic: "model", data: { seat: 3, no: card?.no }, delay: i * 800 })
                 dealerSeat.slots[0]['cards'].push(card.no);
                 const dealerCards = gameObj.cards.filter((c) => dealerSeat.slots[0]['cards'].includes(c.no));
                 const scores = getHandScore(dealerCards);
@@ -149,6 +148,7 @@ const useGameEngine = () => {
                     dealerSeat.slots[0]['score'] = 0;
                     dealerSeat.status = 1;
                     break;
+           
                 } else {
                     const ascores = scores.filter((s) => s >= 17);
                     if (ascores.length > 0) {
@@ -158,8 +158,7 @@ const useGameEngine = () => {
                     }
                 }
             }
-
-            settle(gameObj)
+            // settle(gameObj)
         }
     }
     const splitSlot = (gameObj: GameModel, seat: SeatModel): boolean => {
@@ -206,6 +205,7 @@ const useGameEngine = () => {
                         results.push(item)
                     }
                 })
+                gameObj.status=1;
             }
             gameObj.results = results;
             createEvent({ name: "settleGame", topic: "model", data: results, delay: 1000 });
