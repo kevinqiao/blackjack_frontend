@@ -9,23 +9,28 @@ export default function ControlPanel() {
   const { event, createEvent } = useEventSubscriber(["dealCompleted", "gameOver"], []);
   const { cards, seats, round, currentTurn, deal, hit, split, stand, double, insure } = useGameManager();
   const panelControls = useAnimationControls();
+  console.log(currentTurn)
   useEffect(() => {
-    if (round > 0)
-      panelControls.start({
-        y: -150,
-        transition: {
-          duration: 1.5,
-          type: "spring",
-        },
-      });
-    else
-      panelControls.start({
-        y: 0,
-        transition: {
-          duration: 1.5,
-          type: "spring",
-        },
-      });
+
+    if(panelControls){
+      console.log("round:"+round)
+      if (round > 0)
+        panelControls.start({
+          y: -150,
+          transition: {
+            duration: 1.5,
+            type: "spring",
+          },
+        });
+      else
+        panelControls.start({
+          y: 0,
+          transition: {
+            duration: 1.5,
+            type: "spring",
+          },
+        });
+    }
     // if (currentTurn?.seat === 0) {
     //   panelControls.start({
     //     y: -150,
@@ -43,7 +48,7 @@ export default function ControlPanel() {
     //     },
     //   });
     // }
-  }, [round]);
+  }, [round,panelControls]);
 
   const standSeat = () => {
     if (currentTurn) stand(currentTurn.seat);

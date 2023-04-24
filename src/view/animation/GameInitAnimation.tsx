@@ -5,23 +5,25 @@ import { useGameManager } from "../../service/GameManager";
 import { useTournamentManager } from "../../service/TournamentManager";
 
 export default function useGameInitAnimation(controls: AnimationControls, cardControls: AnimationControls) {
-  const {seatOffset} = useTournamentManager();
-  const { gameId,  cards, seats } = useGameManager();
+
+  const { gameId,  cards, seats,seatOffset} = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
 
   const handleInit = useCallback(() => {
-    controls.start((o) => { 
-  
-
+    controls.start((o) => {
+      console.log(seatOffset)
       if (o.seat >= 0 && o.slot > 0) {
         const seat = seats.find((s) => s.no === o.seat);
   
         if (seat) {
-          let seatNo = o.seat;
-          if (seatNo < 3) {
-            seatNo = seatOffset + seatNo;
-            if (seatNo > 2) seatNo = seatNo - 3;
+          let seatNo = o.seat;    
+          if(seatNo<3){
+              console.log("game seat:"+seatNo+" offset:"+seatOffset)
+              seatNo = seatNo+seatOffset;
+              if (seatNo >2 ) seatNo = seatNo - 3;
+              console.log("seatNo:"+seatNo)
           }
+          
           const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
           const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
           const index = currentSlot?.cards.findIndex((c) => c === o.no);
@@ -90,12 +92,12 @@ export default function useGameInitAnimation(controls: AnimationControls, cardCo
       }
       return {};
     });
-  }, [controls, cardControls, seatCoords, seats]);
+  }, [controls, cardControls, seatCoords, seats,seatOffset]);
   useEffect(() => {
   
     if (cardControls && seatCoords && gameId > 0) {
       setTimeout(() => handleInit(), 100);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cardControls, controls, seatCoords, gameId]);
+  }, [cardControls, controls, seatCoords, gameId,seatOffset]);
 }

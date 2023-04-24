@@ -18,7 +18,7 @@ export default function SlotScorePanel() {
   const { event, createEvent } = useEventSubscriber(["gameStart", "cardReleased", "slotSplitted", "gameOver"], []);
   const gameEngine = useGameEngine();
   const { cardXY, seatCoords } = useCoordManager();
-  const {seatOffset} = useTournamentManager();
+  const {seatOffset} = useGameManager();
   const { gameId, round, cards, seats } = useGameManager();
   const controls = useAnimationControls();
   useEffect(() => {

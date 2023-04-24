@@ -6,10 +6,11 @@ import { useTournamentManager } from "../../../service/TournamentManager";
 import { useUserManager } from "../../../service/UserManager";
 
 export default function SeatAvatar() {
-  const { seatOffset, table, sitDown } = useTournamentManager();
+  const { table, sitDown } = useTournamentManager();
   const { cardXY, seatCoords } = useCoordManager();
   const { uid } = useUserManager();
   const {seats} = useGameManager();
+  const {seatOffset} =useGameManager();
 
   useEffect(()=>{
    console.log("offset:"+seatOffset)

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useMemo } from "react";
-import { CardModel, IGameContext, SeatBetSlot, SeatModel } from "../model";
+import React, { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import { CardModel, IGameContext, SeatBetSlot, SeatModel, TableSeat } from "../model";
 import ActionType from "../model/types/ActionType";
 import useGameDao from "../respository/GameDao";
 import useEventSubscriber from "./EventManager";
@@ -108,6 +108,7 @@ const reducer = (state: any, action: any) => {
 
 const GameContext = createContext<IGameContext>({
   gameId: 0,
+  seatOffset:0,
   round: 0,
   startSeat: -1,
   cards: [],
@@ -125,22 +126,40 @@ const GameContext = createContext<IGameContext>({
 });
 
 export const GameProvider = ({ children }: { children: React.ReactNode }) => {
-  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const [seatOffset, setSeatOffset] = useState(0);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { event, createEvent } = useEventSubscriber(
     ["initGame", "placeBet", "startGame", "settleGame", "releaseCard", "createNewTurn", "splitSlot", "openSlot","finishTournament"],
     ["model"]
   );
 
   const tournamentService = useTournamentService();
-  const {tournament,initTournament,initTable} = useTournamentManager();
+  const {tournament,table,initTournament,initTable,clearTable} = useTournamentManager();
   const gameService = useGameService();
   const gameDao = useGameDao();
   const { uid,tableId} = useUserManager();
+  useEffect(() => {
+      let seat;
+      if(table)
+          seat  = table.seats.find((s: TableSeat) => s.uid === uid&&s.no<3);
+      if(!seat)
+          seat = state.seats.find((s:SeatModel)=>s.uid===uid&&s.no<3);
+      if(!seat)
+          setSeatOffset(0)
+      else{         
+          const offset = seat.no===0?0:3 - seat.no;
+          setSeatOffset(offset);
+      }
+   
+  }, [uid,table,state.seats]);
+  console.log("seatoffsett:"+seatOffset)
   useEffect(()=>{
 
-    if(gameService &&tableId>0){
-      const tableObj = tournamentService.findTable(tableId);
-   
+    if(tableId===0){
+      clearTable();
+    }else{
+      const tableObj = tournamentService.findTable(tableId);  
+      console.log(tableObj) 
       if(tableObj?.status===0){
              const tournamentObj = tournamentService.findTournament(tableObj.tournamentId);
              initTournament(tournamentObj);
@@ -154,7 +173,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     }
   },[tableId])
   useEffect(()=>{
-        // window.localStorage.removeItem("games")
+       window.localStorage.removeItem("games")
   },[])
   useEffect(() => {
     if (event?.name === "initGame") {
@@ -233,18 +252,10 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     dispatch({ type: actions.HIT_CARD, data });
     createEvent({ name: "cardReleased", topic: "", data, delay: 0 });
   };
-  const seatOffset = useMemo(() => {
-    let offset = 0;
-    if (Boolean(uid) && state.seats?.length > 0) {
-      const seat = state.seats.find((s: SeatModel) => s.uid === uid);
-      if(seat)
-        offset = 3 - seat.no < 3 ? 3 - seat.no : 0;
-    }
-    return offset;
-  }, [uid, state.seats]);
 
   const value = {
     gameId: state.gameId,
+    seatOffset:seatOffset,
     round: state.round,
     startSeat: state.startSeat,
     cards: state.cards,

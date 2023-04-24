@@ -91,14 +91,14 @@ const useGameService = () => {
         return initData;
 
     }
-    const createGame = (table:TableModel) => {
+    const createGame = (table:TableModel):GameModel=> {
         const gameData:GameModel=getInitGame(table);
         gameData.tournamentId=table.tournamentId;
         gameData.tableId=table.id;
         initGameProcessor.process(gameData);
-        table.games.push(gameData.gameId);
+        // table.games.push(gameData.gameId);
         create(gameData);
-        
+        return gameData
     }
 
     const deal = (gameId:number,seatNo: number, chips: number) => {
@@ -178,18 +178,20 @@ const useGameService = () => {
     const settle=(gameObj:GameModel)=>{
         settleProcessor.process(gameObj);
         const table = findTableWithLock(gameObj.tableId);
-
-        if (table){   
-            console.log(JSON.parse(JSON.stringify(table)))
+        if (table){           
             const tournament:TournamentModel = findTournament(table.tournamentId); 
-            console.log(tournament)
-            console.log(table.games.length+":"+tournament.rounds)
-            if(tournament&&((tournament.type===0&&table.seats.length>0)||(tournament.type===1&&table.games.length<tournament.rounds))) {               
-                createGame(table);  
-                updateTableWithLock(table, table.ver);
-            }else if(tournament&&tournament.type===1&&table.games.length===tournament.rounds){
-                settleTournamentProcessor.process(tournament,table)
-                //create  event "tournament over"
+            if(tournament){               
+                if((tournament.type===0&&table.seats.filter((s)=>s.no<3).length>0)||(tournament.type===1&&table.games.length<tournament.rounds)) {               
+                    const newGame:GameModel = createGame(table); 
+                    if(tournament.type===0)
+                       table.games=[newGame.gameId]
+                    else 
+                       table.games.push(newGame.gameId)
+                    updateTableWithLock(table, table.ver);
+                }else{
+                    settleTournamentProcessor.process(tournament,table)
+                    //create  event "tournament over"
+                }
             }
         }
     }

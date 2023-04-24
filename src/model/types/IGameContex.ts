@@ -4,6 +4,7 @@ import { SeatModel } from "./Seat";
 import { SlotBattleResult } from "./SlotBattleResult";
 export interface IGameContext {
   gameId: number;
+  seatOffset:number;
   round: number;
   startSeat: number;
   cards: CardModel[];

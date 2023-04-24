@@ -16,7 +16,7 @@ export default function SlotChipPanel() {
     ["slotSplitted", "slotActivated", "dealCompleted", "betPlaced", "gameStart", "gameOver"],
     []
   );
-  const {seatOffset} = useTournamentManager();
+  const {seatOffset} = useGameManager();
   const { viewport, myChipXY, cardXY, seatCoords } = useCoordManager();
   const { gameId,  round, cards, seats, results } = useGameManager();
   const { uid } = useUserManager();

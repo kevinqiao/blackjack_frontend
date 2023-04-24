@@ -7,6 +7,7 @@ import useUserDao from "../respository/UserDao";
 import useInterval from "../util/useInterval";
 import useEventSubscriber from "./EventManager";
 import useGameService from "./GameService";
+import { useTournamentManager } from "./TournamentManager";
 
 
 
@@ -17,6 +18,7 @@ const useTournamentService = () => {
     const { findTable, findTournamentTables, findTableWithLock, createTable, updateTableWithLock } = useTableDao();
     const { findTournament, findAllTournaments, findTournamentsByType, findTournamentWithLock, initTournaments } = useTournamentDao();
     const { createEvent } = useEventSubscriber([], [])
+   
    
     useInterval(() => {
     
@@ -81,10 +83,9 @@ const useTournamentService = () => {
             }
             if(!table.games)
                 table.games=[];
-            if(table.seats.length===1){ 
-                table.lastStartSeat=seatNo>0?seatNo-1:2;
-                table.games=[];              
-                gameService.createGame(table) 
+            if(table.seats.length===1){          
+                const game = gameService.createGame(table);
+                table.games=[game.gameId]                 
             }
             const updatedTable = updateTableWithLock(table, table.ver);
             createEvent({ name: "updateTable", topic: "model", data: updatedTable, delay: 0 });
@@ -108,22 +109,37 @@ const useTournamentService = () => {
 
         }
     }
-    const handleGameOver = (game: GameModel) => {
-        const table = findTableWithLock(game.tableId);
+    const standup = (uid: string, tableId: number) => {
+        const table = findTableWithLock(tableId);
         console.log(table)
-        if (table){   
-            const tournament:TournamentModel = findTournament(table.tournamentId); 
-            console.log(tournament)
-            if(tournament?.type===0||(tournament?.type===1&&table.games.length<tournament.rounds)) {               
-                // gameService.createGame(table);  
-                const updatedTable = updateTableWithLock(table, table.ver);
-                createEvent({ name: "updateTable", topic: "model", data: updatedTable, delay: 0 });
-            }
+        if (table) {
+            const seats = table.seats.filter((s) => s.uid !== uid);
+            table.seats = seats;
+            updateTableWithLock(table, table.ver)
+
+            createEvent({ name: "updateTable", topic: "model", data: table, delay: 0 })
+            // const user =findUserWithLock(uid);
+            // updateUserWithLock({ uid: uid, tableId: 0 },user.ver)
+            // createEvent({ name: "updateUser", topic: "model", data: { tableId: 0 }, delay: 50 })
+
         }
     }
+    // const handleGameOver = (game: GameModel) => {
+    //     const table = findTableWithLock(game.tableId);
+    //     console.log(table)
+    //     if (table){   
+    //         const tournament:TournamentModel = findTournament(table.tournamentId); 
+    //         console.log(tournament)
+    //         if(tournament?.type===0||(tournament?.type===1&&table.games.length<tournament.rounds)) {               
+    //             // gameService.createGame(table);  
+    //             const updatedTable = updateTableWithLock(table, table.ver);
+    //             createEvent({ name: "updateTable", topic: "model", data: updatedTable, delay: 0 });
+    //         }
+    //     }
+    // }
 
 
-    return { join, sitDown, leave, findAllTournaments, findTournament, findTable, initTournaments, handleGameOver }
+    return { join, sitDown, standup,leave, findAllTournaments, findTournament, findTable, initTournaments}
 
 }
 export default useTournamentService;

@@ -7,7 +7,7 @@ import { useTournamentManager } from "../../../service/TournamentManager";
 import useInterval from "../../../util/useInterval";
 
 export default function TurnSeatAnimation() {
-  const {seatOffset} =useTournamentManager();
+  const {seatOffset} =useGameManager();
   const { round, currentTurn, seats } = useGameManager();
 
   const { cardXY, seatCoords } = useCoordManager();

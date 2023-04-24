@@ -7,7 +7,7 @@ import { useTournamentManager } from "../../service/TournamentManager";
 
 export default function useCardReleaseAnimation(controls: AnimationControls, cardControls: AnimationControls) {
   const { gameId, seats } = useGameManager();
-  const {seatOffset} = useTournamentManager();
+  const {seatOffset} = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
   const { event } = useEventSubscriber(["cardReleased"], []);
 
@@ -82,7 +82,7 @@ export default function useCardReleaseAnimation(controls: AnimationControls, car
         400
       );
     },
-    [controls, cardControls, seats]
+    [controls, cardControls, seats,seatOffset]
   );
   useEffect(() => {
     if (event?.name === "cardReleased") {

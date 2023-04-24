@@ -6,7 +6,7 @@ import { useGameManager } from "../../service/GameManager";
 import { useTournamentManager } from "../../service/TournamentManager";
 
 export default function useBetSlotSplitAnimation(controls: AnimationControls, cardControls: AnimationControls) {
-  const {seatOffset} = useTournamentManager();
+  const {seatOffset} = useGameManager();
   const { gameId, seats } = useGameManager();
   const { viewport, cardXY, seatCoords } = useCoordManager();
   const { event } = useEventSubscriber(["slotSplitted"], []);

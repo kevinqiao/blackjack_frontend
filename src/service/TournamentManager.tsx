@@ -47,11 +47,11 @@ const reducer = (state: any, action: any) => {
 
 const TournamentContext = createContext<ITournamentContext>({
   table: null,
-  seatOffset: 0,
   tournament: null,
   tournaments: [],
   initTournament:(tournament:TournamentModel)=>null,
   initTable:(table:TableModel)=>null,
+  clearTable:()=>null,
   sitDown: (seatNo: number) => null,
   join: (tournament: TournamentModel) => null,
   leave: () => null,
@@ -67,7 +67,7 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
     ["model"]
   );
   const tournamentService = useTournamentService();
-  const { uid, token} = useUserManager();
+  const { uid, token,joinTable} = useUserManager();
 
 
   useEffect(() => {
@@ -79,8 +79,8 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
     }
   }, [event]);
   useEffect(() => {
-      // window.localStorage.removeItem("tables");
-     tournamentService.initTournaments();
+     window.localStorage.removeItem("tables");
+    //  tournamentService.initTournaments();
     let tournaments = tournamentService.findAllTournaments();
     dispatch({ type: actions.LOAD_TOURNAMENT, data: tournaments });
   }, []);
@@ -91,6 +91,7 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
        setSeatOffset(0)
     else if (state.table&&state.table.seats?.length > 0) {
         const seat = state.table.seats.find((s: TableSeat) => s.uid === uid&&s.no<3);
+        console.log(seat)
         if (seat){
           offset = seat.no===0?0:3 - seat.no;
           setSeatOffset(offset);
@@ -100,7 +101,6 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
 
   const value = {
     table: state.table,
-    seatOffset: seatOffset,
     tournament: state.tournament,
     tournaments: state.tournaments,
     initTournament:(tournament:TournamentModel)=>{
@@ -108,6 +108,9 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
     },
     initTable:(table:TableModel)=>{
       dispatch({ type: actions.INIT_TABLE, data: table });
+    },
+    clearTable:()=>{
+      dispatch({ type: actions.CLEAR_TABLE});
     },
     sitDown: (seatNo: number) => {
       // let sno = seatNo - seatOffset;
@@ -124,8 +127,9 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
           //    const game = gameDao.find(table.games[0]);
           //    console.log(game)
           // }
-            
+          joinTable(table) 
           dispatch({ type: actions.INIT_TABLE, data:table });
+          
         }
       }
     },
@@ -134,8 +138,8 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
 
     }, [uid, state.table]),
     standup: useCallback(() => {
-      if (uid &&state.table&& state.table.id>0) tournamentService.leave(uid, state.table.id);
-    }, [uid, state.tournament]),
+      if (uid &&state.table&& state.table.id>0) tournamentService.standup(uid, state.table.id);
+    }, [uid, state.table]),
     selectTournament: (t: TournamentModel) => {
       console.log(t);
       dispatch({ type: actions.SELECT_TOURNAMENT, data: t });

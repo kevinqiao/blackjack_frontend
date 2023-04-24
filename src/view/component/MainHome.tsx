@@ -9,7 +9,7 @@ import { useTournamentManager } from "../../service/TournamentManager";
 function MainHome() {
 
   const {table} = useTournamentManager();
-
+  console.log(table)
   return (
     <>
       {/* <Loading /> */}
