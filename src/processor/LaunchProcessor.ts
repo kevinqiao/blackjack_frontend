@@ -55,13 +55,20 @@ const useLaunchProcessor = () => {
                 // setTimeout(() => setAction({ id: Date.now(), name: "releaseCard", seat: size, data: { seat: size, no: 0 } }), time + 250)
             }
         }
-
-        const startSeat = game.seats.find((s) => s.no === game.startSeat);
+        let startSeat;
+        for (let i = 0; i < 3; i++) {
+            const no = game.startSeat + i >= 3 ? game.startSeat + i - 3 : game.startSeat + i;
+            startSeat = game.seats.find((s: SeatModel) => s.no === no);
+            if (startSeat)
+                break;
+        }
+        console.log(startSeat)
+        // startSeat = game.seats.find((s) => s.no === game.startSeat);
 
         if (typeof startSeat !== 'undefined') {
             if (startSeat.status === 0) {
                 time = time + 1000;
-                const actionTurn: ActionTurn = { id: Date.now() + 2, round: 1, acts: [], expireTime: Date.now() + Constants.TURN_INTERVAL + time + 500, seat: game.startSeat, data: null }
+                const actionTurn: ActionTurn = { id: Date.now() + 2, round: 1, acts: [], expireTime: Date.now() + Constants.TURN_INTERVAL + time + 500, seat: startSeat.no, data: null }
                 game.currentTurn = actionTurn;
                 console.log("delay time:" + time)
                 createEvent({ name: "createNewTurn", topic: "model", data: { ...actionTurn, expireTime: Constants.TURN_INTERVAL }, delay: time })

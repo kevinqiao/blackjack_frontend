@@ -151,8 +151,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     let seat;
     if (table) seat = table.seats.find((s: TableSeat) => s.uid === uid && s.no < 3);
     if (!seat) seat = state.seats.find((s: SeatModel) => s.uid === uid && s.no < 3);
-    if (!seat) setSeatOffset(0);
-    else {
+    if (seat) {
       const offset = seat.no === 0 ? 0 : 3 - seat.no;
       setSeatOffset(offset);
     }

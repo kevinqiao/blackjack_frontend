@@ -36,7 +36,6 @@ const useEventSubscriber = (selectors: string[], topics: string[]) => {
   const createEvent = useCallback(
     (event: EventModel) => {
       if (subject) {
-        // console.log(event);
         setTimeout(() => subject.next(event), event.delay);
       }
     },

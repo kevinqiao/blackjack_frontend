@@ -53,16 +53,14 @@ const useGameService = () => {
 
     }, 2500)
     const getInitGame = (table: TableModel): GameModel => {
-
+        table.lastStartSeat = table.lastStartSeat < 0 ? 0 : table.lastStartSeat + 1;
         for (let i = 0; i < 3; i++) {
-            const lastStartSeat = table.lastStartSeat === 2 ? 0 : table.lastStartSeat + 1;
-            const seat = table.seats.find((s: TableSeat) => s.no === lastStartSeat);
-            if (seat) {
-                table.lastStartSeat = lastStartSeat;
+            table.lastStartSeat = table.lastStartSeat + i > 2 ? 0 : table.lastStartSeat + i;
+            const seat = table.seats.find((s: TableSeat) => s.no === table.lastStartSeat);
+            if (seat)
                 break;
-            }
         }
-        console.log("game start seat:" + table.lastStartSeat)
+
         const initData: GameModel = {
             gameId: Date.now(),
             ver: 0,
@@ -104,7 +102,6 @@ const useGameService = () => {
         gameData.tournamentId = table.tournamentId;
         gameData.tableId = table.id;
         initGameProcessor.process(gameData);
-        // table.games.push(gameData.gameId);
         create(gameData);
         return gameData
     }
@@ -168,7 +165,7 @@ const useGameService = () => {
 
     const stand = (gameId: number) => {
         const gameObj: GameModel | null = findWithLock(gameId);
-
+        console.log(gameObj)
         if (gameObj) {
             const ver = gameObj.ver;
             standProcessor.process(gameObj);
