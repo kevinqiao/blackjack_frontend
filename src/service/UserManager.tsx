@@ -10,7 +10,7 @@ interface IUserContext {
   chips: number;
   login: (userId: string, password: string) => void;
   logout: () => void;
-  joinTable:(table:TableModel)=>void;
+  joinTable: (table: TableModel) => void;
 }
 
 const initialState = {
@@ -48,7 +48,7 @@ const UserContext = createContext<IUserContext>({
   chips: 0,
   login: (userId: string, password: string) => null,
   logout: () => null,
-  joinTable:()=>null
+  joinTable: () => null,
 });
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
@@ -56,19 +56,16 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { event } = useEventSubscriber(["updateUser"], ["model"]);
   const userService = useUserService();
   useEffect(() => {
-     window.localStorage.removeItem("users")
-     window.localStorage.removeItem("user")
     const user = userService.signin();
-    console.log(user)
+    console.log(user);
     // console.log(user)
     if (user) dispatch({ type: actions.SIGNIN_SUCCESS, data: user });
   }, []);
 
   useEffect(() => {
     if (event?.name === "updateUser") {
-     
       const u = Object.assign({}, state, event.data);
-      
+
       window.localStorage.setItem("user", JSON.stringify(u));
       dispatch({ type: actions.UPDATE_USER, data: u });
     }
@@ -89,9 +86,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       dispatch({ type: actions.LOGOUT_COMPLETE, data: null });
       userService.logout();
     },
-    joinTable:(table:TableModel)=>{
-      dispatch({type:actions.UPDATE_USER,data:{tableId:table.id}})
-    }
+    joinTable: (table: TableModel) => {
+      dispatch({ type: actions.UPDATE_USER, data: { tableId: table.id } });
+    },
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

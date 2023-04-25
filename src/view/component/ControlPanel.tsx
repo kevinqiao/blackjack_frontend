@@ -1,19 +1,15 @@
 import { motion, useAnimationControls } from "framer-motion";
 import { useCallback, useEffect } from "react";
 import ActionType from "../../model/types/ActionType";
-import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
 import "./styles.css";
 
 export default function ControlPanel() {
-  const { event, createEvent } = useEventSubscriber(["dealCompleted", "gameOver"], []);
-  const { cards, seats, round, currentTurn, deal, hit, split, stand, double, insure } = useGameManager();
+  const { cards, seats, round, currentTurn, hit, split, stand, double, insure } = useGameManager();
   const panelControls = useAnimationControls();
-  console.log(currentTurn)
-  useEffect(() => {
 
-    if(panelControls){
-      console.log("round:"+round)
+  useEffect(() => {
+    if (panelControls) {
       if (round > 0)
         panelControls.start({
           y: -150,
@@ -31,31 +27,12 @@ export default function ControlPanel() {
           },
         });
     }
-    // if (currentTurn?.seat === 0) {
-    //   panelControls.start({
-    //     y: -150,
-    //     transition: {
-    //       duration: 1.5,
-    //       type: "spring",
-    //     },
-    //   });
-    // } else {
-    //   panelControls.start({
-    //     y: -150,
-    //     transition: {
-    //       duration: 1.5,
-    //       type: "spring",
-    //     },
-    //   });
-    // }
-  }, [round,panelControls]);
+  }, [round, panelControls]);
 
   const standSeat = () => {
     if (currentTurn) stand(currentTurn.seat);
   };
   const hitCard = () => {
-    console.log("hitting")
-    console.log(currentTurn)
     if (currentTurn && currentTurn?.seat >= 0) {
       hit(currentTurn.seat);
     }
@@ -100,11 +77,12 @@ export default function ControlPanel() {
         const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
         if (currentSlot?.cards.length === 2) {
           const scards = cards.filter((c) => currentSlot["cards"].includes(c.no));
-          if (scards?.length === 2 && scards[0]["rank"] === scards[1]["rank"]) return true;
+          if (scards?.length === 2) return true;
+          // if (scards?.length === 2 && scards[0]["rank"] === scards[1]["rank"]) return true;
         }
       }
     }
-    return true;
+    return false;
   };
   const canHitAndStand = (): boolean => {
     if (typeof currentTurn != "undefined" && currentTurn && currentTurn.seat < 3) {
@@ -240,23 +218,6 @@ export default function ControlPanel() {
             </div>
           </div>
         ) : null}
-
-        {/* <div style={{ height: 10 }} />
-        <div
-          style={{
-            cursor: "pointer",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: 120,
-            height: 30,
-            backgroundColor: "red",
-            color: "white",
-          }}
-          onClick={startGame}
-        >
-          Initialize
-        </div> */}
       </motion.div>
     </>
   );

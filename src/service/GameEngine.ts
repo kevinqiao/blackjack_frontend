@@ -92,12 +92,12 @@ const useGameEngine = () => {
     const turnSeat = (gameObj: GameModel, seat: SeatModel): boolean => {
         let ok = false;
         const size = gameObj.seats.length - 1;
-        
+
         for (let i = 0; i < 3; i++) {
             const nextSeatNo = seat.no + i >= 3 ? seat.no + i - 3 : seat.no + i;
             const nextSeat = gameObj.seats.find((s) => s.no === nextSeatNo);
-            if (nextSeat&&nextSeat.status === 0){
-                gameObj.currentTurn = { id: Date.now(), expireTime: Date.now() + Constants.TURN_INTERVAL, acts: [], seat: nextSeatNo, data: null };
+            if (nextSeat && nextSeat.status === 0) {
+                gameObj.currentTurn = { id: Date.now(), round: 1, expireTime: Date.now() + Constants.TURN_INTERVAL, acts: [], seat: nextSeatNo, data: null };
                 createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: Constants.TURN_INTERVAL }), delay: 10 });
                 ok = true;
                 break;
@@ -129,7 +129,7 @@ const useGameEngine = () => {
         return ok
     }
     const turnDealer = (gameObj: GameModel) => {
-      
+
         Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: 0, acts: [], seat: 3 })
         createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: 0 }), delay: 10 });
         const dealerSeat = gameObj.seats.find((s) => s.no === 3);
@@ -148,7 +148,7 @@ const useGameEngine = () => {
                     dealerSeat.slots[0]['score'] = 0;
                     dealerSeat.status = 1;
                     break;
-           
+
                 } else {
                     const ascores = scores.filter((s) => s >= 17);
                     if (ascores.length > 0) {
@@ -205,7 +205,7 @@ const useGameEngine = () => {
                         results.push(item)
                     }
                 })
-                gameObj.status=1;
+                gameObj.status = 1;
             }
             gameObj.results = results;
             createEvent({ name: "settleGame", topic: "model", data: results, delay: 1000 });

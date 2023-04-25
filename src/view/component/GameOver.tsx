@@ -5,14 +5,12 @@ import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
 import useGameEngine from "../../service/GameEngine";
 import { useGameManager } from "../../service/GameManager";
-import { useTournamentManager } from "../../service/TournamentManager";
-import { useUserManager } from "../../service/UserManager";
 import "./score.css";
 
 export default function GameOver() {
   const [active, setActive] = useState(false);
-  const {seatOffset} = useGameManager();
-  const {seats, results } = useGameManager();
+  const { seatOffset } = useGameManager();
+  const { seats, results } = useGameManager();
   const { event, createEvent } = useEventSubscriber(["gameOver", "gameStart"], []);
   const gameEngine = useGameEngine();
   const { viewport, cardXY, seatCoords } = useCoordManager();
@@ -38,7 +36,7 @@ export default function GameOver() {
       if (seatNo > 2) seatNo = seatNo - 3;
     }
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
-    console.log(seatCoord)
+
     const seat = seats.find((s: SeatModel) => s.no === sno);
     if (seat?.currentSlot === slot) return seatCoord["y"] + cardXY["height"] / 2;
     else return seatCoord ? seatCoord["y"] - (cardXY["height"] + 115) * 0.3 : 0;

@@ -10,7 +10,13 @@ const Login = () => {
     logout();
     // leave();
   };
- 
+  const reset = () => {
+    window.localStorage.removeItem("users");
+    window.localStorage.removeItem("user");
+    window.localStorage.removeItem("tables");
+    window.localStorage.removeItem("games");
+  };
+
   return (
     <>
       {!uid ? (
@@ -84,7 +90,7 @@ const Login = () => {
             zIndex: 8000,
             top: 0,
             left: 100,
-            width: 250,
+            width: 350,
             display: "flex",
             justifyContent: "space-around",
           }}
@@ -136,6 +142,22 @@ const Login = () => {
             onClick={standup}
           >
             standup
+          </div>
+          <div
+            style={{
+              cursor: "pointer",
+              width: 80,
+              height: 40,
+              borderRadius: 5,
+              backgroundColor: "red",
+              color: "white",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            onClick={reset}
+          >
+            reset
           </div>
         </div>
       )}

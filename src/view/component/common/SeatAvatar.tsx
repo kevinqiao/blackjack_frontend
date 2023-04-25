@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
-import { iif } from "rxjs";
+import { useCallback, useMemo } from "react";
 import useCoordManager from "../../../service/CoordManager";
 import { useGameManager } from "../../../service/GameManager";
 import { useTournamentManager } from "../../../service/TournamentManager";
@@ -9,12 +8,12 @@ export default function SeatAvatar() {
   const { table, sitDown } = useTournamentManager();
   const { cardXY, seatCoords } = useCoordManager();
   const { uid } = useUserManager();
-  const {seats} = useGameManager();
-  const {seatOffset} =useGameManager();
+  const { seats } = useGameManager();
+  const { seatOffset } = useGameManager();
 
-  useEffect(()=>{
-   console.log("offset:"+seatOffset)
-  },[seatOffset])
+  // useEffect(()=>{
+  //  console.log("offset:"+seatOffset)
+  // },[seatOffset])
   const top = useCallback(
     (seatNo) => {
       if (seatCoords && cardXY) {
@@ -36,24 +35,24 @@ export default function SeatAvatar() {
     },
     [uid, seatOffset, seatCoords]
   );
-  
-  const inSeat= useMemo(()=>{
-    let ok=false;
-    if(uid&&table?.seats&&seats){
-        if(seats.find((s)=>s.uid===uid)||table.seats.find((s)=>s.uid===uid))
-        ok=true
+
+  const inSeat = useMemo(() => {
+    let ok = false;
+    if (uid && table?.seats && seats) {
+      if (seats.find((s) => s.uid === uid) || table.seats.find((s) => s.uid === uid)) ok = true;
     }
     return ok;
-  },[uid,table,seats])
+  }, [uid, table, seats]);
   return (
     <>
-      {seats&&table?.seats &&
+      {seats &&
+        table?.seats &&
         [0, 1, 2].map((sno) => {
-          let seatNo: number = sno-seatOffset;
-          if (seatNo <0) seatNo = seatNo + 3;
-          const tableSeat = table.seats.find((s) =>s.no===seatNo);
-          const gameSeat = seats.find((s)=>s.no===seatNo);
-          if (!inSeat&&!tableSeat&&!gameSeat)
+          let seatNo: number = sno - seatOffset;
+          if (seatNo < 0) seatNo = seatNo + 3;
+          const tableSeat = table.seats.find((s) => s.no === seatNo);
+          const gameSeat = seats.find((s) => s.no === seatNo);
+          if (!inSeat && !tableSeat && !gameSeat)
             return (
               <div
                 key={sno}
@@ -68,7 +67,7 @@ export default function SeatAvatar() {
                   height: 25,
                   top: top(sno),
                   left: left(sno),
-                  backgroundColor:  "grey",
+                  backgroundColor: "grey",
                   color: "white",
                 }}
                 onClick={() => sitDown(seatNo)}
@@ -76,10 +75,9 @@ export default function SeatAvatar() {
                 <span>Sit({seatNo})</span>
               </div>
             );
-          if (gameSeat||tableSeat){
-            let suid = gameSeat?gameSeat.uid:null;
-            if(!suid&&tableSeat)
-              suid = tableSeat.uid
+          if (gameSeat || tableSeat) {
+            let suid = gameSeat ? gameSeat.uid : null;
+            if (!suid && tableSeat) suid = tableSeat.uid;
             return (
               <div
                 key={sno}
@@ -93,7 +91,7 @@ export default function SeatAvatar() {
                   height: 25,
                   top: top(sno),
                   left: left(sno),
-                  backgroundColor: gameSeat?"blue":"grey",
+                  backgroundColor: gameSeat ? "blue" : "grey",
                   color: "white",
                 }}
               >

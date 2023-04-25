@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
+import React, { createContext, useContext, useEffect, useReducer, useState } from "react";
 import { CardModel, IGameContext, SeatBetSlot, SeatModel, TableSeat } from "../model";
 import ActionType from "../model/types/ActionType";
 import useGameDao from "../respository/GameDao";
@@ -23,14 +23,13 @@ const actions = {
   PLACE_BET: "PLACE_BET",
   INSURE_BET: "INSURE_BET",
   DOUBLE_BET: "DOUBLE_BET",
-  START_GAME: "START_GAME",
   HIT_CARD: "HIT_CARD",
   HIT_DEALER: "HIT_DEALER",
   UPDATE_TURN: "UPDATE_TURN",
   SLOT_SPLIT: "SLOT_SPLIT",
   SLOT_OPEN: "SLOT_OPEN",
   SETTLE_GAME: "GAME_SETTLE",
-  CLEAR_GAME:"CLEAR_GAME"
+  CLEAR_GAME: "CLEAR_GAME",
 };
 
 const reducer = (state: any, action: any) => {
@@ -46,7 +45,7 @@ const reducer = (state: any, action: any) => {
       if (action.data.seatNo >= 0) {
         seat = state.seats.find((s: SeatModel) => s.no === action.data.seatNo);
         seat.bet = action.data.chips;
-        return Object.assign({}, state, { round: 1, seats: state.seats });
+        return Object.assign({}, state, { seats: state.seats });
       }
       return state;
     case actions.INSURE_BET:
@@ -63,13 +62,13 @@ const reducer = (state: any, action: any) => {
         return Object.assign({}, state, { seats: state.seats });
       }
       return state;
-    case actions.START_GAME:
-      return Object.assign({}, state, action.data);
     case actions.SETTLE_GAME:
       return Object.assign({}, state, { results: action.results });
     case actions.UPDATE_TURN:
       const expire = action.data.expireTime + Date.now();
-      return Object.assign({}, state, { currentTurn: { ...action.data, expireTime: expire } });
+      let round = state.round;
+      if (action.data.round && action.data.round > round) round = action.data.round;
+      return Object.assign({}, state, { currentTurn: { ...action.data, expireTime: expire } }, { round: round });
     case actions.SLOT_SPLIT:
       const seatNo = action.data.seat;
       slot = action.data.slot;
@@ -108,7 +107,7 @@ const reducer = (state: any, action: any) => {
 
 const GameContext = createContext<IGameContext>({
   gameId: 0,
-  seatOffset:0,
+  seatOffset: 0,
   round: 0,
   startSeat: -1,
   cards: [],
@@ -129,52 +128,54 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   const [seatOffset, setSeatOffset] = useState(0);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { event, createEvent } = useEventSubscriber(
-    ["initGame", "placeBet", "startGame", "settleGame", "releaseCard", "createNewTurn", "splitSlot", "openSlot","finishTournament"],
+    [
+      "initGame",
+      "placeBet",
+      "startGame",
+      "settleGame",
+      "releaseCard",
+      "createNewTurn",
+      "splitSlot",
+      "openSlot",
+      "finishTournament",
+    ],
     ["model"]
   );
 
   const tournamentService = useTournamentService();
-  const {tournament,table,initTournament,initTable,clearTable} = useTournamentManager();
+  const { tournament, table, initTournament, initTable, clearTable } = useTournamentManager();
   const gameService = useGameService();
   const gameDao = useGameDao();
-  const { uid,tableId} = useUserManager();
+  const { uid, tableId } = useUserManager();
   useEffect(() => {
-      let seat;
-      if(table)
-          seat  = table.seats.find((s: TableSeat) => s.uid === uid&&s.no<3);
-      if(!seat)
-          seat = state.seats.find((s:SeatModel)=>s.uid===uid&&s.no<3);
-      if(!seat)
-          setSeatOffset(0)
-      else{         
-          const offset = seat.no===0?0:3 - seat.no;
-          setSeatOffset(offset);
-      }
-   
-  }, [uid,table,state.seats]);
-  console.log("seatoffsett:"+seatOffset)
-  useEffect(()=>{
-
-    if(tableId===0){
-      clearTable();
-    }else{
-      const tableObj = tournamentService.findTable(tableId);  
-      console.log(tableObj) 
-      if(tableObj?.status===0){
-             const tournamentObj = tournamentService.findTournament(tableObj.tournamentId);
-             initTournament(tournamentObj);
-             setTimeout(()=>initTable(tableObj),50);
-             if(tableObj.games?.length>0){
-                const game = gameDao.find(tableObj.games[tableObj.games.length-1])
-                if(game)
-                   setTimeout(()=>  dispatch({ type: actions.INIT_GAME, game: game }),80)
-             }
-      } 
+    let seat;
+    if (table) seat = table.seats.find((s: TableSeat) => s.uid === uid && s.no < 3);
+    if (!seat) seat = state.seats.find((s: SeatModel) => s.uid === uid && s.no < 3);
+    if (!seat) setSeatOffset(0);
+    else {
+      const offset = seat.no === 0 ? 0 : 3 - seat.no;
+      setSeatOffset(offset);
     }
-  },[tableId])
-  useEffect(()=>{
-       window.localStorage.removeItem("games")
-  },[])
+  }, [uid, table, state.seats]);
+  // console.log("seatoffsett:" + seatOffset);
+  useEffect(() => {
+    if (tableId === 0) {
+      clearTable();
+    } else {
+      const tableObj = tournamentService.findTable(tableId);
+      // console.log(tableObj);
+      if (tableObj?.status === 0) {
+        const tournamentObj = tournamentService.findTournament(tableObj.tournamentId);
+        initTournament(tournamentObj);
+        setTimeout(() => initTable(tableObj), 50);
+        if (tableObj.games?.length > 0) {
+          const game = gameDao.find(tableObj.games[tableObj.games.length - 1]);
+          if (game) setTimeout(() => dispatch({ type: actions.INIT_GAME, game: game }), 80);
+        }
+      }
+    }
+  }, [tableId]);
+
   useEffect(() => {
     if (event?.name === "initGame") {
       handleInit(event.data);
@@ -184,8 +185,6 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
       handlePlaceBet(event.data);
     } else if (event?.name === "doubleBet") {
       handlePlaceBet(event.data);
-    } else if (event?.name === "startGame") {
-      handleStartGame(event.data);
     } else if (event?.name === "releaseCard") {
       handleRelease(event.data);
     } else if (event?.name === "createNewTurn") {
@@ -195,20 +194,18 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     } else if (event?.name === "openSlot") {
       handleSlotOpen(event.data);
     } else if (event?.name === "settleGame") {
-      console.log(event);
       handleSettleGame(event.data);
-    }else if(event?.name==="finishTournament"){
+    } else if (event?.name === "finishTournament") {
       console.log("clear game");
-      dispatch({type:actions.CLEAR_GAME,data:{}})
+      dispatch({ type: actions.CLEAR_GAME, data: {} });
     }
   }, [event]);
   const handleInit = (gameObj: any) => {
-   
-    if(!tournament||tournament.id!=gameObj.tournamentId){
-            const tournamentObj = tournamentService.findTournament(gameObj.tournamentId);
-            const tableObj= tournamentService.findTable(gameObj.tableId);
-            if(tournamentObj)initTournament(tournamentObj);
-            if(tableObj)setTimeout(()=>initTable(tableObj),100)         
+    if (!tournament || tournament.id != gameObj.tournamentId) {
+      const tournamentObj = tournamentService.findTournament(gameObj.tournamentId);
+      const tableObj = tournamentService.findTable(gameObj.tableId);
+      if (tournamentObj) initTournament(tournamentObj);
+      if (tableObj) setTimeout(() => initTable(tableObj), 100);
     }
     dispatch({ type: actions.INIT_GAME, game: gameObj });
     createEvent({ name: "gameInit", topic: "", data: gameObj, delay: 10 });
@@ -216,10 +213,6 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   const handlePlaceBet = (data: any) => {
     dispatch({ type: actions.PLACE_BET, data: data });
     createEvent({ name: "betPlaced", topic: "", data: data, delay: 10 });
-  };
-  const handleStartGame = (data: any) => {
-    dispatch({ type: actions.START_GAME, data: data });
-    createEvent({ name: "gameStart", topic: "", data: data, delay: 10 });
   };
   const handleSettleGame = (data: any) => {
     dispatch({ type: actions.SETTLE_GAME, results: data });
@@ -255,7 +248,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 
   const value = {
     gameId: state.gameId,
-    seatOffset:seatOffset,
+    seatOffset: seatOffset,
     round: state.round,
     startSeat: state.startSeat,
     cards: state.cards,
@@ -264,20 +257,16 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     currentTurn: state.currentTurn,
     results: state.results,
 
-    shuffle: () => {
-
-    },
-    deal: ( chips: number) => {
-      const seat =state.seats.find((s:SeatModel)=>s.uid);
-      if(seat)
-        gameService.deal(state.gameId,seat.no, chips);
+    shuffle: () => {},
+    deal: (chips: number) => {
+      const seat = state.seats.find((s: SeatModel) => s.uid);
+      if (seat) gameService.deal(state.gameId, seat.no, chips);
       // gameService.startGame();
     },
     hit: (seatNo: number) => {
-      console.log("hit on game:"+state.gameId)
+      console.log("hit on game:" + state.gameId);
       createEvent({ name: "turnOver", topic: "", data: { seat: seatNo }, delay: 10 });
       gameService.hit(state.gameId);
- 
     },
     stand: (seatNo: number) => {
       createEvent({ name: "turnOver", topic: "", data: { seat: seatNo }, delay: 10 });

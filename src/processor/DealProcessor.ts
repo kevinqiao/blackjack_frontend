@@ -6,7 +6,7 @@ import useEventSubscriber, { EventModel } from "../service/EventManager";
 const useDealProcessor = () => {
     const { createEvent } = useEventSubscriber([], []);
     const process = (game: GameModel, seatNo: number, chips: number) => {
-        game.round = 1;
+        // game.round = 1;
         for (let seat of game.seats) {
             if (seat.no === 3)
                 continue;
