@@ -13,7 +13,7 @@ const useTournamentService = () => {
     const gameService = useGameService();
     const { findUserWithLock, updateUserWithLock } = useUserDao();
     const { findTable, findTournamentTables, findTableWithLock, createTable, updateTableWithLock } = useTableDao();
-    const { findTournament, findAllTournaments, findTournamentsByType, findTournamentWithLock, initTournaments } = useTournamentDao();
+    const { findTournament, findAllTournaments, initTournaments } = useTournamentDao();
     const { createEvent } = useEventSubscriber([], [])
 
 
@@ -117,25 +117,8 @@ const useTournamentService = () => {
             table.seats = seats;
             updateTableWithLock(table, table.ver)
             createEvent({ name: "updateTable", topic: "model", data: table, delay: 0 })
-            // const user =findUserWithLock(uid);
-            // updateUserWithLock({ uid: uid, tableId: 0 },user.ver)
-            // createEvent({ name: "updateUser", topic: "model", data: { tableId: 0 }, delay: 50 })
-
         }
     }
-    // const handleGameOver = (game: GameModel) => {
-    //     const table = findTableWithLock(game.tableId);
-    //     console.log(table)
-    //     if (table){   
-    //         const tournament:TournamentModel = findTournament(table.tournamentId); 
-    //         console.log(tournament)
-    //         if(tournament?.type===0||(tournament?.type===1&&table.games.length<tournament.rounds)) {               
-    //             // gameService.createGame(table);  
-    //             const updatedTable = updateTableWithLock(table, table.ver);
-    //             createEvent({ name: "updateTable", topic: "model", data: updatedTable, delay: 0 });
-    //         }
-    //     }
-    // }
 
 
     return { join, sitDown, standup, leave, findAllTournaments, findTournament, findTable, initTournaments }

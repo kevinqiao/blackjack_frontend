@@ -3,13 +3,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import useCoordManager from "../../../service/CoordManager";
 import useEventSubscriber from "../../../service/EventManager";
 import { useGameManager } from "../../../service/GameManager";
-import { useTournamentManager } from "../../../service/TournamentManager";
 import useInterval from "../../../util/useInterval";
 
 export default function TurnSeatAnimation() {
-  const {seatOffset} =useGameManager();
+  const { seatOffset } = useGameManager();
   const { round, currentTurn, seats } = useGameManager();
-
   const { cardXY, seatCoords } = useCoordManager();
   const { event } = useEventSubscriber(["turnOver"], []);
   const [delay, setDelay] = useState(0);
@@ -104,7 +102,7 @@ export default function TurnSeatAnimation() {
   return (
     <>
       {round === 1 && currentTurn && currentTurn.seat < 3 ? (
-        <motion.div style={{ position: "absolute", top: ptop, left: pleft }} animate={show}>
+        <motion.div style={{ position: "absolute", zIndex: 8000, top: ptop, left: pleft }} animate={show}>
           <motion.svg
             width={pwidth}
             height={pheight}

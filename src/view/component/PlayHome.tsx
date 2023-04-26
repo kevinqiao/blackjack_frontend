@@ -6,7 +6,7 @@ import PlayTable from "./PlayTable";
 import SlotScorePanel from "./SlotScorePanel";
 import SeatAvatar from "./common/SeatAvatar";
 import SlotChipPanel from "./common/SlotChipPanel";
-import TurnSeatProgress from "./common/TurnSeatProgress";
+import TurnClockDown from "./common/TurnClockDown";
 
 function PlayHome() {
   return (
@@ -17,7 +17,7 @@ function PlayHome() {
       <ControlPanel />
       <GameOver />
       <CardPanel />
-      <TurnSeatProgress />
+      <TurnClockDown />
       <SlotScorePanel />
       <SlotChipPanel />
     </>

@@ -5,7 +5,6 @@ import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
 import useGameEngine from "../../service/GameEngine";
 import { useGameManager } from "../../service/GameManager";
-import { useTournamentManager } from "../../service/TournamentManager";
 import "./score.css";
 
 export default function SlotScorePanel() {
@@ -18,7 +17,7 @@ export default function SlotScorePanel() {
   const { event, createEvent } = useEventSubscriber(["gameStart", "cardReleased", "slotSplitted", "gameOver"], []);
   const gameEngine = useGameEngine();
   const { cardXY, seatCoords } = useCoordManager();
-  const {seatOffset} = useGameManager();
+  const { seatOffset } = useGameManager();
   const { gameId, round, cards, seats } = useGameManager();
   const controls = useAnimationControls();
   useEffect(() => {
@@ -146,6 +145,7 @@ export default function SlotScorePanel() {
                 display: "flex",
                 justifyContent: "flex-start",
                 position: "absolute",
+                zIndex: 8500,
                 top: top(seat.no, slot.id),
                 left: left(seat.no, slot.id),
               }}
