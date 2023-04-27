@@ -4,6 +4,7 @@ import GameOver from "./GameOver";
 import MyChipBox from "./MyChipBox";
 import PlayTable from "./PlayTable";
 import SlotScorePanel from "./SlotScorePanel";
+import PlaceBetClockDown from "./common/PlaceBetClockDown";
 import SeatAvatar from "./common/SeatAvatar";
 import SlotChipPanel from "./common/SlotChipPanel";
 import TurnClockDown from "./common/TurnClockDown";
@@ -18,6 +19,7 @@ function PlayHome() {
       <GameOver />
       <CardPanel />
       <TurnClockDown />
+      <PlaceBetClockDown />
       <SlotScorePanel />
       <SlotChipPanel />
     </>

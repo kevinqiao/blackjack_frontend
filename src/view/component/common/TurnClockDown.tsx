@@ -5,7 +5,7 @@ import useEventSubscriber from "../../../service/EventManager";
 import { useGameManager } from "../../../service/GameManager";
 import useInterval from "../../../util/useInterval";
 
-export default function TurnSeatAnimation() {
+export default function TurnClockDown() {
   const { seatOffset } = useGameManager();
   const { round, currentTurn, seats } = useGameManager();
   const { cardXY, seatCoords } = useCoordManager();
