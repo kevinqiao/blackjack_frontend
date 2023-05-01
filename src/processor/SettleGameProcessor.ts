@@ -6,13 +6,19 @@ import useTableDao from "../respository/TableDao";
 import { useTournamentDao } from "../respository/TournamentDao";
 import useUserDao from "../respository/UserDao";
 import useEventSubscriber, { EventModel } from "../service/EventManager";
+import useEventService from "../service/EventService";
 import useGameEngine from "../service/GameEngine";
 
 
 const useSettleGameProcessor = () => {
-    const { createEvent } = useEventSubscriber([], []);
+    // const { createEvent } = useEventSubscriber([], []);
+    const eventService =useEventService();
     const gameEngine = useGameEngine();
     const process = (game: GameModel) => {
+        // if(game.round===0){
+        //     createEvent({ name: "clearGame", topic: "model", data: {gameId:game.gameId}, delay: 1000 });
+        //     return;
+        // }
         const dealerSeat = game.seats.find((s) => s.no === 3);
         if (dealerSeat) {
             const results: SlotBattleResult[] = [];
@@ -34,7 +40,7 @@ const useSettleGameProcessor = () => {
                 game.status=2;
             }
             game.results = results;
-            createEvent({ name: "settleGame", topic: "model", data: results, delay: 1000 });
+            eventService.sendEvent({ name: "settleGame", topic: "model", data: results, delay: 1000 });
         }
    }
     useEffect(() => {

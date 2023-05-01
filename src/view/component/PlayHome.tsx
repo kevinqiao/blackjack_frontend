@@ -8,6 +8,7 @@ import PlaceBetClockDown from "./common/PlaceBetClockDown";
 import SeatAvatar from "./common/SeatAvatar";
 import SlotChipPanel from "./common/SlotChipPanel";
 import TurnClockDown from "./common/TurnClockDown";
+import TurnCountDown from "./common/TurnCountDown";
 
 function PlayHome() {
   return (
@@ -18,7 +19,7 @@ function PlayHome() {
       <ControlPanel />
       <GameOver />
       <CardPanel />
-      <TurnClockDown />
+      <TurnCountDown />
       <PlaceBetClockDown />
       <SlotScorePanel />
       <SlotChipPanel />

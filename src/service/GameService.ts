@@ -6,6 +6,7 @@ import useHitProcessor from "../processor/HitProcessor";
 import useInitGameProcessor from "../processor/InitGameProcessor";
 import useInsureProcessor from "../processor/InsureProcessor";
 import useLaunchProcessor from "../processor/LaunchProcessor";
+import useNotActProcessor from "../processor/NotActProcessor";
 import useSettleProcessor from "../processor/SettleGameProcessor";
 import useSettleTournamentProcessor from "../processor/SettleTournamentProcessor";
 import useSplitProcessor from "../processor/SplitProcessor";
@@ -13,16 +14,19 @@ import useStandProcessor from "../processor/StandProcessor";
 import useGameDao from "../respository/GameDao";
 import useTableDao from "../respository/TableDao";
 import { useTournamentDao } from "../respository/TournamentDao";
+import useTurnDao from "../respository/TurnDao";
 import useInterval from "../util/useInterval";
 import useEventSubscriber from "./EventManager";
+import useTournamentService from "./TournamentService";
+import useTurnService from "./TurnService";
 
 
 const useGameService = () => {
 
-    const { find, findWithLock, create, updateWithLock } = useGameDao();
+    const { findWithLock, create, updateWithLock } = useGameDao();
     const { findTableWithLock, updateTableWithLock } = useTableDao();
     const { findTournament } = useTournamentDao();
-    const { createEvent } = useEventSubscriber([], []);
+    const turnService = useTurnService();
     const settleTournamentProcessor = useSettleTournamentProcessor();
     const dealProcessor = useDealProcessor();
     const hitProcessor = useHitProcessor();
@@ -33,25 +37,47 @@ const useGameService = () => {
     const insureProcessor = useInsureProcessor();
     const doubleProcessor = useDoubleProcessor();
     const settleProcessor = useSettleProcessor();
+    const notActProcessor = useNotActProcessor();
 
-    useInterval(() => {
-
-        // if (game?.round === 1) {
-        //     const battle = findWithLock(game?.gameId);
-        //     const turn = battle?.currentTurn;
-        //     const seat = turn?.seat ? turn.seat : 0;
-        //     const interval = turn?.expireTime ? Date.now() - turn.expireTime : 0;
-
-        //     if (battle != null && seat < 3 && interval > 0) {
-        //         const ver = battle.ver;
-        //         standProcessor.process(battle);
-        //         const updatedInstance = updateWithLock(battle, ver);
-        //         if (updatedInstance != null)
-        //             setGame(updatedInstance)
-        //     }
-        // }
-
-    }, 2500)
+    const autoAct=()=>{    
+        if(turnService){
+           const turns = turnService.findAllPast();
+      
+           if(turns){
+               
+                for(let turn of turns){
+                        const game: GameModel | null = findWithLock(turn.gameId);
+                        if(game){
+                            // console.log(game)
+                            notActProcessor.process(game)
+                            const ver = game.ver
+                            if(turn.round===0){
+                                const seats = game.seats.filter((s)=>s.bet>0);
+                                // console.log(seats)
+                                if(seats?.length>0){
+                                    launchProcessor.process(game)
+                                }else{
+                                    turnService.stopCount(game.gameId)
+                                    settle(game)
+                                }
+                            }else if(turn.round===1){
+                                const remainTime = turn.expireTime-Date.now();
+                                if(remainTime<0&&turn.seat===game.currentTurn.seat){
+                                    console.log("stand actioon...")
+                                    standProcessor.process(game);
+                                    if (game.status === 1) {
+                                        console.log("game over")
+                                        // turnService.stopCount(game.gameId)
+                                        setTimeout(() => settle(game), 4000)
+                                    } 
+                                } 
+                            }
+                            updateWithLock(game, ver);
+                        }
+                }
+           }
+        }
+    }
     const getInitGame = (table: TableModel): GameModel => {
         table.lastStartSeat = table.lastStartSeat < 0 ? 0 : table.lastStartSeat + 1;
         for (let i = 0; i < 3; i++) {
@@ -60,17 +86,17 @@ const useGameService = () => {
             if (seat)
                 break;
         }
-
+        const gameId = Date.now();
         const initData: GameModel = {
-            gameId: Date.now(),
+            gameId: gameId,
             ver: 0,
             tournamentId: 0,
             tableId: 0,
             startSeat: table.lastStartSeat,
-            round: 0,
+            round: -1,
             cards: [],
             seats: [],
-            currentTurn: { id: 0, round: 0, acts: [], seat: -1, expireTime: 0, data: null },
+            currentTurn: { id: 0, gameId:gameId,round: -1, acts: [], seat: -1, expireTime: 0, data: null },
             status: 0,
         };
         let currentSlotId = Date.now();
@@ -97,22 +123,32 @@ const useGameService = () => {
         return initData;
 
     }
+    
     const createGame = (table: TableModel): GameModel => {
+        
         const gameData: GameModel = getInitGame(table);
         gameData.tournamentId = table.tournamentId;
         gameData.tableId = table.id;
         initGameProcessor.process(gameData);
+        // console.log(gameData)
         create(gameData);
         return gameData
     }
 
     const deal = (gameId: number, seatNo: number, chips: number) => {
-
+        console.log(gameId+":"+seatNo+":"+chips)
         const gameObj: GameModel | null = findWithLock(gameId);
         if (gameObj) {
-            const ver = gameObj.ver;
-            dealProcessor.process(gameObj, seatNo, chips);
-            launchProcessor.process(gameObj)
+            dealProcessor.process(gameObj,seatNo,chips);
+            const ver = gameObj.ver;          
+            const allBet = gameObj.seats.filter((s)=>s.no<3&&!s.bet);
+            if(allBet?.length===0){                 
+                    launchProcessor.process(gameObj)
+                    if (gameObj.status === 1) {
+                        console.log("game over")
+                        setTimeout(() => settle(gameObj), 4000)
+                    }
+            }
             updateWithLock(gameObj, ver);
         }
 
@@ -165,7 +201,7 @@ const useGameService = () => {
 
     const stand = (gameId: number) => {
         const gameObj: GameModel | null = findWithLock(gameId);
-        console.log(gameObj)
+
         if (gameObj) {
             const ver = gameObj.ver;
             standProcessor.process(gameObj);
@@ -181,27 +217,29 @@ const useGameService = () => {
     const settle = (gameObj: GameModel) => {
         settleProcessor.process(gameObj);
         const table = findTableWithLock(gameObj.tableId);
+
         if (table) {
             const tournament: TournamentModel = findTournament(table.tournamentId);
+          
             if (tournament) {
                 if ((tournament.type === 0 && table.seats.filter((s) => s.no < 3).length > 0) || (tournament.type === 1 && table.games.length < tournament.rounds)) {
                     const newGame: GameModel = createGame(table);
+                    
                     if (tournament.type === 0)
                         table.games = [newGame.gameId]
                     else
                         table.games.push(newGame.gameId)
                     updateTableWithLock(table, table.ver);
-                } else {
+                } else if(tournament.type===1&&table.games.length===tournament.rounds){
                     settleTournamentProcessor.process(tournament, table)
                     //create  event "tournament over"
                 }
             }
         }
     }
-    useEffect(() => {
 
-    }, [])
-    return { createGame, deal, hit, split, double, insure, stand }
+  
+    return { autoAct,createGame, deal, hit, split, double, insure, stand }
 
 }
 export default useGameService

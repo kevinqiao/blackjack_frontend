@@ -9,7 +9,7 @@ const useStandProcessor = () => {
     const process = (gameObj: GameModel) => {
 
         const seat = gameObj.seats.find((s: SeatModel) => s.no === gameObj.currentTurn.seat);
-        console.log(seat)
+       
         if (seat) {
             const currentSlot = seat.slots.find((s) => s.id === seat.currentSlot);
 

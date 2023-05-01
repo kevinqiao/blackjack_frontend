@@ -12,6 +12,7 @@ function MainHome() {
     // window.localStorage.removeItem("user");
     // window.localStorage.removeItem("tables");
     // window.localStorage.removeItem("games");
+    //window.localStorage.removeItem("turns")
   }, []);
 
   return (

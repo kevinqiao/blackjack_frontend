@@ -6,15 +6,16 @@ import useTableDao from "../respository/TableDao";
 import { useTournamentDao } from "../respository/TournamentDao";
 import useUserDao from "../respository/UserDao";
 import useEventSubscriber, { EventModel } from "../service/EventManager";
+import useEventService from "../service/EventService";
 import useGameEngine from "../service/GameEngine";
 
 
 const useSettleTournamentProcessor = () => {
-    const { createEvent } = useEventSubscriber([], []);
+    const eventService = useEventService();
     const userDao = useUserDao();
     const process = (tournament: TournamentModel,table:TableModel) => {
         console.log("tournament round over")
-        createEvent({ name: "finishTournament", topic: "model", data: {id:table.tournamentId}, delay: 10 })
+        eventService.sendEvent({ name: "finishTournament", topic: "model", data: {id:table.tournamentId}, delay: 10 })
         for(let seat of table.seats){
             if(seat.no<3){
                 const user = userDao.findUserWithLock(seat.uid);

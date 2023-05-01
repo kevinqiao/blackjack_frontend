@@ -31,7 +31,7 @@ const useGameDao = () => {
     }
   }
 
-  const find = (gameId:number): GameModel | null => {
+  const findGame = (gameId:number): GameModel | null => {
 
     if (typeof window !== "undefined") {
       const gamestr = window.localStorage.getItem("games");
@@ -63,7 +63,7 @@ const useGameDao = () => {
     }
     return null;
   }
-  return { find, findWithLock, create, updateWithLock}
+  return { findGame, findWithLock, create, updateWithLock}
 }
 
 export default useGameDao

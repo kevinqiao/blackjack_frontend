@@ -3,14 +3,17 @@ import { SeatBetSlot, SeatModel } from "../model";
 import Constants from "../model/types/Constants";
 import { GameModel } from "../model/types/Game";
 import useEventSubscriber from "../service/EventManager";
+import useEventService from "../service/EventService";
 import useGameEngine from "../service/GameEngine";
-import useTournamentService from "../service/TournamentService";
+import useTurnService from "../service/TurnService";
+
 
 
 const useHitProcessor = () => {
     const { createEvent } = useEventSubscriber([], []);
     const gameEngine = useGameEngine();
-
+    const turnService = useTurnService();
+    const eventService = useEventService();
     const process = (gameObj: GameModel) => {
 
         const seat = gameObj.seats.find((s: SeatModel) => s.no === gameObj.currentTurn.seat);
@@ -23,7 +26,7 @@ const useHitProcessor = () => {
             if (card) {
                 const data = { seat: seat.no, no: card.no }
                 currentSlot.cards.push(card.no)
-                createEvent({ name: "releaseCard", topic: "model", data, delay: 0 });
+                eventService.sendEvent({ name: "releaseCard", topic: "model", data, delay: 0 });
             }
             const cards = gameObj.cards.filter((c) => currentSlot.cards.includes(c.no));
             const scores = gameEngine.getHandScore(cards);
@@ -41,8 +44,11 @@ const useHitProcessor = () => {
                 // tournamentService.handleGameOver(gameObj)
 
             } else {
+               
+                
                 Object.assign(gameObj.currentTurn, { id: Date.now(), expireTime: Date.now() + Constants.TURN_INTERVAL, acts: [] })
-                createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: Constants.TURN_INTERVAL }), delay: 100 })
+                turnService.newActionTurn(gameObj.currentTurn,100);
+                // createEvent({ name: "createNewTurn", topic: "model", data: Object.assign({}, gameObj.currentTurn, { expireTime: Constants.TURN_INTERVAL }), delay: 100 })
             }
 
         }

@@ -78,7 +78,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     chips: state.chips,
     login: (userId: string, token: string) => {
       const user = userService.login(userId, token);
-      console.log(user);
+      // console.log(user);
       if (user) dispatch({ type: actions.SIGNIN_SUCCESS, data: user });
     },
     logout: () => {

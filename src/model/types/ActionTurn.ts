@@ -1,7 +1,8 @@
 export declare type ActionTurn = {
   id: number;
+  gameId:number;
   round: number;
-  expireTime: number | undefined;
+  expireTime: number;
   acts: number[];
   seat: number;
   data: any | null;

@@ -1,40 +1,33 @@
-import { motion, useSpring } from "framer-motion";
+import { motion, useAnimation, useSpring } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useCoordManager from "../../../service/CoordManager";
 import useEventSubscriber from "../../../service/EventManager";
 import { useGameManager } from "../../../service/GameManager";
 import useInterval from "../../../util/useInterval";
 
-export default function TurnSeatAnimation() {
+export default function TurnCountDown() {
   const { seatOffset } = useGameManager();
-  const { round, currentTurn, seats } = useGameManager();
+  const { currentTurn, seats } = useGameManager();
   const { cardXY, seatCoords } = useCoordManager();
-  const { event } = useEventSubscriber(["turnOver"], []);
-  const [delay, setDelay] = useState(0);
-
-  const pathLength = useSpring(0, {
-    stiffness: 10,
-    mass: 0.1,
-    damping: 10,
-  });
-
-  useEffect(() => {
-    if (round === 1 && currentTurn) {
-      setDelay(200);
-      pathLength.jump(0);
-    } else {
-      setDelay(0);
-    }
-  }, [currentTurn, pathLength]);
+  const [frequency, setFrequency] = useState(0);
+  const controls = useAnimation();
+  useEffect(()=>{
+    console.log(currentTurn)
+    if(currentTurn?.seat===3)
+        setFrequency(0)
+    else if(currentTurn?.round===1)
+       setFrequency(1000)
+  },[currentTurn])
 
   const updateProgress = useCallback(() => {
-    if (round > 0 && currentTurn && currentTurn.seat < 3 && currentTurn.expireTime) {
-      const past = currentTurn.expireTime - Date.now();
-      pathLength.set((15000 - past) / 15000);
-      if (past < -500) pathLength.jump(0);
-    }
-  }, [currentTurn]);
-  useInterval(updateProgress, delay);
+    if(currentTurn &&(currentTurn.expireTime - Date.now())<=15000){
+      const timeRemaining = (currentTurn.expireTime - Date.now())/15000;
+      controls.start({ strokeDashoffset: timeRemaining<0?0:timeRemaining });
+      if(currentTurn.expireTime - Date.now()<-1500)
+       setFrequency(0)
+    } 
+  },[currentTurn])
+  useInterval(updateProgress,frequency)
   const pwidth = useMemo(() => {
     if (currentTurn && seatCoords && seats && cardXY) {
       let seatNo = currentTurn.seat;
@@ -64,7 +57,7 @@ export default function TurnSeatAnimation() {
         if (seatNo > 2) seatNo = seatNo - 3;
       }
       const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
-      if (seatCoord) return seatCoord["y"] - 5;
+      if (seatCoord) return seatCoord["y"] - 6;
     }
     return 0;
   }, [currentTurn, seatCoords, cardXY]);
@@ -82,7 +75,7 @@ export default function TurnSeatAnimation() {
         const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
         if (seatCoord) {
           const dif = ((currentSlot.cards.length - 1) * seatCoord["dx"] * cardXY["width"]) / 2;
-          const x = seatCoord["x"] - 5 - (currentSlot.cards.length < 4 ? dif * 2 : dif) - cardXY["width"] / 2;
+          const x = seatCoord["x"] - 6 - (currentSlot.cards.length < 4 ? dif * 2 : dif) - cardXY["width"] / 2;
           return x;
         }
       }
@@ -90,20 +83,12 @@ export default function TurnSeatAnimation() {
     return 0;
   }, [currentTurn, seatCoords, seats, cardXY]);
 
-  const show = {
-    opacity: 1,
-    display: "block",
-    transition: {
-      type: "spring",
-      duration: 0.5,
-    },
-  };
-
+ 
   return (
     <>
-      {round === 1 && currentTurn && currentTurn.seat < 3 ? (
-        <motion.div style={{ position: "absolute", zIndex: 8000, top: ptop, left: pleft }} animate={show}>
-          <motion.svg
+      {currentTurn&& frequency>0 ? (
+        <div style={{ position: "absolute", zIndex: 8000, top: ptop, left: pleft }}>
+          <svg
             width={pwidth}
             height={pheight}
             style={{
@@ -111,20 +96,33 @@ export default function TurnSeatAnimation() {
               borderRadius: 5,
             }}
           >
-            <motion.rect
-              width={pwidth}
-              height={pheight}
-              stroke="red"
-              strokeWidth={8}
-              style={{
-                fill: "none",
-                pathLength: pathLength,  
-
-              }}
-        
-            />
-          </motion.svg>
-        </motion.div>
+           <motion.path
+                // d={`M${cx},${cy} a${r},${r} 0 0,1 0,${2*r} a${r},${r} 0 0,1 0,${0-r*2}`}
+                d={`M0,0 H${pwidth} V${pheight} H0 Z`}
+                pathLength="1"
+                fill="none"
+                stroke="#eee"
+                strokeWidth="8"
+                strokeDasharray="1"
+                strokeLinecap="round"
+                strokeLinejoin={"round"}
+              />
+              <motion.path
+                // d={`M${cx},${cy} a${r},${r} 0 0,1 0,${2*r} a${r},${r} 0 0,1 0,${0-r*2}`}
+                d={`M0,0 H${pwidth} V${pheight} H0 Z`}
+                pathLength="1"
+                fill="none"
+                stroke="black"
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeLinejoin={"round"}
+                strokeDasharray="1"
+                initial={{ strokeDashoffset: 1 }}
+                animate={controls}
+                transition={{ duration: 1, ease: 'linear' }}
+              />
+          </svg>
+        </div>
       ) : null}
     </>
   );

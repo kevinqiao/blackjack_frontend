@@ -12,7 +12,8 @@ export const useTableDao = () => {
         if (tables?.length > 0) {
           table = tables.find((t: TableModel) => t.id == data.id);
           if (table.ver === ver) {
-            Object.assign(table, data, { timestamp: 0 });
+            console.log("success update table")
+            Object.assign(table, data, { ver: 0 });
             window.localStorage.setItem("tables", JSON.stringify(tables));
           }
         }
@@ -83,12 +84,14 @@ export const useTableDao = () => {
     let table = null;
     if (typeof window !== "undefined") {
       const tablestr = window.localStorage.getItem("tables");
-
       if (typeof tablestr != "undefined" && tablestr != null) {
         const tables = JSON.parse(tablestr);
+      
         table = tables.find((t: TableModel) => t.id === id);
-
-        if (table != null && (table.ver === 0 || Date.now() - table.ver > 400)) {
+      
+        const past = Date.now()-table.ver;
+ 
+        if (table != null && (table.ver === 0 || past > 400)) {
           table.ver = Date.now();
           window.localStorage.setItem("tables", JSON.stringify(tables));
           return table

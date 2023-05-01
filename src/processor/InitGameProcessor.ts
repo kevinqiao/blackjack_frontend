@@ -1,28 +1,29 @@
 import { useEffect } from "react";
+import { ActionTurn } from "../model/types/ActionTurn";
+import Constants from "../model/types/Constants";
 import { GameModel } from "../model/types/Game";
-import useUserDao from "../respository/UserDao";
 import useEventSubscriber, { EventModel } from "../service/EventManager";
+import useEventService from "../service/EventService";
 import useGameEngine from "../service/GameEngine";
+import useTurnService from "../service/TurnService";
 
 
 const useInitGameProcessor = () => {
-    const { createEvent } = useEventSubscriber([], []);
-    const userDao = useUserDao();
+
+    const turnService = useTurnService();
     const gameEngine = useGameEngine();
+    const eventService = useEventService();
     const process = (game: GameModel) => {
         game.cards=gameEngine.shuffle();
-        // for(let seat of game.seats){
-        //     if(seat.no<3&&seat.uid){
-        //         const user = userDao.findUserWithLock(seat.uid);
-        //         if(user){
-        //             // console.log("update user gameId:"+game.gameId+" ver:"+user.ver)
-        //             userDao.updateUserWithLock({uid:seat.uid,gameId:game.gameId},user.ver)
-        //         }
-        //     }
-        // }
 
         const event: EventModel = { name: "initGame", topic: "model", data: JSON.parse(JSON.stringify(game)), delay: 0 }
-        createEvent(event);
+        // createEvent(event);
+        eventService.sendEvent(event)
+        const actionTurn: ActionTurn = { id: Date.now() + 2,gameId:game.gameId, round: 0, acts: [], expireTime: Date.now() + Constants.TURN_INTERVAL + 500, seat: -1, data: null }
+        game.currentTurn = actionTurn;
+        game.round=0;
+        turnService.newActionTurn(actionTurn,100);
+
     }
 
 

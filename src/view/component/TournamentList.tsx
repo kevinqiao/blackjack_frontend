@@ -1,10 +1,19 @@
+import { TournamentModel } from "../../model";
 import useCoordManager from "../../service/CoordManager";
 import { useTournamentManager } from "../../service/TournamentManager";
+import useTournamentService from "../../service/TournamentService";
+import { useUserManager } from "../../service/UserManager";
 
 const TournamentList = () => {
   const { viewport } = useCoordManager();
-  const { tournaments, join } = useTournamentManager();
-
+  const { tournaments} = useTournamentManager();
+  const tournamentService = useTournamentService();
+ 
+  const join=(t:TournamentModel)=>{
+    if(tournamentService){
+        tournamentService.join(t);
+    }
+  }
   return (
     <div
       style={{

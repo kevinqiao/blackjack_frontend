@@ -2,10 +2,12 @@ import { motion, useAnimationControls } from "framer-motion";
 import { useCallback, useEffect } from "react";
 import ActionType from "../../model/types/ActionType";
 import { useGameManager } from "../../service/GameManager";
+import useGameService from "../../service/GameService";
 import "./styles.css";
 
 export default function ControlPanel() {
-  const { cards, seats, round, currentTurn, hit, split, stand, double, insure } = useGameManager();
+  const {gameId,cards, seats, round, currentTurn } = useGameManager();
+  const gameService =useGameService();
   const panelControls = useAnimationControls();
 
   useEffect(() => {
@@ -30,12 +32,10 @@ export default function ControlPanel() {
   }, [round, panelControls]);
 
   const standSeat = () => {
-    if (currentTurn) stand(currentTurn.seat);
+      gameService.stand(gameId);
   };
   const hitCard = () => {
-    if (currentTurn && currentTurn?.seat >= 0) {
-      hit(currentTurn.seat);
-    }
+      gameService.hit(gameId)
   };
   const canInsure = useCallback((): boolean => {
     if (typeof currentTurn != "undefined" && currentTurn && currentTurn.seat < 3) {
@@ -127,7 +127,7 @@ export default function ControlPanel() {
                 backgroundColor: "red",
                 color: "white",
               }}
-              onClick={split}
+       
             >
               Split
             </div>
@@ -146,7 +146,7 @@ export default function ControlPanel() {
                 backgroundColor: "red",
                 color: "white",
               }}
-              onClick={double}
+             
             >
               Double
             </div>
@@ -164,7 +164,7 @@ export default function ControlPanel() {
                 backgroundColor: "red",
                 color: "white",
               }}
-              onClick={insure}
+          
             >
               Insure
             </div>

@@ -2,14 +2,15 @@ import { useCallback, useMemo } from "react";
 import useCoordManager from "../../../service/CoordManager";
 import { useGameManager } from "../../../service/GameManager";
 import { useTournamentManager } from "../../../service/TournamentManager";
+import useTournamentService from "../../../service/TournamentService";
 import { useUserManager } from "../../../service/UserManager";
 
 export default function SeatAvatar() {
-  const { table, sitDown } = useTournamentManager();
+  const { table } = useTournamentManager();
   const { cardXY, seatCoords } = useCoordManager();
   const { uid } = useUserManager();
-  const { seats } = useGameManager();
-  const { seatOffset } = useGameManager();
+  const {seats, seatOffset } = useGameManager();
+  const tournamentService = useTournamentService();
 
   // useEffect(()=>{
   //  console.log("offset:"+seatOffset)
@@ -43,6 +44,11 @@ export default function SeatAvatar() {
     }
     return ok;
   }, [uid, table, seats]);
+  const sitDown=(seatNo:number)=>{
+      let sno = seatNo - seatOffset;
+      if (sno < 0) sno = sno + 3;
+      if (uid&&table) tournamentService.sitDown(table.id, uid, seatNo);
+  }
   return (
     <>
       {seats &&
@@ -70,7 +76,7 @@ export default function SeatAvatar() {
                   backgroundColor: "grey",
                   color: "white",
                 }}
-                onClick={() => sitDown(seatNo)}
+                onClick={() =>sitDown(seatNo)}
               >
                 <span>Sit({seatNo})</span>
               </div>

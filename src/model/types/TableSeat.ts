@@ -2,6 +2,7 @@
 export declare type TableSeat = {
   no: number;
   uid: string;
-  chips: number;
+  chips?: number;
   status: number;
+  missActs?:number;
 };

@@ -1,11 +1,13 @@
 import useCoordManager from "../../service/CoordManager";
 import { useTournamentManager } from "../../service/TournamentManager";
+import useTournamentService from "../../service/TournamentService";
 import { useUserManager } from "../../service/UserManager";
 
 const Login = () => {
   const { viewport } = useCoordManager();
   const { uid, token, login, logout } = useUserManager();
-  const { leave, standup } = useTournamentManager();
+  const { table} = useTournamentManager();
+  const tournamentService = useTournamentService();
   const signout = () => {
     logout();
     // leave();
@@ -15,8 +17,16 @@ const Login = () => {
     window.localStorage.removeItem("user");
     window.localStorage.removeItem("tables");
     window.localStorage.removeItem("games");
+    window.localStorage.removeItem("turns");
   };
-
+  const leave=()=>{
+    if(uid&&table)
+      tournamentService.leave(uid, table.id);
+  }
+  const standup=()=>{
+    if(uid&&table)
+      tournamentService.standup(uid, table.id);
+  }
   return (
     <>
       {!uid ? (

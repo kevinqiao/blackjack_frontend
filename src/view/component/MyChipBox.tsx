@@ -4,6 +4,8 @@ import { ChipModel } from "../../model";
 import useCoordManager from "../../service/CoordManager";
 import useEventSubscriber from "../../service/EventManager";
 import { useGameManager } from "../../service/GameManager";
+import useGameService from "../../service/GameService";
+import { useUserManager } from "../../service/UserManager";
 import "./chip.css";
 const CHIP_SIZE = 3;
 const chip_btns = [
@@ -16,12 +18,14 @@ const MyChipBox = () => {
   const [betChips, setBetChips] = useState<ChipModel[]>([]);
 
   const { myChipXY, chipScale, viewport, betChipXY, chipWidth, seatCoords } = useCoordManager();
-  const { round, gameId, deal } = useGameManager();
+  const { round, gameId, seats } = useGameManager();
+  const { uid} = useUserManager();
+  const gameService = useGameService();
   const btnControls = useAnimationControls();
   const chipControls = useAnimationControls();
   // const betChipControls = useAnimationControls();
   const dealControls = useAnimationControls();
- 
+
   useEffect(() => {
     if (gameId > 0){
       setBetChips([]);
@@ -235,7 +239,12 @@ const MyChipBox = () => {
         },
         transitionEnd: { display: "none" },
       });
-      deal(total);
+      // deal(total);
+      if(uid){
+       const seat = seats.find((s)=>s.uid==uid)
+       if(seat)
+        gameService.deal(gameId,seat.no,total)
+      }
     }
   };
   return (

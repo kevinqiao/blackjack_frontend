@@ -6,6 +6,8 @@ import { UserProvider } from "./service/UserManager";
 
 import "./styles.css";
 import MainHome from "./view/component/MainHome";
+import CountDownClock from "./view/framer/CountDownClock";
+import CountDownTimer from "./view/framer/CountDownTimer";
 
 function App() {
   const FlattenedProviderTree = (providers: any): any => {
@@ -36,6 +38,8 @@ function App() {
   return (
     <Providers>
       <MainHome />
+      {/* <CountDownClock/> */}
+      {/* <CountDownTimer/> */}
     </Providers>
   );
 }
