@@ -5,7 +5,7 @@ export declare type EventModel = {
   topic: string;
   time?:number;
   delay: number;
-  data: any | undefined;
+  data?: any;
 };
 export interface IContextProps {
   subject: Subject<EventModel> | null;

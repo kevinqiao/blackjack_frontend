@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { CardModel, GameModel, SeatBetSlot, SeatModel } from "../model";
 import ActionType from "../model/types/ActionType";
 import Constants from "../model/types/Constants";
 import { SlotBattleResult } from "../model/types/SlotBattleResult";
 import useEventService from "./EventService";
+import { useGameManager } from "./GameManager";
 import useTurnService from "./TurnService";
 const make_deck = () => {
     const cards: CardModel[] = [];
@@ -33,26 +34,40 @@ const make_deck = () => {
         cards[j++] = { no: ++no, value: v, rank: i, suit: "c", seat: -1, slot: 0 };
         cards[j++] = { no: ++no, value: v, rank: i, suit: "s", seat: -1, slot: 0 };
     }
+    // console.log(cards)
     return cards;
 };
+const cards =[3,17,49,38,7,9]
 const useGameEngine = () => {
+    const {getCardIndex}=useGameManager();
     const turnService = useTurnService();
     // const { createEvent } = useEventSubscriber([], []);
     const eventService = useEventService();
+
+
     const shuffle = (): CardModel[] => {
         return make_deck()
     }
     const releaseCard = (game: GameModel, seatNo: number, slotId: number): CardModel | null => {
         if (game) {
+            if(!game.currentCardIndex)
+             game.currentCardIndex=0;
+            const cardIndex = game.currentCardIndex++;
             const releaseds = game.seats.map((s: any) => s["slots"].map((c: SeatBetSlot) => c["cards"])).flat(2);
             const toReleases = game.cards.filter((c: CardModel) => !releaseds.includes(c.no));
             const no = Math.floor(Math.random() * toReleases.length);
-            // console.log(no)
             const card = toReleases[no];
-            card['seat'] = seatNo;
-            card['slot'] = slotId;
+            //  const index= getCardIndex();
+            // console.log("index:"+cardIndex)
+            // const card = game.cards.find((c)=>c.no=== cards[cardIndex]);
+     
+                card['seat'] = seatNo;
+                card['slot'] = slotId;
+
+                return card;
+
             // console.log(card)
-            return card;
+            
         } else
             return null
 
@@ -150,6 +165,7 @@ const useGameEngine = () => {
                 dealerSeat.slots[0]['cards'].push(card.no);
                 const dealerCards = gameObj.cards.filter((c) => dealerSeat.slots[0]['cards'].includes(c.no));
                 const scores = getHandScore(dealerCards);
+               
                 if (scores.length === 0) {
                     dealerSeat.slots[0]['score'] = 0;
                     dealerSeat.status = 1;
@@ -164,7 +180,6 @@ const useGameEngine = () => {
                     }
                 }
             }
-            turnService.stopCount(gameObj.gameId)
         }
     }
     const splitSlot = (gameObj: GameModel, seat: SeatModel): boolean => {

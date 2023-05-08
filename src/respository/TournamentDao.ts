@@ -101,7 +101,7 @@ export const useTournamentDao = () => {
   const findTournament = (id: number) => {
     if (typeof window !== "undefined") {
       const tournamentsts = window.localStorage.getItem("tournaments");
- 
+      console.log(tournamentsts)
       if (typeof tournamentsts != "undefined" && tournamentsts != null) {
         const tournaments = JSON.parse(tournamentsts);
         if (tournaments?.length > 0)

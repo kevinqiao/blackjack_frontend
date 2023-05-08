@@ -6,7 +6,6 @@ import useGameEngine from "../service/GameEngine";
 
 
 const useSplitProcessor = () => {
-    const { createEvent } = useEventSubscriber([], []);
     const gameEngine = useGameEngine();
     const process = (gameObj: GameModel) => {
 

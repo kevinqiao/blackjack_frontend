@@ -6,6 +6,7 @@ import { SlotBattleResult } from "./SlotBattleResult";
 export declare type GameModel = {
   gameId: number;
   ver: number;
+  currentCardIndex?:number;
   tournamentId: number;
   tableId: number;
   startSeat: number;

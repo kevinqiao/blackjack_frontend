@@ -23,7 +23,6 @@ const useStandProcessor = () => {
                 if (gameEngine.turnSeat(gameObj, seat)) {
                     return;
                 }
-
                 gameEngine.turnDealer(gameObj);
                 gameObj.status = 1;
             }

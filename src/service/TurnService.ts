@@ -1,8 +1,6 @@
-import { useEffect } from "react";
-import { delay } from "rxjs";
+
 import { ActionTurn } from "../model/types/ActionTurn";
 import useTurnDao from "../respository/TurnDao";
-import useEventSubscriber from "./EventManager";
 import useEventService from "./EventService";
 
 
@@ -15,9 +13,12 @@ const useTurnService = () => {
     const newActionTurn = (turn:ActionTurn,delay:number) => {
   
         if(turn?.expireTime){
-            console.log(turn)
-            updateGameTurn(turn)
-            eventService.sendEvent({ name: "createNewTurn", topic: "model", data: {...turn,expireTime:turn.expireTime-Date.now()-delay}, delay: delay})
+            const timeout =turn.expireTime-Date.now()-delay;
+            if(timeout>0)
+                updateGameTurn(turn)
+            else
+                stopCount(turn.gameId)
+            eventService.sendEvent({ name: "createNewTurn", topic: "model", data: {...turn,expireTime:timeout}, delay: delay})
         }
     }
     const findAllPast = (): ActionTurn[] | null => {

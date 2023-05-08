@@ -75,24 +75,41 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
     ["model"]
   );
   const tournamentService = useTournamentService();
-  const { uid} = useUserManager();
+  const {uid,tableId} = useUserManager();
 
   useEffect(() => {
     if (event?.name === "updateTable") {
       dispatch({ type: actions.UPDATE_TABLE, data: event.data });
     } else if (event?.name === "finishTournament") {
-      console.log("clear table");
       dispatch({ type: actions.CLEAR_TABLE });
     }else if(event?.name==="removeSeat"){
-      console.log("remove seat")
       dispatch({type:actions.REMOVE_SEAT,data:event.data})
     }
   }, [event]);
   useEffect(() => {
     //  tournamentService.initTournaments();
-    let tournaments = tournamentService.findAllTournaments();
-    dispatch({ type: actions.LOAD_TOURNAMENT, data: tournaments });
+    tournamentService.findAllTournaments().then((tournaments)=>{
+        dispatch({ type: actions.LOAD_TOURNAMENT, data: tournaments });
+    })
   }, []);
+  useEffect(() => {
+    if (tableId === 0) {
+      dispatch({ type: actions.CLEAR_TABLE });
+    } else {
+     console.log("tableId:"+tableId)
+     tournamentService.findTournamentTable(tableId).then((tableObj)=>{
+        if(tableObj&&(!state.tournament||state.tournament.id !==tableObj.tournamentId)) {
+            tournamentService.findTournament(tableObj.tournamentId).then((tournamentObj)=>{
+                console.log(tournamentObj)
+                if(tournamentObj){               
+                    dispatch({ type: actions.SELECT_TOURNAMENT, data: tournamentObj });
+                    setTimeout(() => dispatch({ type: actions.UPDATE_TABLE, data: tableObj }), 50);
+                }
+            })
+        }
+     })
+    }
+  }, [tableId]);
 
   useEffect(() => {
     let offset = 0;

@@ -12,7 +12,6 @@ export default function TurnCountDown() {
   const [frequency, setFrequency] = useState(0);
   const controls = useAnimation();
   useEffect(()=>{
-    console.log(currentTurn)
     if(currentTurn?.seat===3)
         setFrequency(0)
     else if(currentTurn?.round===1)
@@ -87,7 +86,7 @@ export default function TurnCountDown() {
   return (
     <>
       {currentTurn&& frequency>0 ? (
-        <div style={{ position: "absolute", zIndex: 8000, top: ptop, left: pleft }}>
+        <div key={currentTurn.id+""} style={{ position: "absolute", zIndex: 8000, top: ptop, left: pleft }}>
           <svg
             width={pwidth}
             height={pheight}

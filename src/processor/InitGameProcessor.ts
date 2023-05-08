@@ -13,16 +13,15 @@ const useInitGameProcessor = () => {
     const turnService = useTurnService();
     const gameEngine = useGameEngine();
     const eventService = useEventService();
-    const process = (game: GameModel) => {
+    const process = (game: GameModel,delay:number) => {
         game.cards=gameEngine.shuffle();
-
-        const event: EventModel = { name: "initGame", topic: "model", data: JSON.parse(JSON.stringify(game)), delay: 0 }
+        const event: EventModel = { name: "initGame", topic: "model", data: JSON.parse(JSON.stringify(game)), delay: delay }
         // createEvent(event);
         eventService.sendEvent(event)
         const actionTurn: ActionTurn = { id: Date.now() + 2,gameId:game.gameId, round: 0, acts: [], expireTime: Date.now() + Constants.TURN_INTERVAL + 500, seat: -1, data: null }
         game.currentTurn = actionTurn;
         game.round=0;
-        turnService.newActionTurn(actionTurn,100);
+        turnService.newActionTurn(actionTurn,delay+100);
 
     }
 

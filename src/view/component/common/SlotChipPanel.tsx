@@ -16,9 +16,9 @@ export default function SlotChipPanel() {
     ["slotSplitted", "slotActivated", "dealCompleted", "betPlaced", "gameStart", "gameOver"],
     []
   );
-  const {seatOffset} = useGameManager();
+
   const { viewport, myChipXY, cardXY, seatCoords } = useCoordManager();
-  const { gameId,  round, cards, seats, results } = useGameManager();
+  const { gameId, seatOffset, seats, results } = useGameManager();
   const { uid } = useUserManager();
   const controls = useAnimationControls();
 
@@ -66,7 +66,7 @@ export default function SlotChipPanel() {
     (seatNo: number, slotId: number) => {
       let chips = 0;
       if (seatNo === 3) {
-        chips = seats.map((s) => s.bet * s.slots.length).reduce((total, b) => total + b, 0);
+        chips = seats.filter((s)=>s.no<3).map((s) => s.bet * s.slots.length).reduce((total, b) => total + b, 0);
         if (results?.length > 0) {
           chips =
             chips +
@@ -94,50 +94,50 @@ export default function SlotChipPanel() {
     },
     [seats, results]
   );
-  useEffect(() => {
-    if (gameId > 0 && results?.length > 0) {
-      controls.start((o) => {
-        const animationProps: any = {};
-        const res = results.find((b) => b.slot === o.slot.id);
-        if (res?.win === BattleResultType.FAIL) {
-          if (o.seatNo < 3) {
-            const seat = seats.find((s) => s.no === o.seatNo);
-            if (seat) {
-              const x = left(3) - left(seat.no);
-              const y = top(3) - top(seat.no);
-              animationProps["x"] = [x, x, x];
-              animationProps["y"] = [y, y, y];
-              animationProps["opacity"] = [0, 0, 1];
-              animationProps["transition"] = {
-                duration: 0.5,
-                default: { ease: "linear" },
-                times: [0, 0.4, 1],
-              };
-            }
-          }
-        } else if (res?.win === BattleResultType.WIN) {
-          if (o.seatNo === 3) {
-            const seat = seats.find((s) => s.no === res.seat);
-            if (seat) {
-              const cx = getCurrentX(seat, o.slot.id);
-              const cy = getCurrentY(seat, o.slot.id);
-              const x0 = cx - left(3);
-              const y0 = cy - top(3);
-              animationProps["x"] = [x0, x0, x0];
-              animationProps["y"] = [y0, y0, y0];
-              animationProps["opacity"] = [0, 0, 1];
-              animationProps["transition"] = {
-                duration: 0.5,
-                default: { ease: "linear" },
-                times: [0, 0.4, 1],
-              };
-            }
-          }
-        }
-        return animationProps;
-      });
-    }
-  }, [gameId, seatCoords]);
+  // useEffect(() => {
+  //   if (gameId > 0 && results?.length > 0) {
+  //     controls.start((o) => {
+  //       const animationProps: any = {};
+  //       const res = results.find((b) => b.slot === o.slot.id);
+  //       if (res?.win === BattleResultType.FAIL) {
+  //         if (o.seatNo < 3) {
+  //           const seat = seats.find((s) => s.no === o.seatNo);
+  //           if (seat) {
+  //             const x = left(3) - left(seat.no);
+  //             const y = top(3) - top(seat.no);
+  //             animationProps["x"] = [x, x, x];
+  //             animationProps["y"] = [y, y, y];
+  //             animationProps["opacity"] = [0, 0, 1];
+  //             animationProps["transition"] = {
+  //               duration: 0.5,
+  //               default: { ease: "linear" },
+  //               times: [0, 0.4, 1],
+  //             };
+  //           }
+  //         }
+  //       } else if (res?.win === BattleResultType.WIN) {
+  //         if (o.seatNo === 3) {
+  //           const seat = seats.find((s) => s.no === res.seat);
+  //           if (seat) {
+  //             const cx = getCurrentX(seat, o.slot.id);
+  //             const cy = getCurrentY(seat, o.slot.id);
+  //             const x0 = cx - left(3);
+  //             const y0 = cy - top(3);
+  //             animationProps["x"] = [x0, x0, x0];
+  //             animationProps["y"] = [y0, y0, y0];
+  //             animationProps["opacity"] = [0, 0, 1];
+  //             animationProps["transition"] = {
+  //               duration: 0.5,
+  //               default: { ease: "linear" },
+  //               times: [0, 0.4, 1],
+  //             };
+  //           }
+  //         }
+  //       }
+  //       return animationProps;
+  //     });
+  //   }
+  // }, [gameId, seatCoords]);
   useEffect(() => {
     controls.start((o) => {
       const animationProps: any = {};
@@ -162,6 +162,7 @@ export default function SlotChipPanel() {
   }, [gameId]);
   useEffect(() => {
     if (event?.name === "betPlaced") {
+ 
       controls.start((o) => {
         const animationProps: any = {};
         const seat = seats.find((s) => s.no === o.seatNo);
@@ -191,48 +192,49 @@ export default function SlotChipPanel() {
       });
     }
   }, [event]);
-
-  useEffect(() => {
-    if (event?.name === "gameOver") {
-      const battleResult: SlotBattleResult[] = event.data;
-      if (battleResult?.length > 0) {
-        controls.start((o) => {
-          const animationProps: any = {};
-          const res = battleResult.find((b) => b.slot === o.slot.id);
-          if (res?.win === BattleResultType.FAIL) {
-            if (o.seatNo < 3) {
-              const seat = seats.find((s) => s.no === o.seatNo);
-              if (seat) {
-                animationProps["x"] = left(3) - left(seat.no);
-                animationProps["y"] = top(3) - top(seat.no);
-                animationProps["transition"] = {
-                  duration: 1,
-                  default: { ease: "linear" },
-                };
-              }
-            }
-          } else if (res?.win === BattleResultType.WIN) {
-            if (o.seatNo === 3) {
-              const seat = seats.find((s) => s.no === res.seat);
-              if (seat) {
-                const cx = getCurrentX(seat, o.slot.id);
-                const cy = getCurrentY(seat, o.slot.id);
-                const x0 = cx - left(3);
-                const y0 = cy - top(3);
-                animationProps["x"] = x0;
-                animationProps["y"] = y0;
-                animationProps["opacity"] = 1;
-                animationProps["transition"] = {
-                  duration: 0.2,
-                  default: { ease: "linear" },
-                };
-              }
+  useEffect(()=>{
+    if (results?.length > 0) {
+      controls.start((o) => {
+        const animationProps: any = {};
+        const res = results.find((b) => b.slot === o.slot.id);
+        if (res?.win === BattleResultType.FAIL) {
+          if (o.seatNo < 3) {
+            const seat = seats.find((s) => s.no === o.seatNo);
+            if (seat) {
+              animationProps["x"] = left(3) - left(seat.no);
+              animationProps["y"] = top(3) - top(seat.no);
+              animationProps["transition"] = {
+                type:"tween",
+                duration: 0.2,
+              };
             }
           }
-          return animationProps;
-        });
-      }
-    } else if (event?.name === "slotSplitted" || event?.name === "slotActivated") {
+        } else if (res?.win === BattleResultType.WIN) {
+          if (o.seatNo === 3) {
+            const seat = seats.find((s) => s.no === res.seat);
+            if (seat) {
+              const cx = getCurrentX(seat, o.slot.id);
+              const cy = getCurrentY(seat, o.slot.id);
+              const x0 = cx - left(3);
+              const y0 = cy - top(3);
+              animationProps["x"] = x0;
+              animationProps["y"] = y0;
+              animationProps["opacity"] = 1;
+              animationProps["transition"] = {
+                type:"tween",
+                duration: 0.2,
+              };
+            }
+          }
+        }
+        return animationProps;
+      })
+    }
+  },[results])
+
+  useEffect(() => {
+
+    if (event?.name === "slotSplitted" || event?.name === "slotActivated") {
       const data = event?.data;
       let seatNo = data.seat;
       controls.start((o) => {
@@ -263,8 +265,9 @@ export default function SlotChipPanel() {
     }
     if (!seatCoords) return 0;
     const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
+    if(!seatCoord) return 0;
     if (seatNo === 3) return seatCoord["y"] + cardXY["height"] + 20;
-    else return seatCoord["y"] - 40;
+    else return seatCoord["y"] - 45;
   };
 
   const left = (seatNo: number): number => {
@@ -279,25 +282,24 @@ export default function SlotChipPanel() {
   };
   return (
     <>
-      {round > 0 &&
-        seats
-          .filter((s) => s.no < 3)
+      {
+        gameId>0&&seats.filter((s)=>s.no<3)
           .map((seat) =>
             seat.slots.map((slot) => (
-              <div key={seat.no + "-" + slot.id}>
+              <div key={gameId+"-"+seat.no + "-" + slot.id}>
                 <motion.div
-                  key={seat.no + "-" + slot.id}
+                  key={gameId+"-"+seat.no + "-" + slot.id}
                   custom={{ seatNo: seat.no, slot: slot }}
                   initial={{ opacity: 0 }}
                   animate={controls}
                   style={{
                     position: "absolute",
-                    zIndex: 1700,
+                    zIndex: 9700,
                     top: top(seat.no),
                     left: left(seat.no),
                   }}
                 >
-                  <div key={slot["id"] + ""} className="betchip bred"></div>
+                  <div  className="betchip bred"></div>
 
                   {seatBet(seat.no, slot["id"]) > 0 ? (
                     <div
@@ -327,13 +329,12 @@ export default function SlotChipPanel() {
                 </motion.div>
 
                 <motion.div
-                  key={"3-" + slot.id}
                   custom={{ seatNo: 3, slot: slot }}
                   initial={{ opacity: 0 }}
                   animate={controls}
                   style={{
                     position: "absolute",
-                    zIndex: 1700,
+                    zIndex: 9700,
                     top: top(3),
                     left: left(3),
                   }}
@@ -343,10 +344,11 @@ export default function SlotChipPanel() {
               </div>
             ))
           )}
-      {seatBet(3, 0) > 0 ? (
+       {seatBet(3, 0) > 0 ? (
         <div
           style={{
             position: "absolute",
+            zIndex: 9600,
             top: top(3) + 5,
             left: left(3) + 15,
             display: "flex",
@@ -362,7 +364,7 @@ export default function SlotChipPanel() {
           }}
         >
           <span>{seatBet(3, 0)}</span>
-        </div>
+        </div> 
       ) : null}
     </>
   );

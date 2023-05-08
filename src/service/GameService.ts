@@ -42,18 +42,18 @@ const useGameService = () => {
     const autoAct=()=>{    
         if(turnService){
            const turns = turnService.findAllPast();
-      
+          
            if(turns){
                
                 for(let turn of turns){
                         const game: GameModel | null = findWithLock(turn.gameId);
                         if(game){
-                            // console.log(game)
+                            
                             notActProcessor.process(game)
                             const ver = game.ver
                             if(turn.round===0){
                                 const seats = game.seats.filter((s)=>s.bet>0);
-                                // console.log(seats)
+                                console.log(seats)
                                 if(seats?.length>0){
                                     launchProcessor.process(game)
                                 }else{
@@ -62,8 +62,9 @@ const useGameService = () => {
                                 }
                             }else if(turn.round===1){
                                 const remainTime = turn.expireTime-Date.now();
+
                                 if(remainTime<0&&turn.seat===game.currentTurn.seat){
-                                    console.log("stand actioon...")
+                                
                                     standProcessor.process(game);
                                     if (game.status === 1) {
                                         console.log("game over")
@@ -124,19 +125,19 @@ const useGameService = () => {
 
     }
     
-    const createGame = (table: TableModel): GameModel => {
+    const createGame = (table: TableModel,delay:number): GameModel => {
         
         const gameData: GameModel = getInitGame(table);
         gameData.tournamentId = table.tournamentId;
         gameData.tableId = table.id;
-        initGameProcessor.process(gameData);
+        initGameProcessor.process(gameData,delay);
         // console.log(gameData)
         create(gameData);
         return gameData
     }
 
     const deal = (gameId: number, seatNo: number, chips: number) => {
-        console.log(gameId+":"+seatNo+":"+chips)
+       
         const gameObj: GameModel | null = findWithLock(gameId);
         if (gameObj) {
             dealProcessor.process(gameObj,seatNo,chips);
@@ -223,7 +224,7 @@ const useGameService = () => {
           
             if (tournament) {
                 if ((tournament.type === 0 && table.seats.filter((s) => s.no < 3).length > 0) || (tournament.type === 1 && table.games.length < tournament.rounds)) {
-                    const newGame: GameModel = createGame(table);
+                    const newGame: GameModel = createGame(table,2000);
                     
                     if (tournament.type === 0)
                         table.games = [newGame.gameId]

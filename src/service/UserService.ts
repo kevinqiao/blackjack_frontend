@@ -1,23 +1,23 @@
+
 import { useEffect } from "react";
 import { UserModel } from "../model/types/User";
 import useUserDao from "../respository/UserDao";
-
-
-
+import { useUserManager } from "./UserManager";
 
 const useUserService = () => {
-    const { findUser,  createUser } = useUserDao();
+
+    const { findUser,  createUser ,updateUser} = useUserDao();
     const signin = (): UserModel | null => {
         if (typeof window !== "undefined") {
             const userstr = window.localStorage.getItem("user");
             if (userstr) {
                 let user = JSON.parse(userstr);
-                user =findUser(user.uid)
+                console.log(user)
+                // user =findUser(user.uid)
                 return user;
             }
         }
         return null;
-
     }
     const login = (userId: string, password: string): UserModel | null => {
         const user = findUser(userId);

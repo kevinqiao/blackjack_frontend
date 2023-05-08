@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect } from "react";
-import { TableModel } from "../model";
+import { TableModel, UserModel } from "../model";
+import useUserDao from "../respository/UserDao";
 
 import useEventSubscriber from "./EventManager";
 import useUserService from "./UserService";
@@ -8,9 +9,10 @@ interface IUserContext {
   token: string | null;
   tableId: number;
   chips: number;
-  login: (userId: string, password: string) => void;
-  logout: () => void;
-  joinTable: (table: TableModel) => void;
+  // login: (userId: string, password: string) => void;
+  // logout: () => void;
+  // joinTable: (table: TableModel) => void;
+  updateUser:(data:any)=>void
 }
 
 const initialState = {
@@ -34,7 +36,6 @@ const reducer = (state: any, action: any) => {
       return initialState;
     case actions.UPDATE_USER:
       const u = Object.assign({}, state, action.data);
-
       return u;
     default:
       return state;
@@ -46,15 +47,17 @@ const UserContext = createContext<IUserContext>({
   token: null,
   tableId: 0,
   chips: 0,
-  login: (userId: string, password: string) => null,
-  logout: () => null,
-  joinTable: () => null,
+  // login: (userId: string, password: string) => null,
+  // logout: () => null,
+  // joinTable: () => null,
+  updateUser:()=>null
 });
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { event } = useEventSubscriber(["updateUser"], ["model"]);
   const userService = useUserService();
+  const userDao = useUserDao();
   useEffect(() => {
     const user = userService.signin();
     console.log(user);
@@ -76,19 +79,26 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     token: state.token,
     tableId: state.tableId,
     chips: state.chips,
-    login: (userId: string, token: string) => {
-      const user = userService.login(userId, token);
-      // console.log(user);
-      if (user) dispatch({ type: actions.SIGNIN_SUCCESS, data: user });
+    // login: (userId: string, token: string) => {
+    //   const user = userService.login(userId, token);
+    //   // console.log(user);
+    //   if (user) dispatch({ type: actions.SIGNIN_SUCCESS, data: user });
+    // },
+    // logout: () => {
+    //   console.log("logging out");
+    //   dispatch({ type: actions.LOGOUT_COMPLETE, data: null });
+    //   userService.logout();
+    // },
+    updateUser:(data:any)=>{
+      console.log(data)
+      dispatch({ type: actions.UPDATE_USER, data: data });
+      const u = Object.assign({}, state, data);
+      console.log(u)
+      window.localStorage.setItem("user", JSON.stringify(u));
     },
-    logout: () => {
-      console.log("logging out");
-      dispatch({ type: actions.LOGOUT_COMPLETE, data: null });
-      userService.logout();
-    },
-    joinTable: (table: TableModel) => {
-      dispatch({ type: actions.UPDATE_USER, data: { tableId: table.id } });
-    },
+    // joinTable: (table: TableModel) => {
+    //   dispatch({ type: actions.UPDATE_USER, data: { tableId: table.id } });
+    // },
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

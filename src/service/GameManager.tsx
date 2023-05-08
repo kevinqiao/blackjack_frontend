@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useReducer, useState } from "react";
+import React, { createContext, useContext, useEffect, useReducer, useRef, useState } from "react";
 import { CardModel, IGameContext, SeatBetSlot, SeatModel, TableSeat } from "../model";
 import ActionType from "../model/types/ActionType";
 import useGameDao from "../respository/GameDao";
@@ -118,9 +118,11 @@ const GameContext = createContext<IGameContext>({
   status: 0,
   currentTurn: null,
   results: [],
+  getCardIndex:()=>0
 });
 
 export const GameProvider = ({ children }: { children: React.ReactNode }) => {
+  const cardIndex=useRef(-1);
   const [seatOffset, setSeatOffset] = useState(0);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { event, createEvent } = useEventSubscriber(
@@ -140,7 +142,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const tournamentService = useTournamentService();
-  const { tournament, table, initTournament, initTable, clearTable } = useTournamentManager();
+  const { tournament, table, initTournament, initTable } = useTournamentManager();
   const gameService = useGameService();
   const gameDao = useGameDao();
   const { uid, tableId } = useUserManager();
@@ -158,26 +160,17 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   }, [uid, table, state.seats]);
   // console.log("seatoffsett:" + seatOffset);
   useEffect(() => {
-    if (tableId === 0) {
-      clearTable();
-    } else {
-      const tableObj = tournamentService.findTable(tableId);
-      // console.log(tableObj);
-      if (tableObj?.status === 0) {
-        const tournamentObj = tournamentService.findTournament(tableObj.tournamentId);
-        initTournament(tournamentObj);
-        setTimeout(() => initTable(tableObj), 50);
-        if (tableObj.games?.length > 0) {
-          const game = gameDao.findGame(tableObj.games[tableObj.games.length - 1]);
+    
+      if (table&&table.games?.length > 0&&state.gameId!==table.games[table.games.length-1]) {
+          const game = gameDao.findGame(table.games[table.games.length - 1]);
           if (game) setTimeout(() => dispatch({ type: actions.INIT_GAME, game: game }), 80);
-        }
       }
-    }
-  }, [tableId]);
+       
+  }, [table]);
 
   useEffect(() => {
     if (event?.name === "initGame") {
-      handleInit(event.data);
+      handleInit(event.data).then(()=>console.log("handle init game"))
     } else if (event?.name === "placeBet") {
       handlePlaceBet(event.data);
     } else if (event?.name === "insureBet") {
@@ -199,12 +192,15 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
       dispatch({ type: actions.CLEAR_GAME, data: {} });
     }
   }, [event]);
-  const handleInit = (gameObj: any) => {
+  const handleInit = async (gameObj: any) => {
+    cardIndex.current=-1;
     if (!tournament || tournament.id != gameObj.tournamentId) {
-      const tournamentObj = tournamentService.findTournament(gameObj.tournamentId);
-      const tableObj = tournamentService.findTable(gameObj.tableId);
+      const tournamentObj = await tournamentService.findTournament(gameObj.tournamentId);
       if (tournamentObj) initTournament(tournamentObj);
-      if (tableObj) setTimeout(() => initTable(tableObj), 100);
+      if(!table||table.id!==gameObj.tableId){
+          const tableObj = await tournamentService.findTournamentTable(gameObj.tableId);
+          if (tableObj) setTimeout(() => initTable(tableObj), 100);
+      }
     }
     dispatch({ type: actions.INIT_GAME, game: gameObj });
     createEvent({ name: "gameInit", topic: "", data: gameObj, delay: 10 });
@@ -215,7 +211,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   };
   const handleSettleGame = (data: any) => {
     dispatch({ type: actions.SETTLE_GAME, results: data });
-    createEvent({ name: "gameOver", topic: "", data: data, delay: 3000 });
+    // createEvent({ name: "gameOver", topic: "", data: data, delay: 3000 });
   };
   const handleCreateNewTurn = (data: any) => {
     dispatch({ type: actions.UPDATE_TURN, data: data });
@@ -255,7 +251,9 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     status: state.status,
     currentTurn: state.currentTurn,
     results: state.results,
-
+    getCardIndex:()=>{
+      return cardIndex.current++;
+    }
     // shuffle: () => {},
     // deal: (chips: number) => {
     //   const seat = state.seats.find((s: SeatModel) => s.uid);

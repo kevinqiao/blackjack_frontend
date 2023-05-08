@@ -2,69 +2,80 @@ import { TableModel, TournamentModel } from "../model";
 import useTableDao from "../respository/TableDao";
 import { useTournamentDao } from "../respository/TournamentDao";
 import useUserDao from "../respository/UserDao";
-import useInterval from "../util/useInterval";
 import useEventSubscriber from "./EventManager";
 import useGameService from "./GameService";
 import { useTournamentManager } from "./TournamentManager";
 import { useUserManager } from "./UserManager";
-
+import useTournamentAPI from "../api/TournamentAPI";
+import DEPLOY_ENV from "../Config";
+import useTableAPI from "../api/TableAPI";
 
 
 
 const useTournamentService = () => {
     const { initTable,initTournament } = useTournamentManager();
-    const {uid,token,joinTable} = useUserManager();
+    const {uid,token,updateUser} = useUserManager();
 
     const gameService = useGameService();
     const { findUserWithLock, updateUserWithLock } = useUserDao();
     const { findTable, findTournamentTables, findTableWithLock, createTable, updateTableWithLock } = useTableDao();
-    const { findTournament, findAllTournaments, initTournaments } = useTournamentDao();
+    // const { findTournament, findAllTournaments, initTournaments } = useTournamentDao();
+    const tournamentDao =useTournamentDao();
+    const tournamentAPI = useTournamentAPI();
+    const tableAPI = useTableAPI();
     const { createEvent } = useEventSubscriber([], [])
 
 
-    const join = (tournament: TournamentModel) => {
+    const join = async (tournament: TournamentModel) => {
         let table = null;
-        if (tournament?.type === 0) {
-            let tables: TableModel[] | null = findTournamentTables(tournament.id);
-            if (!tables || tables.length === 0) {
-                table = {
-                    id: Date.now(),
-                    tournamentId: tournament.id,
-                    tournamentType: 0,
-                    size: 3,
-                    lastStartSeat: -1,
-                    sits: 0,
-                    seats: [],
-                    games: [],
-                    status: 0,
-                    ver: 0
-                }
-                tables = [table]
-                createTable(table);
-            }
-            tables = tables.filter((t) => t.sits < 3 && t.status === 0).sort((a, b) => a.sits - b.sits);
-            if (tables.length > 0)
-                table = tables[0]
+        if(DEPLOY_ENV.BACKBONE===0&&uid){
+           table = await tournamentAPI.join(tournament.id,uid)
+        }else{
+            if (tournament?.type === 0) {
+                    let tables: TableModel[] | null = findTournamentTables(tournament.id);
+                    console.log("tournament type is 0,tables:")
+                    console.log(tables)
+                    if (!tables || tables.length === 0) {
+                        table = {
+                            id: Date.now(),
+                            tournamentId: tournament.id,
+                            tournamentType: 0,
+                            size: 3,
+                            lastStartSeat: -1,
+                            sits: 0,
+                            seats: [],
+                            games: [],
+                            status: 0,
+                            ver: 0
+                        }
+                        tables = [table]
+                        createTable(table);
+                    }
+                    tables = tables.filter((t) => t.sits < 3 && t.status === 0).sort((a, b) => a.sits - b.sits);
+                    if (tables.length > 0)
+                        table = tables[0]
 
-        } else if (tournament?.type === 1) {
-            table = {
-                id: Date.now(),
-                tournamentId: tournament.id,
-                tournamentType: 0,
-                size: 3,
-                lastStartSeat: -1,
-                sits: 0,
-                seats: [],
-                games: [],
-                status: 0,
-                ver: 0
-            }
-            createTable(table);
+                } else if (tournament?.type === 1) {
+                    table = {
+                        id: Date.now(),
+                        tournamentId: tournament.id,
+                        tournamentType: 0,
+                        size: 3,
+                        lastStartSeat: -1,
+                        sits: 0,
+                        seats: [],
+                        games: [],
+                        status: 0,
+                        ver: 0
+                    }
+                    createTable(table);
+                }
         }
         if(table){
+            console.log(table)
             initTable(table);
             initTournament(tournament);
-            joinTable(table)
+            updateUser({tableId:table.id})
         }
 
     }
@@ -85,7 +96,7 @@ const useTournamentService = () => {
 
             if (table.seats.length===1) {
                 console.log(table)
-                const game = gameService.createGame(table);
+                const game = gameService.createGame(table,0);
                 table.games = [game.gameId]
             }
  
@@ -113,7 +124,7 @@ const useTournamentService = () => {
     }
     const standup = (uid: string, tableId: number) => {
         const table = findTableWithLock(tableId);
-        console.log(table)
+     
         if (table) {
             const seats = table.seats.filter((s) => s.uid !== uid);
             table.seats = seats;
@@ -121,9 +132,34 @@ const useTournamentService = () => {
             createEvent({ name: "updateTable", topic: "model", data: table, delay: 0 })
         }
     }
-
-
-    return { join, sitDown, standup, leave, findAllTournaments, findTournament, findTable, initTournaments }
+    const findAllTournaments=async ():Promise<TournamentModel[]|null>=>{
+       console.log(DEPLOY_ENV)
+       console.log("env:"+DEPLOY_ENV.BACKBONE)
+        if(DEPLOY_ENV.BACKBONE===0){
+           return await tournamentAPI.findAll()
+        }else
+           return tournamentDao.findAllTournaments();
+    }
+    const findTournament=async (id:number):Promise<TournamentModel|null>=>{
+    
+        if(DEPLOY_ENV.BACKBONE===1){
+            const tour= tournamentDao.findTournament(id);
+            console.log(tour)
+            return tour
+        }else{
+            return await tournamentAPI.findOne(id)
+        }
+    }
+    const findTournamentTable=async (id:number):Promise<TableModel|null>=>{
+        if(DEPLOY_ENV.BACKBONE===1){
+            return findTable(id);
+        }else{
+            return await tableAPI.findOne(id)
+        }
+       
+    }
+    return { join, sitDown, standup, leave, findAllTournaments,findTournament
+         ,findTournamentTable}
 
 }
 export default useTournamentService;

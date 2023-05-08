@@ -94,7 +94,7 @@ export const CoordProvider = ({ children }: { children: HTMLElement }) => {
     v["cardXY"] = { width: cardWidth, height: cardHeight };
 
     v["seatCoords"] = [];
-    const seat0 = { no: 0, direction: 0, x: w / 2, y: h - cardHeight - 20, dx: 0.3 };
+    const seat0 = { no: 0, direction: 0, x: w / 2, y: h - cardHeight - 50, dx: 0.3 };
     const seat1 = { no: 1 };
     const seat2 = { no: 2 };
     const seat3 = { no: 3, direction: 0, x: w / 2, y: 40, dx: 0.3 };

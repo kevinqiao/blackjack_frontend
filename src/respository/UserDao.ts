@@ -19,6 +19,22 @@ export const useUserDao = () => {
     }
     return user;
   }
+  const updateUser = (data: any) => {
+    let user = null;
+    if (typeof window !== "undefined") {
+      const userstr = window.localStorage.getItem("users");
+      if (typeof userstr != "undefined" && userstr != null) {
+        const users = JSON.parse(userstr);
+        if (users?.length > 0) {
+          user = users.find((t: UserModel) => t.uid == data.uid);
+            Object.assign(user, data);
+            window.localStorage.setItem("users", JSON.stringify(users));
+          
+        }
+      }
+    }
+    return user;
+  }
   const createUser = (data: any) => {
     if (typeof window !== "undefined") {
       const userstr = window.localStorage.getItem("users");
@@ -64,7 +80,7 @@ export const useUserDao = () => {
     }
     return null;
   }
-  return { findUser,findUserWithLock, createUser, updateUserWithLock }
+  return { findUser,findUserWithLock, createUser, updateUser,updateUserWithLock }
 }
 
 export default useUserDao

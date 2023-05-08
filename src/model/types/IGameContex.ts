@@ -12,6 +12,7 @@ export interface IGameContext {
   currentTurn: ActionTurn | null;
   status: number;
   results: SlotBattleResult[];
+  getCardIndex:()=>number;
   // newGame: () => void;
   // deal: (chips: number) => void;
   // shuffle: () => void;

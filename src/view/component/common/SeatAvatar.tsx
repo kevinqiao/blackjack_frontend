@@ -19,7 +19,7 @@ export default function SeatAvatar() {
     (seatNo) => {
       if (seatCoords && cardXY) {
         const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
-        if (seatCoord) return seatCoord["y"] - 25;
+        if (seatCoord) return seatCoord["y"]+cardXY['height'] +10;
       }
       return 0;
     },
@@ -30,7 +30,7 @@ export default function SeatAvatar() {
     (seatNo) => {
       if (seatCoords && cardXY) {
         const seatCoord = seatCoords.find((s: any) => s.no === seatNo);
-        if (seatCoord) return seatCoord["x"] - 5;
+        if (seatCoord) return seatCoord["x"] - 45;
       }
       return 0;
     },

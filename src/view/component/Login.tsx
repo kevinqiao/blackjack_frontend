@@ -1,15 +1,29 @@
+import { useEffect } from "react";
 import useCoordManager from "../../service/CoordManager";
 import { useTournamentManager } from "../../service/TournamentManager";
 import useTournamentService from "../../service/TournamentService";
 import { useUserManager } from "../../service/UserManager";
+import useUserService from "../../service/UserService";
 
 const Login = () => {
   const { viewport } = useCoordManager();
-  const { uid, token, login, logout } = useUserManager();
+  const { uid,updateUser} = useUserManager();
+  const  userService = useUserService();
   const { table} = useTournamentManager();
   const tournamentService = useTournamentService();
+ useEffect(()=>{
+   const user = userService.signin();
+   if(user)
+      updateUser(user) 
+ },[])
+  const login=(userid:string,token:string)=>{
+    const user  = userService.login(userid,token)
+    console.log(user)
+    if(user)
+      updateUser(user) 
+  }
   const signout = () => {
-    logout();
+    userService.logout();
     // leave();
   };
   const reset = () => {
