@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useContext, createContext, useRef } from "react";
 import io, { Socket } from 'socket.io-client';
-const url = "ws://127.0.0.1:8080/?uid=1";
+import useEventSubscriber from "./EventManager";
+import { useUserManager } from "./UserManager";
+const url = "ws://127.0.0.1:8080";
 interface ISocketContext {
   sendEvent:(uid:string,event:any)=>void
 }
@@ -11,27 +13,37 @@ export const SocketContext = createContext<ISocketContext>({
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   const socketRef = useRef<Socket | null>(null);
-
+  const {uid,token}=useUserManager();
+  const {createEvent} = useEventSubscriber([],[]);
+  console.log(uid+":"+token)
   useEffect(() => {
-    console.log("tryinig connect to websocket")
+    console.log("tryinig connect to websocket,"+uid+":"+token)
     // Connect to the Socket.IO server
-    socketRef.current = io(url);
-    if(socketRef.current!=null)
-  
-      socketRef.current.on("connect", () => {
-        console.log("socket connected"); // true
-    });
-    // Listen for new messages
-    if(socketRef.current)
-    socketRef.current.on('events', (message:any) => {
-      console.log(message)
-    });
-
+    if(uid&&token){
+          const uri=url+"/?uid="+uid+"&token="+token;
+          socketRef.current = io(uri);
+          if(socketRef.current!=null){        
+              socketRef.current.on("connect", () => {
+                  console.log("socket connected"); // true
+              });
+              socketRef.current.on('events', (events:any) => {
+                console.log(events)
+                 if(Array.isArray(events)){
+                    let count=0;
+                    for(const event of events){
+                       setTimeout(()=>createEvent(event),count*10);
+                       count++;
+                    }
+                 }else
+                    createEvent(events)
+              });
+          }
+    }
     // Clean up when the component is unmounted
     return () => {
       socketRef.current?.disconnect();
     };
-  }, []);
+  }, [uid,token]);
   const value = {
     sendEvent: (uid:string,event:any) => {
       // console.log("send events");

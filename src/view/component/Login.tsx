@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import useUserAPI from "../../api/UserAPI";
 import useCoordManager from "../../service/CoordManager";
 import { useTournamentManager } from "../../service/TournamentManager";
 import useTournamentService from "../../service/TournamentService";
@@ -7,25 +8,17 @@ import useUserService from "../../service/UserService";
 
 const Login = () => {
   const { viewport } = useCoordManager();
-  const { uid,updateUser} = useUserManager();
+  const { uid,token,updateUser,signout} = useUserManager();
   const  userService = useUserService();
   const { table} = useTournamentManager();
   const tournamentService = useTournamentService();
- useEffect(()=>{
-   const user = userService.signin();
-   if(user)
-      updateUser(user) 
- },[])
-  const login=(userid:string,token:string)=>{
-    const user  = userService.login(userid,token)
-    console.log(user)
+
+  const login=async (name:string,password:string)=>{
+    const user = await userService.login(name,password)
     if(user)
-      updateUser(user) 
+       updateUser(user)
+
   }
-  const signout = () => {
-    userService.logout();
-    // leave();
-  };
   const reset = () => {
     window.localStorage.removeItem("users");
     window.localStorage.removeItem("user");
@@ -35,12 +28,13 @@ const Login = () => {
   };
   const leave=()=>{
     if(uid&&table)
-      tournamentService.leave(uid, table.id);
+      tournamentService.leave(table.id);
   }
   const standup=()=>{
     if(uid&&table)
-      tournamentService.standup(uid, table.id);
+      tournamentService.standup(table.id);
   }
+ 
   return (
     <>
       {!uid ? (
@@ -69,7 +63,7 @@ const Login = () => {
                 backgroundColor: "red",
                 color: "white",
               }}
-              onClick={() => login("1", "test")}
+              onClick={() => login("kevin1", "12345")}
             >
               User 1
             </div>
@@ -85,7 +79,7 @@ const Login = () => {
                 backgroundColor: "red",
                 color: "white",
               }}
-              onClick={() => login("2", "test")}
+              onClick={() => login("kevin2", "12345")}
             >
               User 2
             </div>
@@ -101,9 +95,25 @@ const Login = () => {
                 backgroundColor: "red",
                 color: "white",
               }}
-              onClick={() => login("3", "test")}
+              onClick={() => login("kevin3", "12345")}
             >
               User 3
+            </div>
+            <div
+              style={{
+                cursor: "pointer",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: 80,
+                height: 40,
+                borderRadius: 5,
+                backgroundColor: "red",
+                color: "white",
+              }}
+              onClick={() => login("kevin1","54321")}
+            >
+              Login
             </div>
           </div>
         </div>

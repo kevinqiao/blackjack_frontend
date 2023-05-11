@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useTournamentManager } from "../../service/TournamentManager";
 import LobbyHome from "./LobbyHome";
 import PlayHome from "./PlayHome";
+import { useUserManager } from "../../service/UserManager";
 
 function MainHome() {
   const { table } = useTournamentManager();
@@ -12,7 +13,7 @@ function MainHome() {
     // window.localStorage.removeItem("user");
     // window.localStorage.removeItem("tables");
     // window.localStorage.removeItem("games");
-    //window.localStorage.removeItem("turns")
+    // window.localStorage.removeItem("turns")
   }, []);
 
   return (

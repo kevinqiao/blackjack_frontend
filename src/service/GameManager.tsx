@@ -136,7 +136,8 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
       "splitSlot",
       "openSlot",
       "finishTournament",
-      "clearGame"
+      "clearGame",
+      "leaveTable"
     ],
     ["model"]
   );
@@ -188,6 +189,9 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     } else if (event?.name === "settleGame") {
       handleSettleGame(event.data);
     } else if (event?.name === "finishTournament"||event?.name==="clearGame") {
+      console.log("clear game");
+      dispatch({ type: actions.CLEAR_GAME, data: {} });
+    }else if(event?.name==="leaveTable"&&uid===event.data.uid){
       console.log("clear game");
       dispatch({ type: actions.CLEAR_GAME, data: {} });
     }

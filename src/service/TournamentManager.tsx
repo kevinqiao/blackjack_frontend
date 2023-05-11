@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { TableModel, TableSeat, TournamentModel } from "../model";
 import { ITournamentContext } from "../model/types/ITournamentContex";
-import TableHome from "../view/component/TableHome";
 import useEventSubscriber from "./EventManager";
 import useTournamentService from "./TournamentService";
 import { useUserManager } from "./UserManager";
@@ -19,6 +18,7 @@ const actions = {
   CLEAR_TOURNAMENT: "CLEAR_TOURNAMENT",
   INIT_TABLE: "INIT_TABLE",
   UPDATE_TABLE: "UPDATE_TABLE",
+  ADD_SEAT:"ADD_SEAT",
   CLEAR_TABLE: "CLEAR_TABLE",
   REMOVE_SEAT:"REMOVE_SEAT"
 };
@@ -40,12 +40,18 @@ const reducer = (state: any, action: any) => {
       return Object.assign({}, state, { table: Object.assign({}, state.table, action.data) });
     case actions.CLEAR_TABLE:
       return Object.assign({}, state, { table: null });
+    case actions.ADD_SEAT:
+      if(state.table){
+        const seats = [...state.table.seats,action.data]
+        const table = Object.assign({},state.table,{seats:seats})
+        return Object.assign({},state,{table:table})
+      } 
     case actions.REMOVE_SEAT:
       if(state.table){
-           const seatNo = action.data.seatNo;
+           const seatNo = action.data.no;
            const seats =state.table.seats.filter((s:TableSeat)=>s.no!==seatNo);
-           console.log(seats)
-           return Object.assign({},state,{table:Object.assign({},state.table,{seats:seats})})
+           const table = Object.assign({},state.table,{seats:seats})
+           return Object.assign({},state,{table:table})
       }
       return state;
     default:
@@ -60,29 +66,23 @@ const TournamentContext = createContext<ITournamentContext>({
   initTournament: (tournament: TournamentModel) => null,
   initTable: (table: TableModel) => null,
   clearTable: () => null,
-  // sitDown: (seatNo: number) => null,
-  // join: (tournament: TournamentModel) => null,
-  // leave: () => null,
-  // standup: () => null,
-  //selectTournament: (t: TournamentModel) => null,
 });
 
 export const TournamentProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const [seatOffset, setSeatOffset] = useState(0);
   const { event, createEvent } = useEventSubscriber(
-    ["initTable", "updateTable","removeSeat", "sitDown", "standUp", "quitMatch", "settleMatch", "finishTournament"],
+    ["initTable", "updateTable","removeSeat", "sitDown", "standup", "quitMatch", "settleMatch", "finishTournament"],
     ["model"]
   );
   const tournamentService = useTournamentService();
   const {uid,tableId} = useUserManager();
 
   useEffect(() => {
-    if (event?.name === "updateTable") {
-      dispatch({ type: actions.UPDATE_TABLE, data: event.data });
+    if (event?.name === "sitDown") {
+      dispatch({ type: actions.ADD_SEAT, data: event.data });
     } else if (event?.name === "finishTournament") {
       dispatch({ type: actions.CLEAR_TABLE });
-    }else if(event?.name==="removeSeat"){
+    }else if(event?.name==="standup"){
       dispatch({type:actions.REMOVE_SEAT,data:event.data})
     }
   }, [event]);
@@ -96,11 +96,9 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
     if (tableId === 0) {
       dispatch({ type: actions.CLEAR_TABLE });
     } else {
-     console.log("tableId:"+tableId)
      tournamentService.findTournamentTable(tableId).then((tableObj)=>{
         if(tableObj&&(!state.tournament||state.tournament.id !==tableObj.tournamentId)) {
             tournamentService.findTournament(tableObj.tournamentId).then((tournamentObj)=>{
-                console.log(tournamentObj)
                 if(tournamentObj){               
                     dispatch({ type: actions.SELECT_TOURNAMENT, data: tournamentObj });
                     setTimeout(() => dispatch({ type: actions.UPDATE_TABLE, data: tableObj }), 50);
@@ -111,18 +109,6 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
     }
   }, [tableId]);
 
-  useEffect(() => {
-    let offset = 0;
-    if (!uid || !state.table) setSeatOffset(0);
-    else if (state.table && state.table.seats?.length > 0) {
-      const seat = state.table.seats.find((s: TableSeat) => s.uid === uid && s.no < 3);
-    
-      if (seat) {
-        offset = seat.no === 0 ? 0 : 3 - seat.no;
-        setSeatOffset(offset);
-      }
-    }
-  }, [uid, state.table]);
 
   const value = {
     table: state.table,
@@ -137,36 +123,7 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
     clearTable: () => {
       dispatch({ type: actions.CLEAR_TABLE });
     },
-    // sitDown: (seatNo: number) => {
-    //   // let sno = seatNo - seatOffset;
-    //   // if (sno < 0) sno = sno + 3;
-    //   if (uid) tournamentService.sitDown(state.table.id, uid, seatNo);
-    // },
-    // join: (tournament: TournamentModel) => {
-    //   dispatch({ type: actions.SELECT_TOURNAMENT, data: tournament });
-    //   if (tournament != null && uid != null && token != null) {
-    //     const table = tournamentService.join(tournament.id, uid, token);
-    //     console.log(table);
-    //     if (table) {
-    //       // if(table.games?.length>0){
-    //       //    const game = gameDao.find(table.games[0]);
-    //       //    console.log(game)
-    //       // }
-    //       joinTable(table);
-    //       dispatch({ type: actions.INIT_TABLE, data: table });
-    //     }
-    //   }
-    // },
-    // leave: useCallback(() => {
-    //   if (uid && state.table && state.table.id > 0) tournamentService.leave(uid, state.table.id);
-    // }, [uid, state.table]),
-    // standup: useCallback(() => {
-    //   if (uid && state.table && state.table.id > 0) tournamentService.standup(uid, state.table.id);
-    // }, [uid, state.table]),
-    // selectTournament: (t: TournamentModel) => {
-    //   console.log(t);
-    //   dispatch({ type: actions.SELECT_TOURNAMENT, data: t });
-    // },
+
   };
 
   return <TournamentContext.Provider value={value}>{children}</TournamentContext.Provider>;

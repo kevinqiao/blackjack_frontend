@@ -1,39 +1,51 @@
-
+import { TableModel } from "../model";
+import { useUserManager } from "../service/UserManager";
+import axios, { AxiosRequestConfig } from 'axios';
 const useTableAPI=()=>{
-  const leave = async (tableId:number,uid:string):Promise<any> => {
+  const {uid,token} =useUserManager();
+  const leave = async (tableId:number) => {
  
-    const url = "http://localhost:8080/table/leave/"+tableId+"?uid="+uid;
-    const res = await fetch(url);
-    const json = await res.json();
-    console.log(json)
-    return json;
+    
+  const url = "http://localhost:8080/table/leave/"+tableId;
+  const headers: AxiosRequestConfig['headers'] = {
+    'Authorization': `Bearer ${token}`,
+  };
+
+ const res =  await axios.get(url, { headers })
   
  };
- const standup = async (tableId:number,uid:string):Promise<any> => {
+ const standup = async (tableId:number):Promise<any> => {
  
-  const url = "http://localhost:8080/table/standup/"+tableId+"?uid="+uid;
-  const res = await fetch(url);
-  const json = await res.json();
-  console.log(json)
-  return json;
+  const url = "http://localhost:8080/table/standup/"+tableId;
+  const headers: AxiosRequestConfig['headers'] = {
+    'Authorization': `Bearer ${token}`,
+  };
+
+ const res =  await axios.get(url, { headers })
 
 };
-  const sitDown = async (tableId:number,uid:string,seatNo:number):Promise<any> => {
+  const sitDown = async (tableId:number,uid:string,seatNo:number):Promise<void> => {
  
-    const url = "http://localhost:8080/table/sitdown/"+tableId+"?uid="+uid+"&seatNo="+seatNo;
-    const res = await fetch(url);
-    const json = await res.json();
-    console.log(json)
-    return json;
-  
+    const url = "http://localhost:8080/table/sitdown/"+tableId+"?seatNo="+seatNo;
+    // const res = await fetch(url);
+
+    const headers: AxiosRequestConfig['headers'] = {
+      'Authorization': `Bearer ${token}`,
+    };
+
+   const res =  await axios.get(url, { headers })
+
  };
- const findOne = async (tableId:number) => {
+ const findOne = async (tableId:number):Promise<TableModel|null>=> {
    console.log("tableId:"+tableId)
    const url = "http://localhost:8080/table/"+tableId;
    console.log(url)
    const res = await fetch(url);
    const json = await res.json();
-   return json;
+   if(json.ok)
+     return json.message;
+   else
+     return null
  };
  const findAll = async () => {
    const url = "http://localhost:8080/table/list";

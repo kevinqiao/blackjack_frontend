@@ -12,9 +12,6 @@ export default function SeatAvatar() {
   const {seats, seatOffset } = useGameManager();
   const tournamentService = useTournamentService();
 
-  // useEffect(()=>{
-  //  console.log("offset:"+seatOffset)
-  // },[seatOffset])
   const top = useCallback(
     (seatNo) => {
       if (seatCoords && cardXY) {
@@ -38,17 +35,20 @@ export default function SeatAvatar() {
   );
 
   const inSeat = useMemo(() => {
+
     let ok = false;
-    if (uid && table?.seats && seats) {
-      if (seats.find((s) => s.uid === uid) || table.seats.find((s) => s.uid === uid)) ok = true;
+    if (uid) {
+      if(table?.seats&&table.seats.find((s) => s.uid === uid)) ok = true;
+      if (seats&&seats.find((s) => s.uid === uid)) ok = true;
     }
     return ok;
-  }, [uid, table, seats]);
+  }, [table, seats]);
   const sitDown=(seatNo:number)=>{
       let sno = seatNo - seatOffset;
       if (sno < 0) sno = sno + 3;
       if (uid&&table) tournamentService.sitDown(table.id, uid, seatNo);
   }
+ 
   return (
     <>
       {seats &&
@@ -56,9 +56,10 @@ export default function SeatAvatar() {
         [0, 1, 2].map((sno) => {
           let seatNo: number = sno - seatOffset;
           if (seatNo < 0) seatNo = seatNo + 3;
+        
           const tableSeat = table.seats.find((s) => s.no === seatNo);
           const gameSeat = seats.find((s) => s.no === seatNo);
-          if (!inSeat && !tableSeat && !gameSeat)
+          if (!inSeat&&!tableSeat&&!gameSeat)
             return (
               <div
                 key={sno}

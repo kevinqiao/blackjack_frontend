@@ -34,8 +34,8 @@ function App() {
   const Providers = FlattenedProviderTree([
     [CoordProvider],
     [EventProvider],
-    [SocketProvider],
     [UserProvider],
+    [SocketProvider],
     [TournamentProvider],
     [GameProvider],
   ]);
