@@ -59,7 +59,7 @@ export default function TurnCountDown() {
       if (seatCoord) return seatCoord["y"] - 6;
     }
     return 0;
-  }, [currentTurn, seatCoords, cardXY]);
+  }, [seatOffset,currentTurn, seatCoords, cardXY]);
 
   const pleft = useMemo(() => {
     if (currentTurn && seatCoords && seats && cardXY) {
@@ -80,7 +80,7 @@ export default function TurnCountDown() {
       }
     }
     return 0;
-  }, [currentTurn, seatCoords, seats, cardXY]);
+  }, [seatOffset,currentTurn, seatCoords, seats, cardXY]);
 
  
   return (

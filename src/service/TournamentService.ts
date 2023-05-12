@@ -51,8 +51,7 @@ const useTournamentService = () => {
         tableAPI.standup(tableId).then(()=>console.log("stand up"))
     }
     const findAllTournaments=async ():Promise<TournamentModel[]|null>=>{
-       console.log(DEPLOY_ENV)
-       console.log("env:"+DEPLOY_ENV.BACKBONE)
+       
         if(DEPLOY_ENV.BACKBONE===0){
            return await tournamentAPI.findAll()
         }else

@@ -6,12 +6,12 @@ const useTableAPI=()=>{
   const leave = async (tableId:number) => {
  
     
-  const url = "http://localhost:8080/table/leave/"+tableId;
-  const headers: AxiosRequestConfig['headers'] = {
-    'Authorization': `Bearer ${token}`,
-  };
+      const url = "http://localhost:8080/table/leave/"+tableId;
+      const headers: AxiosRequestConfig['headers'] = {
+        'Authorization': `Bearer ${token}`,
+      };
 
- const res =  await axios.get(url, { headers })
+    const res =  await axios.get(url, { headers })
   
  };
  const standup = async (tableId:number):Promise<any> => {

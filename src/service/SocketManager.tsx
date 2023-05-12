@@ -15,9 +15,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const socketRef = useRef<Socket | null>(null);
   const {uid,token}=useUserManager();
   const {createEvent} = useEventSubscriber([],[]);
-  console.log(uid+":"+token)
+  
   useEffect(() => {
-    console.log("tryinig connect to websocket,"+uid+":"+token)
+    
     // Connect to the Socket.IO server
     if(uid&&token){
           const uri=url+"/?uid="+uid+"&token="+token;

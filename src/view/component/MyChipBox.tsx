@@ -243,7 +243,7 @@ const MyChipBox = () => {
       if(uid){
        const seat = seats.find((s)=>s.uid==uid)
        if(seat)
-        gameService.deal(gameId,seat.no,total)
+        gameService.deal(gameId,total)
       }
     }
   };

@@ -80,7 +80,7 @@ export const TournamentProvider = ({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (event?.name === "sitDown") {
       dispatch({ type: actions.ADD_SEAT, data: event.data });
-    } else if (event?.name === "finishTournament") {
+    } else if (event?.name === "finishTournament"&&state.tournament.type===1) {
       dispatch({ type: actions.CLEAR_TABLE });
     }else if(event?.name==="standup"){
       dispatch({type:actions.REMOVE_SEAT,data:event.data})

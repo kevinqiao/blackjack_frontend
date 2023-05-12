@@ -62,6 +62,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     userService.signin().then((user)=>{
       window.localStorage.setItem("user", JSON.stringify(user));
       dispatch({ type: actions.UPDATE_USER, data: user });
+    }).catch((err)=>{
+       console.log(err)
+       window.localStorage.removeItem("user")
     })
   }, []);
 

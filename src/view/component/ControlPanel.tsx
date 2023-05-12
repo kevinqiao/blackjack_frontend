@@ -3,16 +3,19 @@ import { useCallback, useEffect } from "react";
 import ActionType from "../../model/types/ActionType";
 import { useGameManager } from "../../service/GameManager";
 import useGameService from "../../service/GameService";
+import { useUserManager } from "../../service/UserManager";
 import "./styles.css";
 
 export default function ControlPanel() {
+  const {uid} = useUserManager();
   const {gameId,cards, seats, round, currentTurn } = useGameManager();
   const gameService =useGameService();
   const panelControls = useAnimationControls();
 
   useEffect(() => {
-    if (panelControls) {
-      if (round > 0)
+    if (panelControls&&currentTurn) {
+      const seat = seats.find((s) => s.no === currentTurn.seat);
+      if (seat?.uid ===uid&&currentTurn.round > 0)
         panelControls.start({
           y: -150,
           transition: {
@@ -29,8 +32,10 @@ export default function ControlPanel() {
           },
         });
     }
-  }, [round, panelControls]);
-
+  }, [currentTurn, panelControls]);
+  const splitCard = () => {
+    gameService.split(gameId);
+};
   const standSeat = () => {
       gameService.stand(gameId);
   };
@@ -127,7 +132,7 @@ export default function ControlPanel() {
                 backgroundColor: "red",
                 color: "white",
               }}
-       
+              onClick={()=>splitCard()}
             >
               Split
             </div>

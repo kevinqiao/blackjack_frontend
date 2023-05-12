@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useReducer, useRef, useState } from "react";
+import useGameAPI from "../api/GameAPI";
 import { CardModel, IGameContext, SeatBetSlot, SeatModel, TableSeat } from "../model";
 import ActionType from "../model/types/ActionType";
 import useGameDao from "../respository/GameDao";
@@ -145,11 +146,9 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   const tournamentService = useTournamentService();
   const { tournament, table, initTournament, initTable } = useTournamentManager();
   const gameService = useGameService();
-  const gameDao = useGameDao();
+  const gameAPI = useGameAPI();
   const { uid, tableId } = useUserManager();
-  useInterval(()=>{
-     gameService.autoAct();
-  },5000)
+
   useEffect(() => {
     let seat;
     if (table) seat = table.seats.find((s: TableSeat) => s.uid === uid && s.no < 3);
@@ -162,10 +161,11 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   // console.log("seatoffsett:" + seatOffset);
   useEffect(() => {
     
-      if (table&&table.games?.length > 0&&state.gameId!==table.games[table.games.length-1]) {
-          const game = gameDao.findGame(table.games[table.games.length - 1]);
-          if (game) setTimeout(() => dispatch({ type: actions.INIT_GAME, game: game }), 80);
-      }
+      if (table&&table.games?.length > 0&&state.gameId!==table.games[table.games.length-1])
+           gameAPI.findGame(table.games[table.games.length - 1]).then((game)=>{ 
+            console.log(game)     
+           if (game) setTimeout(() => dispatch({ type: actions.INIT_GAME, game: game }), 80);
+         })
        
   }, [table]);
 
@@ -258,33 +258,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
     getCardIndex:()=>{
       return cardIndex.current++;
     }
-    // shuffle: () => {},
-    // deal: (chips: number) => {
-    //   const seat = state.seats.find((s: SeatModel) => s.uid);
-    //   if (seat) gameService.deal(state.gameId, seat.no, chips);
-    //   // gameService.startGame();
-    // },
-    // hit: (seatNo: number) => {
-    //   console.log("hit on game:" + state.gameId);
-    //   createEvent({ name: "turnOver", topic: "", data: { seat: seatNo }, delay: 10 });
-    //   gameService.hit(state.gameId);
-    // },
-    // stand: (seatNo: number) => {
-    //   createEvent({ name: "turnOver", topic: "", data: { seat: seatNo }, delay: 10 });
-    //   gameService.stand(state.gameId);
-    // },
-    // double: () => {
-    //   console.log("double bet");
-    //   gameService.double();
-    // },
-    // insure: () => {
-    //   gameService.insure();
-    //   dispatch({ type: actions.INSURE_BET, data: { seatNo: state.currentTurn.seat } });
-    // },
-    // split: () => {
-    //   createEvent({ name: "turnOver", topic: "", data: { seat: state.currentTurn.seat }, delay: 10 });
-    //   gameService.split(state.gameId);
-    // },
+   
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
