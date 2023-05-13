@@ -13,6 +13,18 @@ const useGameAPI=()=>{
      console.log(res.data)
      return res.data;
   }
+  const findGameByTable = async (tableId:number) => {
+    const url = "http://localhost:8080/game/table/"+tableId;
+    const headers: AxiosRequestConfig['headers'] = {
+      'Authorization': `Bearer ${token}`,
+    };
+   const res =  await axios.get(url, { headers })
+   console.log(res)
+   if(res.data.ok)
+      return res.data.message
+   else
+      return null
+}
   const deal = async (gameId:number,chips:number) => {
   
       const url = "http://localhost:8080/game/deal/"+gameId+"?chips="+chips;
@@ -52,7 +64,7 @@ const stand = async (gameId:number) => {
     const res =  await axios.get(url, { headers })
 
 };
-return {deal,hit,stand,split,findGame}
+return {deal,hit,stand,split,findGame,findGameByTable}
  
 }
 export default useGameAPI

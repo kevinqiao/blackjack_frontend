@@ -18,7 +18,7 @@ const MyChipBox = () => {
   const [betChips, setBetChips] = useState<ChipModel[]>([]);
 
   const { myChipXY, chipScale, viewport, betChipXY, chipWidth, seatCoords } = useCoordManager();
-  const { round, gameId, seats } = useGameManager();
+  const { round,currentTurn, gameId, seats } = useGameManager();
   const { uid} = useUserManager();
   const gameService = useGameService();
   const btnControls = useAnimationControls();
@@ -33,23 +33,27 @@ const MyChipBox = () => {
   }, [gameId]);
   useEffect(() => {
 
-    if (round === 0 && gameId > 0) {
-      btnControls.start({
-        opacity: 1,
-        y: -200,
-        transition: {
-          type: "spring",
-          duration: 1.5,
-        },
-      });
-      dealControls.start({
-        opacity: 1,
-        transition: {
-          duration: 1.5,
-          type: "spring",
-        },
-      });
-    } else if (round > 0 || gameId <= 0) {
+    if (seats?.length>0&&currentTurn?.round === 0 && gameId > 0) {
+        const seat = seats.find((s)=>s.uid===uid);
+        if(seat?.bet===0){
+              btnControls.start({
+                opacity: 1,
+                y: -200,
+                transition: {
+                  type: "spring",
+                  duration: 1.5,
+                },
+              });
+              dealControls.start({
+                opacity: 1,
+                transition: {
+                  duration: 1.5,
+                  type: "spring",
+                },
+              });
+              return;
+        }
+    }else if(!currentTurn||currentTurn.round>0)
       btnControls.start({
         opacity: 0,
         y: 0,
@@ -65,8 +69,8 @@ const MyChipBox = () => {
           type: "spring",
         },
       });
-    }
-  }, [btnControls,dealControls,round, gameId]);
+   
+  }, [btnControls,dealControls,currentTurn, gameId,seats]);
   const total = useMemo(() => {
     const t = betChips.map((c) => c.amount).reduce((sub, c) => sub + c, 0);
     return t;

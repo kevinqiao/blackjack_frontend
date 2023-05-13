@@ -21,6 +21,7 @@ const initialState = {
   token: null,
   chips: 0,
   gameId: 0,
+  tableId:0
 };
 
 const actions = {
@@ -66,7 +67,28 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
        console.log(err)
        window.localStorage.removeItem("user")
     })
-  }, []);
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log('Tab is inactive');
+        dispatch({ type: actions.UPDATE_USER, data: {tableId:0} });
+      } else {
+        userService.signin().then((user)=>{
+          window.localStorage.setItem("user", JSON.stringify(user));
+          dispatch({ type: actions.UPDATE_USER, data: user });
+        }).catch((err)=>{
+           console.log(err)
+           window.localStorage.removeItem("user")
+        })
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup function
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [])
 
   useEffect(() => {
     if (event?.name === "leaveTable") {

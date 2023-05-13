@@ -282,8 +282,7 @@ export default function SlotChipPanel() {
   };
   return (
     <>
-      {
-        gameId>0&&seats.filter((s)=>s.no<3)
+      {gameId>0&&seats.filter((s)=>s.no<3)
           .map((seat) =>
             seat.slots.map((slot) => (
               <div key={gameId+"-"+seat.no + "-" + slot.id}>
@@ -299,9 +298,11 @@ export default function SlotChipPanel() {
                     left: left(seat.no),
                   }}
                 >
-                  <div  className="betchip bred"></div>
-
+                 
                   {seatBet(seat.no, slot["id"]) > 0 ? (
+                    <>
+                     <div  className="betchip bred"></div>
+
                     <div
                       // custom={{ seatNo: seat.no, slot: slot }}
                       // initial={{ opacity: 1 }}
@@ -324,7 +325,7 @@ export default function SlotChipPanel() {
                       }}
                     >
                       <span>{seatBet(seat.no, slot["id"])}</span>
-                    </div>
+                    </div></>
                   ) : null}
                 </motion.div>
 

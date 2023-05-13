@@ -145,7 +145,6 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 
   const tournamentService = useTournamentService();
   const { tournament, table, initTournament, initTable } = useTournamentManager();
-  const gameService = useGameService();
   const gameAPI = useGameAPI();
   const { uid, tableId } = useUserManager();
 
@@ -161,13 +160,15 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   // console.log("seatoffsett:" + seatOffset);
   useEffect(() => {
     
-      if (table&&table.games?.length > 0&&state.gameId!==table.games[table.games.length-1])
-           gameAPI.findGame(table.games[table.games.length - 1]).then((game)=>{ 
+      if (tableId)
+           gameAPI.findGameByTable(tableId).then((game)=>{ 
             console.log(game)     
-           if (game) setTimeout(() => dispatch({ type: actions.INIT_GAME, game: game }), 80);
+            if(game) setTimeout(() => dispatch({ type: actions.INIT_GAME, game: game }), 80);
          })
+      else
+      dispatch({ type: actions.CLEAR_GAME })
        
-  }, [table]);
+  }, [tableId]);
 
   useEffect(() => {
     if (event?.name === "initGame") {
