@@ -30,7 +30,7 @@ const useTournamentService = () => {
         let table = null;
         if(uid)
            table = await tournamentAPI.join(tournament.id,uid)
-      
+        console.log(table)
             
         if(table){
             initTable(table);

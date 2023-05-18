@@ -56,7 +56,7 @@ const UserContext = createContext<IUserContext>({
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const { event } = useEventSubscriber(["leaveTable"], ["model"]);
+  const { event } = useEventSubscriber(["joinTable","leaveTable"], ["model"]);
   const userService = useUserService();
 
   useEffect(() => {
@@ -91,7 +91,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   useEffect(() => {
-    if (event?.name === "leaveTable") {
+    if (event?.name === "joinTable") {
+       console.log(event.data)
+       if((event.data.uid&&event.data.uid===state.uid)||(event.data.uids&&event.data.uids.includes(state.uid)))
+            dispatch({ type: actions.UPDATE_USER, data: {tableId:event.data.tableId} });
+    }else if (event?.name === "leaveTable") {
       const uid = event.data.uid;
       if(uid===state.uid){
         console.log("handle leave table")

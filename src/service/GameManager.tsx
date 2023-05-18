@@ -2,8 +2,6 @@ import React, { createContext, useContext, useEffect, useReducer, useRef, useSta
 import useGameAPI from "../api/GameAPI";
 import { CardModel, IGameContext, SeatBetSlot, SeatModel, TableSeat } from "../model";
 import ActionType from "../model/types/ActionType";
-import useGameDao from "../respository/GameDao";
-import useInterval from "../util/useInterval";
 import useEventSubscriber from "./EventManager";
 import useGameService from "./GameService";
 import { useTournamentManager } from "./TournamentManager";
@@ -12,6 +10,7 @@ import { useUserManager } from "./UserManager";
 
 const initialState = {
   gameId: 0,
+  tableId:0,
   round: -1,
   cards: [],
   seats: [],
@@ -111,6 +110,7 @@ const reducer = (state: any, action: any) => {
 
 const GameContext = createContext<IGameContext>({
   gameId: 0,
+  tableId:0,
   seatOffset: 0,
   round: 0,
   startSeat: -1,
@@ -160,7 +160,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
   // console.log("seatoffsett:" + seatOffset);
   useEffect(() => {
     
-      if (tableId)
+      if (tableId&&tableId!==state.tableId)
            gameAPI.findGameByTable(tableId).then((game)=>{ 
             console.log(game)     
             if(game) setTimeout(() => dispatch({ type: actions.INIT_GAME, game: game }), 80);
@@ -248,6 +248,7 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 
   const value = {
     gameId: state.gameId,
+    tableId:state.tableId,
     seatOffset: seatOffset,
     round: state.round,
     startSeat: state.startSeat,

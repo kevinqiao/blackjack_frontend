@@ -27,6 +27,8 @@ const useEventSubscriber = (selectors: string[], topics: string[]) => {
     if (selectors && selectors.length > 0 && subject) {
       const observable = subject.asObservable();
       const subscription = observable.subscribe((event: EventModel) => {
+        console.log(selectors);
+        console.log(event)
         if ((!topics || topics.length === 0 || topics?.includes(event.topic)) && selectors?.includes(event.name))
           setEvent(event);
       });
@@ -37,7 +39,7 @@ const useEventSubscriber = (selectors: string[], topics: string[]) => {
   const createEvent = useCallback(
     (event: EventModel) => {
       if (subject) {
-        // console.log(event)
+        console.log(event)
         
         setTimeout(() => subject.next(event), event.delay);
       }

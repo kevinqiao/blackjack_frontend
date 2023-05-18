@@ -11,6 +11,11 @@ import LuckySpin from "./view/component/lucky/LuckySpin";
 import MainHome from "./view/component/MainHome";
 import CountDownClock from "./view/framer/CountDownClock";
 import CountDownTimer from "./view/framer/CountDownTimer";
+import LobbyHome from "./view/mvp/LobbyHome";
+import { NavProvider } from "./service/NavManager";
+import TournamentList from "./view/component/lobby/TournamentList";
+import Loading from "./view/component/Loading";
+import EmojiSelector from "./view/mvp/EmojiSelector";
 
 function App() {
   const FlattenedProviderTree = (providers: any): any => {
@@ -38,12 +43,17 @@ function App() {
     [SocketProvider],
     [TournamentProvider],
     [GameProvider],
+    [NavProvider]
   ]);
   return (
     <Providers>
+      <EmojiSelector/>
+      {/* <TournamentList/> */}
+      {/* <LobbyHome/>
+      <Loading/> */}
       {/* <LuckySpin/> */}
       {/* <CasinoWheel/> */}
-      <MainHome />
+      {/* <MainHome /> */}
       {/* <CountDownClock/> */}
       {/* <CountDownTimer/> */}
     </Providers>

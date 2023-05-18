@@ -45,14 +45,7 @@ export default function ControlPanel() {
   const canInsure = useCallback((): boolean => {
     if (typeof currentTurn != "undefined" && currentTurn && currentTurn.seat < 3) {
       const seat = seats.find((s) => s.no === currentTurn.seat);
-      if (!seat?.acted.includes(ActionType.INSURE)) return true;
-      if (!seat?.acted.includes(ActionType.INSURE) && seat?.slots.length === 1 && seat.slots[0].cards.length === 2) {
-        const dealer = seats.find((s) => s.no === 3);
-        if (dealer?.slots.length === 1 && dealer.slots[0].cards?.length === 1) {
-          const card = cards.find((c) => c.no === dealer.slots[0]["cards"][0]);
-          if (card?.rank === 14) return true;
-        }
-      }
+
       return true;
     } else return false;
   }, [currentTurn]);

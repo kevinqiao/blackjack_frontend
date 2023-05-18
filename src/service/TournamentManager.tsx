@@ -51,6 +51,7 @@ const reducer = (state: any, action: any) => {
            const seatNo = action.data.no;
            const seats =state.table.seats.filter((s:TableSeat)=>s.no!==seatNo);
            const table = Object.assign({},state.table,{seats:seats})
+           console.log(table)
            return Object.assign({},state,{table:table})
       }
       return state;
